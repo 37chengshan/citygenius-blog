@@ -1,0 +1,961 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { assetUrl, withBase } from '../../lib/url';
+import { getCollection } from 'astro:content';
+
+type CategoryKey = 'all' | 'ai' | 'macos' | 'android' | 'full-stack';
+
+function normalizeDateValue(input: string) {
+  var match = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec(input);
+  if (!match) return 0;
+  return Number(match[1] + match[2] + match[3]);
+}
+
+function uniqueFilters(post: (typeof posts)[number]) {
+  return [...new Set(Object.values(post.data.tagFilters).filter((value) => value === 'ai' || value === 'macos' || value === 'android' || value === 'full-stack'))];
+}
+
+const posts = (await getCollection('blog'))
+  .filter((post) => post.id !== 'dev-log')
+  .sort((a, b) => normalizeDateValue(b.data.date) - normalizeDateValue(a.data.date));
+
+const heroPost = posts[0];
+const leadRailPosts = posts.slice(1, 3);
+const recommendedPosts = posts.slice(3, 7);
+const allPosts = posts;
+
+const categoryCounts: Record<CategoryKey, number> = {
+  all: posts.length,
+  ai: posts.filter((post) => uniqueFilters(post).includes('ai')).length,
+  macos: posts.filter((post) => uniqueFilters(post).includes('macos')).length,
+  android: posts.filter((post) => uniqueFilters(post).includes('android')).length,
+  'full-stack': posts.filter((post) => uniqueFilters(post).includes('full-stack')).length,
+};
+
+---
+
+<BaseLayout
+  title="文章索引 — CityGenius Blog"
+  description="查看 CityGenius 的最新文章、推荐阅读与完整归档，支持分类筛选和关键词搜索。"
+  extraFonts="&family=Noto+Serif+SC:wght@400;500;700;900"
+>
+  <Fragment slot="head">
+    <style>
+      .article-index-page {
+        padding: 84px 0 108px;
+      }
+      .article-top {
+        display: grid;
+        gap: 34px;
+        padding-bottom: 44px;
+        border-bottom: 1px solid var(--line);
+      }
+      .article-top-intro {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+        gap: 36px;
+        align-items: end;
+      }
+      .article-top-intro h1 {
+        margin: 22px 0 18px;
+        font-size: clamp(48px, 5vw, 84px);
+        line-height: 0.95;
+        max-width: 10.8ch;
+      }
+      .article-top-copy {
+        max-width: 40ch;
+        font-size: 17px;
+        line-height: 1.68;
+        color: var(--ink-soft);
+      }
+      .article-top-note {
+        justify-self: end;
+        width: min(100%, 360px);
+        padding: 24px 26px 22px;
+        border-radius: 24px;
+        background: rgba(247, 241, 222, 0.84);
+        box-shadow: var(--shadow), inset 0 0 0 1px rgba(21, 20, 15, 0.06);
+      }
+      .article-top-note .meta-line {
+        margin-bottom: 16px;
+      }
+      .article-top-note p {
+        font-size: 14px;
+        line-height: 1.68;
+        color: var(--ink-mute);
+      }
+      .article-top-note .note-stats {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+        font-family: var(--sans);
+        font-size: 10.5px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+
+      .editorial-stage {
+        display: grid;
+        grid-template-columns: minmax(240px, 0.78fr) minmax(0, 1.48fr) minmax(250px, 0.78fr);
+        gap: 22px;
+        align-items: stretch;
+      }
+      .editorial-rail,
+      .editorial-side {
+        display: grid;
+        gap: 18px;
+        align-content: start;
+      }
+      .editorial-main {
+        min-width: 0;
+      }
+      .article-card,
+      .recommended-card,
+      .archive-card {
+        display: flex;
+        color: inherit;
+        text-decoration: none;
+      }
+      .article-card,
+      .archive-card {
+        flex-direction: column;
+      }
+      .editorial-card,
+      .archive-card {
+        border-radius: 24px;
+        transition: transform 0.22s ease, box-shadow 0.22s ease;
+      }
+      .editorial-card:hover,
+      .archive-card:hover,
+      .recommended-card:hover {
+        transform: translateY(-3px);
+      }
+      .rail-card {
+        padding: 14px;
+        background: rgba(247, 241, 222, 0.78);
+        box-shadow: var(--shadow), inset 0 0 0 1px rgba(21, 20, 15, 0.06);
+      }
+      .hero-card {
+        padding: 18px 18px 22px;
+        background: rgba(247, 241, 222, 0.88);
+        box-shadow: var(--shadow), inset 0 0 0 1px rgba(21, 20, 15, 0.06);
+        min-height: 100%;
+      }
+      .media-shell {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        background: var(--bone);
+      }
+      .media-shell img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .rail-card .media-shell {
+        aspect-ratio: 1 / 0.78;
+      }
+      .hero-card .media-shell {
+        aspect-ratio: 1.08 / 0.82;
+      }
+      .archive-card .media-shell {
+        aspect-ratio: 1 / 0.84;
+      }
+      .rank-chip,
+      .badge-chip {
+        position: absolute;
+        left: 14px;
+        top: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 42px;
+        height: 42px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: rgba(239, 231, 210, 0.92);
+        border: 1px solid rgba(21, 20, 15, 0.08);
+        font-family: var(--sans);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .hero-card .rank-chip {
+        background: rgba(237, 111, 92, 0.94);
+        color: #fff;
+      }
+      .badge-chip {
+        min-width: 0;
+        height: 28px;
+        font-size: 9.5px;
+        padding: 0 10px;
+      }
+
+      .card-copy {
+        display: grid;
+        gap: 10px;
+        padding-top: 16px;
+      }
+      .rail-card .card-copy {
+        gap: 8px;
+      }
+      .meta-line,
+      .recommended-meta,
+      .archive-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+        align-items: center;
+        font-family: var(--sans);
+        font-size: 10.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+      .meta-line span,
+      .recommended-meta span,
+      .archive-meta span {
+        white-space: nowrap;
+      }
+      .meta-line .slash,
+      .recommended-meta .slash,
+      .archive-meta .slash {
+        color: var(--coral);
+      }
+
+      .art-title {
+        font-family: 'Noto Serif SC', var(--serif);
+        font-weight: 700;
+        letter-spacing: -0.052em;
+        line-height: 0.9;
+        color: var(--ink);
+        text-wrap: balance;
+        text-rendering: geometricPrecision;
+      }
+      .art-title em {
+        font-family: var(--sans);
+        font-style: italic;
+        font-weight: 800;
+        letter-spacing: -0.045em;
+      }
+      .art-title .tail {
+        color: var(--coral);
+      }
+      .top-title {
+        font-size: clamp(24px, 2.3vw, 39px);
+      }
+      .hero-title {
+        font-size: clamp(42px, 3.7vw, 62px);
+        text-align: center;
+        max-width: 10.4ch;
+        margin: 0 auto;
+      }
+      .archive-title {
+        font-size: clamp(24px, 1.95vw, 32px);
+      }
+      .top-excerpt,
+      .archive-excerpt {
+        color: var(--ink-mute);
+        line-height: 1.66;
+      }
+      .top-excerpt {
+        font-size: 14px;
+      }
+      .hero-excerpt {
+        max-width: 28ch;
+        margin: 0 auto;
+        text-align: center;
+        color: var(--ink-soft);
+        font-size: 15px;
+        line-height: 1.68;
+      }
+      .hero-copy {
+        display: grid;
+        gap: 16px;
+        padding-top: 22px;
+      }
+      .hero-copy .meta-line {
+        justify-content: center;
+      }
+      .hero-author {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-family: var(--sans);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .hero-author::before {
+        content: '';
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(237, 111, 92, 0.88), rgba(233, 185, 74, 0.88));
+        box-shadow: inset 0 0 0 2px rgba(247, 241, 222, 0.76);
+      }
+
+      .editorial-side {
+        padding-left: 2px;
+      }
+      .side-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .side-heading .heading-text {
+        font-family: var(--sans);
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+      .side-heading .arrow-mark {
+        font-family: var(--sans);
+        font-size: 24px;
+        line-height: 1;
+        color: var(--ink-faint);
+      }
+      .recommended-list {
+        display: grid;
+        align-content: start;
+        align-self: start;
+      }
+      .recommended-card {
+        gap: 14px;
+        align-items: start;
+        padding: 14px 0 18px;
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .recommended-thumb {
+        width: 118px;
+        aspect-ratio: 1 / 0.78;
+        flex-shrink: 0;
+        overflow: hidden;
+        border-radius: 12px;
+        background: var(--bone);
+      }
+      .recommended-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .recommended-copy {
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+      }
+      .recommended-copy h3 {
+        font-family: 'Noto Serif SC', var(--serif);
+        font-size: clamp(24px, 1.62vw, 30px);
+        font-weight: 700;
+        letter-spacing: -0.042em;
+        line-height: 0.94;
+        text-wrap: balance;
+      }
+      .recommended-copy h3 em {
+        font-family: var(--sans);
+        font-style: italic;
+        font-weight: 800;
+      }
+      .recommended-author {
+        font-family: var(--sans);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .article-tools {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 28px;
+        align-items: end;
+        padding: 54px 0 26px;
+      }
+      .search-shell {
+        display: grid;
+        gap: 12px;
+      }
+      .search-shell label {
+        font-family: var(--sans);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+      .search-input-wrap {
+        position: relative;
+      }
+      .search-input-wrap::before {
+        content: '⌕';
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-family: var(--sans);
+        font-size: 14px;
+        color: var(--ink-faint);
+      }
+      .search-input {
+        width: 100%;
+        height: 56px;
+        padding: 0 18px 0 46px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(244, 239, 227, 0.78);
+        font-family: var(--body);
+        font-size: 15px;
+        color: var(--ink);
+        outline: none;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+      .search-input:focus {
+        border-color: var(--coral);
+        box-shadow: 0 0 0 3px rgba(237, 111, 92, 0.12);
+      }
+      .tool-copy {
+        font-family: var(--sans);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        line-height: 1.6;
+        text-align: right;
+      }
+      .tool-copy b {
+        display: block;
+        color: var(--ink);
+        font-size: 12px;
+      }
+
+      .article-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 28px;
+      }
+      .article-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        text-decoration: none;
+        background: transparent;
+        font-family: var(--sans);
+        font-size: 13px;
+        color: var(--ink-soft);
+        transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+      }
+      .article-pill:hover {
+        background: rgba(21, 20, 15, 0.04);
+      }
+      .article-pill.active {
+        background: var(--coral);
+        border-color: var(--coral);
+        color: #fff;
+      }
+      .article-pill .count {
+        padding-left: 8px;
+        border-left: 1px solid var(--line);
+        font-size: 10px;
+        color: var(--ink-faint);
+      }
+      .article-pill.active .count {
+        border-color: rgba(255, 255, 255, 0.28);
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .archive-section {
+        padding-top: 6px;
+      }
+      .results-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: end;
+        margin-bottom: 24px;
+      }
+      .results-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        font-family: var(--sans);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+      .results-count .ring {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px dashed var(--ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .archive-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
+      }
+      .archive-card {
+        padding: 16px;
+        background: rgba(247, 241, 222, 0.74);
+        box-shadow: var(--shadow), inset 0 0 0 1px rgba(21, 20, 15, 0.06);
+      }
+      .archive-card[hidden] {
+        display: none !important;
+      }
+      .archive-copy {
+        display: grid;
+        gap: 10px;
+        padding-top: 16px;
+      }
+      .archive-excerpt {
+        font-size: 14px;
+      }
+      .archive-footer {
+        margin-top: auto;
+        padding-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+      .archive-badge {
+        font-family: var(--sans);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--coral);
+      }
+      .arrow-pill {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+      }
+      .archive-card:hover .arrow-pill,
+      .rail-card:hover .arrow-pill,
+      .hero-card:hover .arrow-pill {
+        background: var(--coral);
+        border-color: var(--coral);
+        color: #fff;
+      }
+      .arrow-pill svg {
+        width: 11px;
+        height: 11px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.6;
+      }
+
+      .article-empty {
+        display: none;
+        padding: 34px 28px;
+        border-radius: 24px;
+        background: rgba(247, 241, 222, 0.82);
+        box-shadow: var(--shadow), inset 0 0 0 1px rgba(21, 20, 15, 0.06);
+      }
+      .article-empty.show {
+        display: block;
+      }
+      .article-empty h3 {
+        font-family: var(--sans);
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .article-empty h3 em {
+        font-family: var(--serif);
+        font-style: italic;
+        font-weight: 500;
+      }
+      .article-empty p {
+        margin-top: 10px;
+        max-width: 40ch;
+        font-size: 14px;
+        line-height: 1.66;
+        color: var(--ink-mute);
+      }
+
+      .editorial-stage.is-filtered {
+        display: none;
+      }
+
+      @media (max-width: 1220px) {
+        .editorial-stage {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .editorial-side {
+          padding-left: 0;
+        }
+        .recommended-list {
+          gap: 0;
+        }
+        .recommended-card {
+          padding: 16px 0;
+        }
+      }
+      @media (max-width: 980px) {
+        .article-index-page {
+          padding-top: 66px;
+        }
+        .article-top-intro,
+        .article-tools {
+          grid-template-columns: 1fr;
+        }
+        .article-top-note {
+          justify-self: start;
+        }
+        .tool-copy {
+          text-align: left;
+        }
+        .archive-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 720px) {
+        .recommended-card {
+          flex-direction: column;
+        }
+        .recommended-thumb {
+          width: 100%;
+          aspect-ratio: 1.2 / 0.78;
+        }
+        .archive-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 640px) {
+        .article-index-page {
+          padding-bottom: 88px;
+        }
+        .results-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </Fragment>
+
+  <main class='article-index-page'>
+    <div class='container'>
+      <div class='sec-rule'>
+        <span class='roman'>IV.</span>
+        <span class='meta-grp'><span>文章 / Articles</span><span class='dot-mark'>•</span><span>最新与推荐</span></span>
+        <span>{String(posts.length).padStart(2, '0')} / 文章索引</span>
+      </div>
+
+      <section class='article-top'>
+        <div class='article-top-intro'>
+          <div data-reveal>
+            <span class='label'>文章索引 <span class='ix'>· CityGenius</span></span>
+            <h1 class='display'>先看最新的<em>重点文章</em><span class='dot'>.</span></h1>
+            <p class='article-top-copy'>上面这组只负责展示最新与推荐，下面再展开全部文章。阅读入口、分类筛选和关键词搜索都保留，但页面先把结构讲清楚，再让你筛。</p>
+          </div>
+          <aside class='article-top-note' data-reveal='right'>
+            <div class='meta-line'><span>最新</span><span class='slash'>/</span><span>推荐</span></div>
+            <p>这一页现在只按排版结构重排，不跟着参考图改整套配色。顶部三栏负责做“左侧最新补充，中间主文章，右侧推荐列表”的杂志式版面。</p>
+            <div class='note-stats'>
+              <span>{String(posts.length).padStart(2, '0')} 篇文章</span>
+              <span>搜索 + 筛选</span>
+            </div>
+          </aside>
+        </div>
+
+        <div class='editorial-stage' data-editorial-stage>
+          <div class='editorial-rail'>
+            {leadRailPosts.map((post, index) => (
+              <a
+                class='article-card editorial-card rail-card'
+                href={withBase(`/article/${post.id}/`)}
+                data-article-card
+                data-search-text={`${post.data.title.replace(/<[^>]+>/g, '')} ${post.data.description} ${post.data.tags.join(' ')}`}
+                data-categories={uniqueFilters(post).join(' ')}
+                data-zone='feature'
+                data-reveal
+              >
+                <div class='media-shell'>
+                  <span class='rank-chip'>{String(index + 1).padStart(2, '0')}</span>
+                  <img src={assetUrl(post.data.image)} alt={post.data.imageAlt} width={post.data.imageWidth} height={post.data.imageHeight} loading='lazy' decoding='async' />
+                </div>
+                <div class='card-copy'>
+                  <div class='meta-line'>
+                    <span>{post.data.date}</span>
+                    <span class='slash'>/</span>
+                    <span>{post.data.category}</span>
+                  </div>
+                  <h2 class='art-title top-title'><Fragment set:html={post.data.title} /></h2>
+                  <p class='top-excerpt'>{post.data.description}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          {heroPost && (
+            <div class='editorial-main'>
+              <a
+                class='article-card editorial-card hero-card'
+                href={withBase(`/article/${heroPost.id}/`)}
+                data-article-card
+                data-search-text={`${heroPost.data.title.replace(/<[^>]+>/g, '')} ${heroPost.data.description} ${heroPost.data.tags.join(' ')}`}
+                data-categories={uniqueFilters(heroPost).join(' ')}
+                data-zone='feature'
+                data-reveal='scale'
+              >
+                <div class='media-shell'>
+                  <span class='rank-chip'>New</span>
+                  <img src={assetUrl(heroPost.data.image)} alt={heroPost.data.imageAlt} width={heroPost.data.imageWidth} height={heroPost.data.imageHeight} loading='eager' decoding='async' />
+                </div>
+                <div class='hero-copy'>
+                  <div class='meta-line'>
+                    <span>{heroPost.data.date}</span>
+                    <span class='slash'>/</span>
+                    <span>{heroPost.data.category}</span>
+                  </div>
+                  <h2 class='art-title hero-title'><Fragment set:html={heroPost.data.title} /></h2>
+                  <p class='hero-excerpt'>{heroPost.data.description}</p>
+                  <span class='hero-author'>CityGenius</span>
+                </div>
+              </a>
+            </div>
+          )}
+
+          <aside class='editorial-side' data-reveal='left'>
+            <div class='side-heading'>
+              <span class='heading-text'>推荐阅读</span>
+              <span class='arrow-mark'>→</span>
+            </div>
+            <div class='recommended-list'>
+              {recommendedPosts.map((post) => (
+                <a
+                  class='recommended-card'
+                  href={withBase(`/article/${post.id}/`)}
+                  data-article-card
+                  data-search-text={`${post.data.title.replace(/<[^>]+>/g, '')} ${post.data.description} ${post.data.tags.join(' ')}`}
+                  data-categories={uniqueFilters(post).join(' ')}
+                  data-zone='feature'
+                >
+                  <div class='recommended-thumb'>
+                    <img src={assetUrl(post.data.image)} alt={post.data.imageAlt} width={post.data.imageWidth} height={post.data.imageHeight} loading='lazy' decoding='async' />
+                  </div>
+                  <div class='recommended-copy'>
+                    <div class='recommended-meta'>
+                      <span>{post.data.date}</span>
+                      <span class='slash'>/</span>
+                      <span>{post.data.badge}</span>
+                    </div>
+                    <h3><Fragment set:html={post.data.title} /></h3>
+                    <span class='recommended-author'>CityGenius</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class='article-tools'>
+        <div class='search-shell' data-reveal>
+          <label for='article-search'>搜索文章</label>
+          <div class='search-input-wrap'>
+            <input
+              id='article-search'
+              class='search-input'
+              type='search'
+              placeholder='搜索标题、摘要或标签'
+              autocomplete='off'
+            />
+          </div>
+        </div>
+        <div class='tool-copy' data-reveal='right'>
+          <b>文章检索</b>
+          搜索标题、摘要、标签
+          <br />
+          分类筛选与完整文章联动
+        </div>
+      </section>
+
+      <div class='article-pills' role='tablist' aria-label='文章分类' data-reveal>
+        <a class='article-pill active' href={withBase('/article/')} data-filter='all' aria-pressed='true'>全部<span class='count'>{String(categoryCounts.all).padStart(2, '0')}</span></a>
+        <a class='article-pill' href={withBase('/article/?category=ai')} data-filter='ai' aria-pressed='false'>AI<span class='count'>{String(categoryCounts.ai).padStart(2, '0')}</span></a>
+        <a class='article-pill' href={withBase('/article/?category=macos')} data-filter='macos' aria-pressed='false'>macOS<span class='count'>{String(categoryCounts.macos).padStart(2, '0')}</span></a>
+        <a class='article-pill' href={withBase('/article/?category=android')} data-filter='android' aria-pressed='false'>Android<span class='count'>{String(categoryCounts.android).padStart(2, '0')}</span></a>
+        <a class='article-pill' href={withBase('/article/?category=full-stack')} data-filter='full-stack' aria-pressed='false'>全栈<span class='count'>{String(categoryCounts['full-stack']).padStart(2, '0')}</span></a>
+      </div>
+
+      <section class='archive-section'>
+        <div class='results-head' data-reveal>
+          <div>
+            <span class='label'>全部文章 <span class='ix'>· 完整归档</span></span>
+            <h2 class='display' style='margin-top:18px;font-size:clamp(34px,3.5vw,54px);line-height:0.98;'>继续往下读完整的<em>文章归档</em><span class='dot'>.</span></h2>
+          </div>
+          <div class='results-count'>
+            <span class='ring' data-results-count>{String(allPosts.length).padStart(2, '0')}</span>
+            <span data-results-copy>全部文章</span>
+          </div>
+        </div>
+
+        <div class='archive-grid' data-archive-grid>
+          {allPosts.map((post, index) => (
+            <a
+              class='archive-card'
+              href={withBase(`/article/${post.id}/`)}
+              data-article-card
+              data-search-text={`${post.data.title.replace(/<[^>]+>/g, '')} ${post.data.description} ${post.data.tags.join(' ')}`}
+              data-categories={uniqueFilters(post).join(' ')}
+              data-zone='archive'
+              data-reveal
+            >
+              <div class='media-shell'>
+                <span class='badge-chip'>{index === 0 ? 'Latest' : post.data.badge}</span>
+                <img src={assetUrl(post.data.image)} alt={post.data.imageAlt} width={post.data.imageWidth} height={post.data.imageHeight} loading='lazy' decoding='async' />
+              </div>
+              <div class='archive-copy'>
+                <div class='archive-meta'>
+                  <span>{post.data.date}</span>
+                  <span class='slash'>/</span>
+                  <span>{post.data.category}</span>
+                </div>
+                <h3 class='art-title archive-title'><Fragment set:html={post.data.title} /></h3>
+                <p class='archive-excerpt'>{post.data.description}</p>
+                <div class='archive-footer'>
+                  <span class='archive-badge'>{post.data.badge}</span>
+                  <span class='arrow-pill' aria-hidden='true'>
+                    <svg viewBox='0 0 24 24'><path d='M5 19L19 5M19 5H8M19 5v11'></path></svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <div class='article-empty' data-empty-state>
+          <h3>没有找到合适的<em>文章</em></h3>
+          <p>可以先切回 `All`，或者换一个关键词继续搜。搜索会同时匹配标题、摘要和标签。</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <Fragment slot="scripts">
+    <script>
+      (function () {
+        var categories = ['all', 'ai', 'macos', 'android', 'full-stack'];
+        var cards = Array.prototype.slice.call(document.querySelectorAll('[data-article-card]'));
+        var pills = Array.prototype.slice.call(document.querySelectorAll('.article-pill[data-filter]'));
+        var searchInput = document.getElementById('article-search');
+        var resultsCount = document.querySelector('[data-results-count]');
+        var resultsCopy = document.querySelector('[data-results-copy]');
+        var emptyState = document.querySelector('[data-empty-state]');
+        var archiveGrid = document.querySelector('[data-archive-grid]');
+        var editorialStage = document.querySelector('[data-editorial-stage]');
+        if (!cards.length || !pills.length || !searchInput || !resultsCount || !resultsCopy || !emptyState || !archiveGrid || !editorialStage) return;
+
+        function normalizeFilter(value) {
+          var filter = String(value || '').toLowerCase().trim();
+          if (!filter || filter === 'all') return 'all';
+          return categories.indexOf(filter) !== -1 ? filter : 'all';
+        }
+
+        function normalizeQuery(value) {
+          return String(value || '').toLowerCase().trim();
+        }
+
+        function matchesCard(card, category, query) {
+          var cardCategories = String(card.dataset.categories || '').split(/\s+/).filter(Boolean);
+          var searchText = normalizeQuery(card.dataset.searchText || '');
+          var categoryMatch = category === 'all' || cardCategories.indexOf(category) !== -1;
+          var queryMatch = !query || searchText.indexOf(query) !== -1;
+          return categoryMatch && queryMatch;
+        }
+
+        function applyPillState(category) {
+          for (var i = 0; i < pills.length; i++) {
+            var active = pills[i].dataset.filter === category;
+            pills[i].classList.toggle('active', active);
+            pills[i].setAttribute('aria-pressed', active ? 'true' : 'false');
+          }
+        }
+
+        function updateUi(category, query, syncUrl) {
+          var visible = 0;
+          var filtering = category !== 'all' || Boolean(query);
+
+          applyPillState(category);
+
+          for (var j = 0; j < cards.length; j++) {
+            var matches = matchesCard(cards[j], category, query);
+            if (cards[j].dataset.zone === 'archive') {
+              cards[j].hidden = !matches;
+              cards[j].setAttribute('aria-hidden', matches ? 'false' : 'true');
+              if (matches) visible += 1;
+            }
+          }
+
+          editorialStage.classList.toggle('is-filtered', filtering);
+          archiveGrid.hidden = visible === 0;
+          emptyState.classList.toggle('show', visible === 0);
+          resultsCount.textContent = String(visible).padStart(2, '0');
+          resultsCopy.textContent = query ? '搜索结果' : category === 'all' ? '全部文章' : '筛选结果';
+
+          if (syncUrl) {
+            var url = new URL(window.location.href);
+            if (category === 'all') url.searchParams.delete('category');
+            else url.searchParams.set('category', category);
+            if (query) url.searchParams.set('q', query);
+            else url.searchParams.delete('q');
+            history.replaceState(null, '', url.pathname + url.search);
+          }
+        }
+
+        for (var k = 0; k < pills.length; k++) {
+          pills[k].addEventListener('click', function (event) {
+            event.preventDefault();
+            updateUi(normalizeFilter(this.dataset.filter), normalizeQuery(searchInput.value), true);
+          });
+        }
+
+        searchInput.addEventListener('input', function () {
+          var current = document.querySelector('.article-pill.active');
+          var category = normalizeFilter(current ? current.dataset.filter : 'all');
+          updateUi(category, normalizeQuery(searchInput.value), true);
+        });
+
+        var initialUrl = new URL(window.location.href);
+        var initialCategory = normalizeFilter(initialUrl.searchParams.get('category'));
+        var initialQuery = normalizeQuery(initialUrl.searchParams.get('q'));
+        searchInput.value = initialQuery;
+        updateUi(initialCategory, initialQuery, false);
+      })();
+    </script>
+  </Fragment>
+</BaseLayout>

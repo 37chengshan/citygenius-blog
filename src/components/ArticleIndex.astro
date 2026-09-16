@@ -1,0 +1,432 @@
+---
+interface PostItem {
+  id: string;
+  data: {
+    title: string;
+    description: string;
+    date: string;
+    category: string;
+    tagFilters: Record<string, string>;
+    badge: string;
+    image: string;
+    imageAlt: string;
+    imageWidth: number;
+    imageHeight: number;
+  };
+}
+
+interface Props {
+  posts: PostItem[];
+  categoryCounts: {
+    all: number;
+    ai: number;
+    macos: number;
+    android: number;
+    'full-stack': number;
+  };
+  sectionId?: string;
+  sectionClass?: string;
+  mode?: 'full' | 'preview';
+  heading?: string;
+  label?: string;
+  indexLabel?: string;
+  metaCopy?: string;
+  showFilters?: boolean;
+  ctaHref?: string;
+  ctaLabel?: string;
+}
+
+const {
+  posts,
+  categoryCounts,
+  sectionId = 'articles',
+  sectionClass = 'labs',
+  mode = 'full',
+  heading = '从实践中<em>提炼</em>，在代码里<em>发现</em>',
+  label = '写作索引',
+  indexLabel = 'Nº 04',
+  metaCopy = '技术博客 · 项目复盘<br/>AI 工具链 · 设计思考<br/>持续沉淀',
+  showFilters = true,
+  ctaHref,
+  ctaLabel,
+} = Astro.props;
+
+const sectionTitle = mode === 'preview' ? '精选 / Articles' : '文章 / Articles';
+const sectionMeta = mode === 'preview' ? '精选预览' : '开发笔记';
+const defaultCount = showFilters ? categoryCounts.all : posts.length;
+const cards = posts.map((post) => ({
+  ...post,
+  categoryKey: [...new Set(Object.values(post.data.tagFilters))].join(' '),
+}));
+---
+
+<section class={sectionClass} id={sectionId} data-article-index data-mode={mode}>
+  <div class='container'>
+    <div class='sec-rule'>
+      <span class='roman'>IV.</span>
+      <span class='meta-grp'><span>{sectionTitle}</span><span class='dot-mark'>•</span><span>{sectionMeta}</span></span>
+      <span>004 / 006</span>
+    </div>
+    <div class='labs-head'>
+      <div data-reveal>
+        <span class='label'>{label} <span class='ix'>· {indexLabel}</span></span>
+        <h2 class='display' style='margin-top:30px;' set:html={`${heading}<span class='dot'>.</span>`}></h2>
+      </div>
+      {
+        showFilters ? (
+          <div class='pills' data-reveal='right' role='tablist' aria-label='文章分类'>
+            <button class='pill active' type='button' data-filter='all' aria-pressed='true'>All<span class='count'>{String(categoryCounts.all).padStart(2, '0')}</span></button>
+            <button class='pill' type='button' data-filter='ai' aria-pressed='false'>AI<span class='count'>{String(categoryCounts.ai).padStart(2, '0')}</span></button>
+            <button class='pill' type='button' data-filter='macos' aria-pressed='false'>macOS<span class='count'>{String(categoryCounts.macos).padStart(2, '0')}</span></button>
+            <button class='pill' type='button' data-filter='android' aria-pressed='false'>Android<span class='count'>{String(categoryCounts.android).padStart(2, '0')}</span></button>
+            <button class='pill' type='button' data-filter='full-stack' aria-pressed='false'>Full-Stack<span class='count'>{String(categoryCounts['full-stack']).padStart(2, '0')}</span></button>
+          </div>
+        ) : (
+          <div class='labs-side' data-reveal='right'>
+            <p>保留首页的内容密度，但把完整文章索引交给独立列表页。</p>
+            {ctaHref && ctaLabel ? <a class='labs-link' href={ctaHref}>{ctaLabel}</a> : null}
+          </div>
+        )
+      }
+    </div>
+    <div class='labs-meta'>
+      <span class='ring' data-labs-count>{String(defaultCount).padStart(2, '0')}</span>
+      <div class='meta-text'><b>{showFilters ? 'Latest notes' : 'Selected notes'}</b><Fragment set:html={metaCopy} /></div>
+    </div>
+    <div class={`labs-grid${mode === 'preview' ? ' labs-grid-preview' : ''}`}>
+      {cards.map((post) => (
+        <div class='lab' data-reveal data-category={post.categoryKey} tabindex='0' role='link'>
+          <div class='lab-img'>
+            <span class='badge'>{post.data.badge}</span>
+            <img src={`/assets/${post.data.image}`} alt={post.data.imageAlt} width={post.data.imageWidth} height={post.data.imageHeight} loading='lazy' decoding='async' />
+          </div>
+          <div class='num-row'><span>{post.data.date}</span><span>{post.data.category}</span></div>
+          <h4>{post.data.title}</h4>
+          <p>{post.data.description}</p>
+          <a class='arrow-mark' href={`/article/${post.id}`} aria-label='Open article'>
+            <svg viewBox='0 0 24 24'><path d='M5 19L19 5M19 5H8M19 5v11'></path></svg>
+          </a>
+        </div>
+      ))}
+    </div>
+    {
+      mode === 'preview' && ctaHref && ctaLabel ? (
+        <div class='labs-footer' data-reveal>
+          <a class='btn btn-ghost' href={ctaHref}>{ctaLabel}<span class='arrow'><svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='9'></circle><path d='M9 12h6M12 9v6'></path></svg></span></a>
+        </div>
+      ) : null
+    }
+  </div>
+</section>
+
+<style is:global>
+  .labs-head {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 60px;
+    align-items: end;
+    margin-bottom: 48px;
+  }
+  .labs-head h2 { font-size: clamp(40px, 4.8vw, 68px); }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .pill {
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pill:hover { background: rgba(21, 20, 15, 0.04); }
+  .pill.active {
+    background: var(--coral);
+    border-color: var(--coral);
+    color: #fff;
+  }
+  .pill .count {
+    font-size: 10px;
+    color: var(--ink-faint);
+    border-left: 1px solid var(--line);
+    padding-left: 8px;
+  }
+  .pill.active .count { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.3); }
+  .labs-side {
+    display: grid;
+    gap: 18px;
+    justify-items: end;
+    align-content: end;
+    text-align: right;
+  }
+  .labs-side p {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    max-width: 28ch;
+  }
+  .labs-link {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--coral);
+    text-decoration: none;
+  }
+  .labs-meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 22px;
+    margin-bottom: 30px;
+  }
+  .labs-meta .ring {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1px dashed var(--ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .labs-meta .meta-text {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1.55;
+    color: var(--ink-faint);
+    max-width: 28ch;
+  }
+  .labs-meta .meta-text b { display: block; color: var(--ink); }
+  .labs-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 22px;
+  }
+  .labs-grid-preview {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px;
+  }
+  .lab {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.22s ease;
+  }
+  .lab:hover { transform: translateY(-3px); }
+  .lab:hover .arrow-mark { background: var(--coral); border-color: var(--coral); color: #fff; }
+  .lab:focus-visible { outline: 2px solid var(--coral); outline-offset: 8px; }
+  .lab[hidden] { display: none !important; }
+  .lab-img {
+    aspect-ratio: 4 / 5;
+    background: var(--bone);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .lab-img img { width: 100%; height: 100%; object-fit: cover; }
+  .lab-img .badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(239, 231, 210, 0.9);
+    color: var(--ink);
+    padding: 4px 9px;
+    border-radius: 4px;
+    font-family: var(--sans);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .lab .num-row {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.14em;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    text-transform: uppercase;
+  }
+  .lab h4 {
+    font-family: var(--sans);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.014em;
+    margin-bottom: 8px;
+  }
+  .lab p {
+    font-family: var(--body);
+    font-size: 13px;
+    color: var(--ink-mute);
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+  .lab .arrow-mark {
+    width: 28px; height: 28px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    margin-top: auto;
+    align-self: flex-start;
+  }
+  .lab .arrow-mark svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  .labs-footer {
+    margin-top: 34px;
+    display: flex;
+    justify-content: flex-start;
+  }
+  .labs[data-mode='preview'] .labs-meta {
+    justify-content: space-between;
+    align-items: center;
+  }
+  @media (max-width: 1280px) {
+    .labs-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .labs-grid-preview { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 960px) {
+    .labs-head { grid-template-columns: 1fr; }
+    .labs-side {
+      justify-items: start;
+      text-align: left;
+    }
+    .pills { justify-content: flex-start; }
+    .labs-grid { grid-template-columns: repeat(2, 1fr); }
+    .labs-grid-preview { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .labs-grid { grid-template-columns: 1fr; }
+    .labs-grid-preview { grid-template-columns: 1fr; }
+    .labs-meta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+
+{
+  showFilters ? (
+    <script>
+      (function () {
+        var sections = document.querySelectorAll('[data-article-index][data-mode="full"]');
+        if (!sections.length) return;
+
+        function normalizeFilter(value) {
+          var filter = String(value || '').toLowerCase().trim();
+          if (!filter || filter === 'all') return 'all';
+          return /^(ai|macos|android|full-stack)$/.test(filter) ? filter : 'all';
+        }
+
+        for (var s = 0; s < sections.length; s++) {
+          (function (section) {
+            var pills = Array.prototype.slice.call(section.querySelectorAll('.pill[data-filter]'));
+            var labs = Array.prototype.slice.call(section.querySelectorAll('.lab[data-category]'));
+            var countRing = section.querySelector('[data-labs-count]');
+            var defaultRingText = countRing ? countRing.textContent : '';
+            if (!pills.length || !labs.length) return;
+
+            function applyFilter(filter, syncUrl) {
+              var normalized = normalizeFilter(filter);
+              var visibleCount = 0;
+              for (var i = 0; i < pills.length; i++) {
+                var active = pills[i].dataset.filter === normalized;
+                pills[i].classList.toggle('active', active);
+                pills[i].setAttribute('aria-pressed', active ? 'true' : 'false');
+              }
+              for (var j = 0; j < labs.length; j++) {
+                var categories = (labs[j].dataset.category || '').split(/\s+/);
+                var visible = normalized === 'all' || categories.indexOf(normalized) !== -1;
+                labs[j].hidden = !visible;
+                labs[j].setAttribute('aria-hidden', visible ? 'false' : 'true');
+                if (visible) visibleCount += 1;
+              }
+              if (countRing) {
+                countRing.textContent = normalized === 'all' ? defaultRingText : String(visibleCount).padStart(2, '0');
+              }
+              if (syncUrl) {
+                var url = new URL(window.location.href);
+                if (normalized === 'all') { url.searchParams.delete('category'); }
+                else { url.searchParams.set('category', normalized); }
+                history.replaceState(null, '', url.pathname + url.search);
+              }
+            }
+
+            for (var k = 0; k < pills.length; k++) {
+              pills[k].addEventListener('click', function () { applyFilter(this.dataset.filter, true); });
+            }
+
+            for (var l = 0; l < labs.length; l++) {
+              (function (lab) {
+                lab.addEventListener('click', function (event) {
+                  var interactive = event.target.closest('a, button');
+                  if (interactive) return;
+                  var arrow = lab.querySelector('.arrow-mark[href]');
+                  if (!arrow) return;
+                  window.location.href = arrow.href;
+                });
+                lab.addEventListener('keydown', function (event) {
+                  if (event.key !== 'Enter' && event.key !== ' ') return;
+                  event.preventDefault();
+                  var arrow = lab.querySelector('.arrow-mark[href]');
+                  if (!arrow) return;
+                  window.location.href = arrow.href;
+                });
+              })(labs[l]);
+            }
+
+            var initialFilter = normalizeFilter(new URL(window.location.href).searchParams.get('category'));
+            applyFilter(initialFilter, false);
+          })(sections[s]);
+        }
+      })();
+    </script>
+  ) : (
+    <script>
+      (function () {
+        var sections = document.querySelectorAll('[data-article-index][data-mode="preview"]');
+        if (!sections.length) return;
+        for (var s = 0; s < sections.length; s++) {
+          var labs = sections[s].querySelectorAll('.lab[data-category]');
+          for (var l = 0; l < labs.length; l++) {
+            (function (lab) {
+              lab.addEventListener('click', function (event) {
+                var interactive = event.target.closest('a, button');
+                if (interactive) return;
+                var arrow = lab.querySelector('.arrow-mark[href]');
+                if (!arrow) return;
+                window.location.href = arrow.href;
+              });
+              lab.addEventListener('keydown', function (event) {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                var arrow = lab.querySelector('.arrow-mark[href]');
+                if (!arrow) return;
+                window.location.href = arrow.href;
+              });
+            })(labs[l]);
+          }
+        }
+      })();
+    </script>
+  )
+}
