@@ -12,10 +12,10 @@ tagFilters:
   "多 Agent": "ai"
   "MCP": "ai"
   "Agent CLI": "ai"
-image: "lab-1.webp"
-imageAlt: "agent-mcp multi-agent control plane article cover"
-imageWidth: 1003
-imageHeight: 1568
+image: "illu-agent-mcp.webp"
+imageAlt: "多 Agent 编排控制面插画"
+imageWidth: 1536
+imageHeight: 1024
 badge: "Agent MCP"
 sideNote: "agent-mcp · Control Plane ·<br/>spawn · wait · steer"
 caption: "<b>Agent work pool.</b>(CityGenius, MMXXVI)"
@@ -50,6 +50,11 @@ related:
 想法很简单：**把任意 Agent CLI 收成一个工作池**。主 Agent 只负责拆任务和汇总结果。派发、等待、插话、超时、续接，都交给一层基础设施。我不要求大家用同一个模型，也不想替各家 CLI 重写 agent loop。我要的只是统一入口。
 
 这就是 <em>agent-mcp</em>。
+
+<figure class="illu left">
+  <img src="/citygenius-blog/assets/illu-agent-mcp.webp" alt="多 Agent 编排控制面示意" width="1536" height="1024" loading="lazy" />
+  <figcaption>把多个 CLI 收成一个可调度的工作池。</figcaption>
+</figure>
 
 ## 踩坑：原来 CLI 差这么多
 

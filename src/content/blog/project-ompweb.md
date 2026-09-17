@@ -13,10 +13,10 @@ tagFilters:
   "Electron": "full-stack"
   "MCP": "ai"
   "PTY": "full-stack"
-image: "lab-4.webp"
-imageAlt: "ompweb local-first agent workspace editorial artwork"
-imageWidth: 916
-imageHeight: 1717
+image: "illu-ompweb.webp"
+imageAlt: "Agent Web 工作区插画"
+imageWidth: 1536
+imageHeight: 1024
 badge: "Project"
 sideNote: "ompweb · oh-my-pi ·<br/>Next.js · Electron · PTY · MCP"
 caption: "<b>Local-first agent workspace.</b>(CityGenius, MMXXVI)"
@@ -61,6 +61,11 @@ related:
 
 ## 关键决定：不重写 Agent，只读它的会话文件
 
+<figure class="illu">
+  <img src="/citygenius-blog/assets/illu-ompweb.webp" alt="本地会话工作区" width="1536" height="1024" loading="lazy" />
+  <figcaption>Web 只是壳，会话权威仍在本地 Agent。</figcaption>
+</figure>
+
 ompweb 最重要的架构原则是一句话：**OMP 仍然是唯一权威**。会话、凭证、模型配置、插件，全部属于用户本机已安装的 `omp` 和 `~/.omp/agent/`。UI 不建第二套数据格式，也不碰 `agent.db` 里的鉴权数据。
 
 具体接法很朴素：
@@ -74,6 +79,11 @@ ompweb 最重要的架构原则是一句话：**OMP 仍然是唯一权威**。�
 顺带说明来源：这个 UI 不是从零长出来的。它源自 [agegr/pi-web](https://github.com/agegr/pi-web)（MIT），ompweb 作为面向 OMP 的下游继续维护——保留许可与署名，选择性吸收上游修复，但不会假设 Pi 专用的实现能原样 merge。这和「给 omp 贡献一个界面」是同一件事的两种说法：上游的 UI 想法值得学，运行时边界却必须按 omp 自己的格式重画一遍。
 
 ## 实现：Next.js 一套代码，Web 和桌面共用
+
+<figure class="illu left">
+  <img src="/citygenius-blog/assets/illu-ompweb.webp" alt="session tree 与 Web 工作区" width="1536" height="1024" loading="lazy" />
+  <figcaption>会话树、PTY、文件预览拼成一个工作台。</figcaption>
+</figure>
 
 对外有三种启动方式：`npx @37chengshan/ompweb@latest` 直接开浏览器（默认 `127.0.0.1:30177`）、Electron 打包成带托盘的桌面应用、或者克隆仓库 `npm run dev` 本地改。
 

@@ -178,12 +178,58 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       .article-body .prose {
         font-family: var(--body);
         font-size: 17px;
-        line-height: 1.7;
+        line-height: 1.85;
         color: var(--ink-soft);
+        text-align: justify;
+        text-justify: inter-ideograph;
+        word-break: break-word;
       }
-      .article-body .prose p { margin-bottom: 28px; max-width: 65ch; text-indent: 2em; }
+      .article-body .prose p {
+        margin: 0 0 1.6em;
+        max-width: 65ch;
+        text-indent: 2em;
+        text-align: justify;
+        text-align-last: left;
+      }
+      .article-body .prose p + p { margin-top: 0.15em; }
       .article-body .prose h2 + p,
       .article-body .prose h3 + p { text-indent: 0; }
+      .article-body .prose figure.illu {
+        margin: 8px 0 28px;
+        width: min(42%, 320px);
+        float: right;
+        clear: right;
+        margin-left: 28px;
+        margin-right: 0;
+      }
+      .article-body .prose figure.illu.left {
+        float: left;
+        clear: left;
+        margin-left: 0;
+        margin-right: 28px;
+      }
+      .article-body .prose figure.illu img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: var(--bone);
+      }
+      .article-body .prose figure.illu figcaption {
+        font-family: var(--sans);
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--ink-faint);
+        margin-top: 8px;
+        text-indent: 0;
+        text-align: left;
+      }
+      .article-body .prose::after {
+        content: '';
+        display: table;
+        clear: both;
+      }
       .article-body .prose h2 {
         font-family: var(--serif);
         font-style: italic;
@@ -434,7 +480,16 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         .article-header .about-art { padding-right: 0; padding-bottom: 0; aspect-ratio: auto; }
         .article-header .about-art img { height: auto; max-height: none; object-fit: contain; border-radius: 0; }
         .article-header .about-side-note,
-        .article-header .about-caption { position: static; max-width: none; text-align: left; margin-top: 14px; }
+      @media (max-width: 760px) {
+        .article-body .prose figure.illu,
+        .article-body .prose figure.illu.left {
+          float: none;
+          width: 100%;
+          margin: 20px 0 28px;
+        }
+        .article-body .prose p { max-width: none; }
+      }
+      .article-header .about-caption { position: static; max-width: none; text-align: left; margin-top: 14px; }
         .article-header .about-side-note b { margin: 0 0 10px; }
       }
       @media (max-width: 560px) {
