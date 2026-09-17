@@ -12,8 +12,8 @@ tagFilters:
   "多 Agent": "ai"
   "MCP": "ai"
   "Agent CLI": "ai"
-image: "diagram-agent-mcp.webp"
-imageAlt: "多 Agent 编排控制面插画"
+image: "illu-agent-mcp.webp"
+imageAlt: "项目主视觉插画"
 imageWidth: 1536
 imageHeight: 1024
 badge: "Agent MCP"
@@ -51,9 +51,13 @@ related:
 
 这就是 <em>agent-mcp</em>。
 
+<figure class="illu">
+  <img src="/citygenius-blog/assets/illu-agent-mcp.webp" alt="插图" width="1536" height="1024" loading="lazy" />
+</figure>
+
 <figure class="illu method">
-  <img src="/citygenius-blog/assets/diagram-agent-mcp.webp" alt="多 Agent 编排控制面示意" width="1536" height="1024" loading="lazy" />
-  <figcaption>把多个 CLI 收成一个可调度的工作池。</figcaption>
+  <img src="/citygenius-blog/assets/diagram-agent-mcp.webp" alt="方法论示意" width="1536" height="1024" loading="lazy" />
+  <figcaption>结构示意</figcaption>
 </figure>
 
 ## 踩坑：原来 CLI 差这么多

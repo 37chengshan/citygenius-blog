@@ -12,7 +12,7 @@ tagFilters:
   "教育决策": "ai"
   "Evidence Graph": "ai"
   "Python": "full-stack"
-image: "diagram-eduevidence.webp"
+image: "illu-eduevidence.webp"
 imageAlt: "证据研究引擎插画"
 imageWidth: 1536
 imageHeight: 1024
@@ -62,9 +62,13 @@ EduEvidence 的起点就一句话：我不想再让模型自由发挥研究结�
 
 ## 实现路径：先定契约，再谈 Agent
 
+<figure class="illu">
+  <img src="/citygenius-blog/assets/illu-eduevidence.webp" alt="插图" width="1536" height="1024" loading="lazy" />
+</figure>
+
 <figure class="illu method">
-  <img src="/citygenius-blog/assets/diagram-eduevidence.webp" alt="证据检索与 Evidence Graph" width="1536" height="1024" loading="lazy" />
-  <figcaption>检索片段只是线索，证据必须可追溯。</figcaption>
+  <img src="/citygenius-blog/assets/diagram-eduevidence.webp" alt="方法论示意" width="1536" height="1024" loading="lazy" />
+  <figcaption>结构示意</figcaption>
 </figure>
 
 一开始我也想「让多个 Agent 分工调研」。后来发现方向反了——多 Agent 只是执行方式，真正难的是**中间产物长什么样、什么算合格**。

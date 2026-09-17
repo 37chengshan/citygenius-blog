@@ -12,7 +12,7 @@ tagFilters:
   "Rust": "full-stack"
   "Token 优化": "ai"
   "本地工具": "full-stack"
-image: "diagram-d-token.webp"
+image: "illu-d-token.webp"
 imageAlt: "本地 Token 控制面插画"
 imageWidth: 1536
 imageHeight: 1024
@@ -60,9 +60,13 @@ related:
 
 ## 为什么必须是「本地」控制面
 
+<figure class="illu">
+  <img src="/citygenius-blog/assets/illu-d-token.webp" alt="插图" width="1536" height="1024" loading="lazy" />
+</figure>
+
 <figure class="illu method">
-  <img src="/citygenius-blog/assets/diagram-d-token.webp" alt="本地上下文压缩与路由" width="1536" height="1024" loading="lazy" />
-  <figcaption>上下文在离开本机前先被压缩和路由。</figcaption>
+  <img src="/citygenius-blog/assets/diagram-d-token.webp" alt="方法论示意" width="1536" height="1024" loading="lazy" />
+  <figcaption>结构示意</figcaption>
 </figure>
 
 把压缩和路由放到云端看起来更省事，但有几件事我没法接受：源码和完整 prompt 要先离开本机；出了问题只能等服务商的 dashboard；配置变更没法精确回滚。d-token 选择本地优先——设置、诊断、请求元数据和回退记录都留在本机，普通日志不主动保存完整 prompt、完整 response、源码正文或 API key。模型服务商仍然会收到你主动发出的请求，这一点产品里也没有回避。
