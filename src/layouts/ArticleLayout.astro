@@ -74,13 +74,14 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       }
       .article-meta-top .tag { color: var(--ink); font-weight: 600; letter-spacing: 0.08em; text-transform: none; font-size: 13px; }
       .article-header h1 {
-        font-family: var(--sans);
-        font-size: clamp(32px, 4vw, 48px);
-        font-weight: 700;
-        letter-spacing: -0.03em;
-        line-height: 1.15;
+        font-family: var(--serif);
+        font-size: clamp(32px, 4vw, 46px);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.22;
         margin: 0 auto 18px;
         max-width: 16ch;
+        text-align: center;
         text-wrap: balance;
       }
       .article-header h1 em { font-family: var(--serif); font-style: italic; font-weight: 500; }
@@ -245,12 +246,13 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       .article-body .prose {
         font-family: var(--body);
         font-size: 16.5px;
-        line-height: 1.75;
+        line-height: 1.95;
         color: var(--ink-soft);
         max-width: none;
+        letter-spacing: 0.01em;
       }
       .article-body .prose p {
-        margin: 0 0 1.15em;
+        margin: 0 0 1.45em;
         text-align: justify;
         text-justify: inter-ideograph;
         word-break: break-word;
@@ -258,25 +260,25 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       }
       .article-body .prose p + p { margin-top: 0; }
       .article-body .prose h2 {
-        font-family: var(--sans);
+        font-family: var(--serif);
         font-style: normal;
-        font-weight: 700;
-        font-size: 24px;
-        letter-spacing: -0.015em;
+        font-weight: 600;
+        font-size: 26px;
+        letter-spacing: -0.01em;
         color: var(--ink);
-        margin: 2.4em 0 0.75em;
-        line-height: 1.3;
+        margin: 2.8em 0 0.9em;
+        line-height: 1.35;
       }
       .article-body .prose h2 em { font-family: var(--serif); font-style: italic; font-weight: 500; }
       .article-body .prose h3 {
         font-family: var(--sans);
-        font-size: 14px;
-        font-weight: 650;
-        letter-spacing: 0.02em;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
         color: var(--ink);
-        margin: 1.8em 0 0.55em;
-        line-height: 1.4;
-        text-transform: none;
+        margin: 2em 0 0.7em;
+        line-height: 1.45;
       }
       .article-body .prose figure.illu {
         margin: 0.25em 0 0.9em;
@@ -711,7 +713,8 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       height: auto !important;
     }
     .article-body .prose p {
-      margin-bottom: 1.35em !important;
+      margin-bottom: 1.45em !important;
+      line-height: 1.95 !important;
     }
   </style>
 </BaseLayout>
