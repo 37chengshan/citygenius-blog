@@ -153,10 +153,6 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         max-width: 1200px;
         margin: 0 auto;
       }
-      /* squeeze chrome above the article */
-      .topbar { display: none !important; }
-      .nav { padding-top: 10px !important; padding-bottom: 10px !important; }
-      .nav .brand-meta { display: none !important; }
       .article-toc {
         position: sticky;
         top: 72px;
@@ -708,5 +704,10 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       background: #f7f1de !important;
       object-fit: contain !important;
     }
+    /* article pages: drop top chrome */
+    body .topbar { display: none !important; }
+    body .nav { padding-top: 10px !important; padding-bottom: 10px !important; }
+    body .nav .brand-meta { display: none !important; }
+    body .article-header { padding-top: 4px !important; }
   </style>
 </BaseLayout>

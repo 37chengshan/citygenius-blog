@@ -44,9 +44,12 @@ const categoryCounts: Record<CategoryKey, number> = {
       .article-index-page {
         padding: 12px 0 64px;
       }
-      .topbar { display: none !important; }
-      .nav { padding-top: 10px !important; padding-bottom: 10px !important; }
-      .nav .brand-meta { display: none !important; }
+    </style>
+    <style is:global>
+      body .topbar { display: none !important; }
+      body .nav { padding-top: 10px !important; padding-bottom: 10px !important; }
+      body .nav .brand-meta { display: none !important; }
+    </style>
       .article-top {
         display: grid;
         gap: 24px;
