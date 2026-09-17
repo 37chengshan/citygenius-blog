@@ -180,18 +180,21 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       .article-toc a {
         display: block;
         font-size: 13px;
-        line-height: 1.35;
-        color: var(--ink-mute);
-        text-decoration: none;
+        line-height: 1.4;
+        color: #15140f !important;
+        text-decoration: none !important;
+        border-bottom: none !important;
         border-left: 2px solid transparent;
         padding-left: 10px;
         transition: color 0.18s ease, border-color 0.18s ease;
       }
       .article-toc a:hover,
       .article-toc a.is-active {
-        color: var(--ink);
-        border-left-color: var(--ink);
+        color: #15140f !important;
+        border-left-color: #15140f;
+        text-decoration: none !important;
       }
+      .article-toc a:visited { color: #15140f !important; }
       @media (max-width: 1100px) {
         .article-shell { grid-template-columns: 1fr; padding: 0 20px; max-width: 720px; }
         .article-toc { display: none; }
@@ -665,4 +668,49 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       onScroll();
     })();
   </script>
+
+  <style is:global>
+    .article-toc a,
+    .article-toc a:link,
+    .article-toc a:visited,
+    .article-toc a:hover,
+    .article-toc a:focus {
+      color: #15140f !important;
+      text-decoration: none !important;
+      border-bottom: 0 !important;
+      box-shadow: none !important;
+    }
+    .article-toc a.is-active {
+      color: #15140f !important;
+      border-left-color: #15140f !important;
+      font-weight: 600;
+    }
+    .article-body .prose figure.illu {
+      width: 168px !important;
+      max-width: 168px !important;
+      float: right;
+      clear: right;
+      margin: 0.35em 0 0.9em 1.25em !important;
+    }
+    .article-body .prose figure.illu img {
+      width: 168px !important;
+      max-width: 168px !important;
+      height: auto !important;
+      display: block;
+    }
+    .article-body .prose figure.illu.method {
+      float: none !important;
+      width: min(100%, 400px) !important;
+      max-width: 400px !important;
+      margin: 1.5em auto !important;
+    }
+    .article-body .prose figure.illu.method img {
+      width: 100% !important;
+      max-width: 400px !important;
+      height: auto !important;
+    }
+    .article-body .prose p {
+      margin-bottom: 1.35em !important;
+    }
+  </style>
 </BaseLayout>
