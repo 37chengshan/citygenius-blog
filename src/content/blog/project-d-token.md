@@ -67,14 +67,15 @@ AI 编程 Agent
 - **显式路由**：每个请求走明确路径，绝不静默切换服务商。
 - **每请求一张回执**：来源 Agent、路由、变换、Local / Provider Token、恢复状态。
 
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/real-d-token-hero.webp" alt="d-token 控制面" width="1400" height="787" loading="lazy" />
-  <figcaption>请求路径：编码 Agent → 本地控制面 → 已配置的模型服务商。</figcaption>
-</figure>
-
 ## 问题
 
 AI 编码 Agent 会一遍又一遍重发相同的文件、日志和工具输出。token 账单悄悄增长，但：
+
+
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/chart-d-token-savings.webp" alt="单次实测节省" width="1416" height="830" loading="lazy" />
+  <figcaption>2026-08-04 单次真实路由请求：少发送 33,705 token（非平均值）。</figcaption>
+</figure>
 
 - 说不清哪个会话最烧钱
 - 说不清「优化」是否生效
@@ -88,8 +89,8 @@ AI 编码 Agent 会一遍又一遍重发相同的文件、日志和工具输出�
 d-token 把设置、诊断、请求元数据、回退记录都留在本机。普通日志不会主动保存完整 prompt、完整 response、源代码正文、API key。你选的服务商仍会收到你主动发出的请求——但中间多了一层你自己掌控的门。
 
 <figure class="illu method">
-  <img src="/citygenius-blog/assets/scenario-context-funnel.webp" alt="上下文漏斗" width="1400" height="858" loading="lazy" />
-  <figcaption>上下文在离开本机前经过压缩，并生成 Optimization Receipt。</figcaption>
+  <img src="/citygenius-blog/assets/fig-d-token-pipeline.webp" alt="四段路径" width="1416" height="758" loading="lazy" />
+  <figcaption>Agent → 压缩变换 → 显式路由 → 已配置的服务商。</figcaption>
 </figure>
 
 ## 做法
@@ -105,21 +106,11 @@ d-token 把设置、诊断、请求元数据、回退记录都留在本机。普
 
 更底层的教训是：在 AI 工具链里做中间层，**诚实比功能表重要**。
 
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/real-d-token-routing.svg" alt="显式路由管线" width="1400" height="787" loading="lazy" />
-  <figcaption>优化与路由为显式阶段，每阶段可观察、可对账。</figcaption>
-</figure>
-
 ## 结果
 
 README 记录的数字是：**单次真实路由请求物理减少 33,705 token**（实测，2026-08-04）。
 
 这不是「平均省 30%」的营销话术，而是一次可复现的实测点。回执里能看到 Local Token 与 Provider Token 的对比——省了多少，写在纸上，不靠感觉。
-
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/real-d-token-receipt.svg" alt="Optimization Receipt" width="1400" height="787" loading="lazy" />
-  <figcaption>单次请求回执记录路由、变换与 token 对比。</figcaption>
-</figure>
 
 当前 **`0.2.0-beta.1`**，公开未签名预发布（macOS ARM64 / Windows x64）。未签名构建可能触发系统安全警告——请核对仓库与哈希，不要绕过系统保护。
 

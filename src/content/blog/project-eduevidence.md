@@ -66,14 +66,15 @@ README 的产品句是：**From Research Questions to Evidence-Based Decisions.*
 
 **ADOPT / PILOT / REJECT / INSUFFICIENT EVIDENCE**，外加可执行的干预与评估计划。
 
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/real-edu-workflow.svg" alt="EduEvidence 研究工作流" width="1400" height="800" loading="lazy" />
-  <figcaption>完整研究周期：从问题框定到证据接地的决策更新。</figcaption>
-</figure>
-
 ## 问题
 
 教育决策有三个坑：
+
+
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/fig-edu-nine-stage.webp" alt="九阶段协议" width="1444" height="824" loading="lazy" />
+  <figcaption>Research Core 六阶段 + Decision Extension 三阶段。</figcaption>
+</figure>
 
 - **引用像真的**：年份、期刊、结论都对得上，细节却经不起核对
 - **把相关当因果**：「用了分数提高」往往只是选择偏差
@@ -99,8 +100,8 @@ CHI 2023 和 PNAS 2025 这类真实研究提醒我们：AI 辅助编码在短任
 多域靠**契约**而不是复制引擎：`education` 与 `policy` 各自声明 frame schema、outcome taxonomy、方法清单；未知 token **fail closed**。
 
 <figure class="illu method">
-  <img src="/citygenius-blog/assets/real-edu-graph.webp" alt="Evidence Graph 与 Studio" width="1400" height="952" loading="lazy" />
-  <figcaption>Evidence Graph 与报告库；图 revision 不可变，报告为投影。</figcaption>
+  <img src="/citygenius-blog/assets/chart-edu-decisions.webp" alt="四态决策" width="1402" height="648" loading="lazy" />
+  <figcaption>ADOPT / PILOT / REJECT / 证据不足。</figcaption>
 </figure>
 
 ## 做法

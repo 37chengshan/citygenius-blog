@@ -51,11 +51,6 @@ agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」�
 
 派发、等待、插话、超时、排队、续接、降档，全部交给控制面。模型推理仍发生在各家 CLI 原生 runtime 里；agent-mcp 不重写 agent loop，也不锁死单一模型。
 
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/real-agent-mcp-orchestration.webp" alt="agent-mcp 编排示意" width="1400" height="787" loading="lazy" />
-  <figcaption>控制面将任务派发至多个 Agent CLI，Run 为唯一执行单位。</figcaption>
-</figure>
-
 另一个原则是：**按任务匹配底座**。
 
 读密集探索丢给快底座（omp / pi / grok），深推理规划丢给强底座（claude）。成本与质量现场匹配，而不是「全家都用同一个模型」。
@@ -63,6 +58,12 @@ agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」�
 ## 问题
 
 多开几个终端很简单。难的是：
+
+
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/chart-agent-mcp-scale.webp" alt="控制面规模" width="1400" height="820" loading="lazy" />
+  <figcaption>公开规模指标：34 个 MCP 工具、589 个测试、11 款内置 CLI 适配。</figcaption>
+</figure>
 
 - 子任务跑飞了怎么办？
 - 槽位满了怎么排队？
@@ -73,8 +74,8 @@ agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」�
 各家 CLI 还互不相通：有的吐 JSONL，有的只吐纯文本，usage 字段名完全不同，resume 有的支持有的不支持。如果不管这些差异，多 Agent 只会把混乱放大。
 
 <figure class="illu method">
-  <img src="/citygenius-blog/assets/scenario-agent-dispatch.webp" alt="任务分发场景" width="1400" height="858" loading="lazy" />
-  <figcaption>主 Agent 负责拆解与汇合；派发、等待与容错交给基础设施。</figcaption>
+  <img src="/citygenius-blog/assets/fig-agent-mcp-flow.webp" alt="派发路径" width="1400" height="780" loading="lazy" />
+  <figcaption>主 Agent 只做拆解与汇合；派发、等待与容错由控制面完成。</figcaption>
 </figure>
 
 ## 做法
@@ -91,11 +92,6 @@ agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」�
 底层是 daemon 控制面。**Run 是唯一执行单位**。槽位满了自动排队。任务超时会终止整棵进程树。token 预算超了可以降档重跑。`session_id` 是所有权边界。
 
 适配器层内置 11 款 CLI（claude / grok / opencode / omp / codex / kimi / copilot 等）的事件流、usage、session 归一化。不在列表里的 CLI，写一份 JSON 配置也能接，不用改代码。
-
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/real-agent-mcp-routing.webp" alt="路由与适配器" width="1400" height="787" loading="lazy" />
-  <figcaption>适配器归一化各 CLI 的事件流与会话标识。</figcaption>
-</figure>
 
 DeepSeek Harness 也做了原生接入：一行 `insert` patch，34 个工具以 `mcp__agentmcp__*` 全量注册；daemon 未起自动拉起，断线指数退避重连。
 

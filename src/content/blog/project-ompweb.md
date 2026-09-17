@@ -65,20 +65,26 @@ ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、
 
 一句话：**OMP 写会话，ompweb 展示和编排；权威不在 UI。**
 
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/real-ompweb-arch.webp" alt="ompweb 架构" width="1400" height="920" loading="lazy" />
-  <figcaption>Web 与桌面共享工作区；会话权威仍在本地 OMP 进程。</figcaption>
-</figure>
-
 ## 问题
 
 终端有三个天花板：
+
+
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/fig-ompweb-local-first.webp" alt="本地优先架构" width="1416" height="802" loading="lazy" />
+  <figcaption>会话 JSONL 为权威；ompweb 展示与窄写；live 执行走 omp。</figcaption>
+</figure>
 
 1. **历史不可视** —— 会话在文件里，不在眼前
 2. **多开无结构** —— 分支、对比、回滚靠人肉窗口管理
 3. **生态不可见** —— MCP、技能、Git 状态散落各处
 
 如果重写一个 Agent，你就分裂了生态。ompweb 选择站在 omp 旁边，而不是对面。
+
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/chart-ompweb-stack.webp" alt="运行时基线" width="1392" height="675" loading="lazy" />
+  <figcaption>Node ≥22.19、Next.js 16.3、Electron 44。</figcaption>
+</figure>
 
 ## 做法
 
@@ -89,11 +95,6 @@ ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、
 - **远端可控**：`--password`、`--hostname`、`--no-open`，适合服务器后台
 
 后面又加了一层 Rust `ompweb-host` 守护进程：Git / PTY / 会话扫描 / 设置 / supervisor，走有界 NDJSON（UDS / Named Pipe）。
-
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/real-ompweb-ui.webp" alt="ompweb 界面" width="1400" height="875" loading="lazy" />
-  <figcaption>会话树、对话区与侧栏构成的工作台界面。</figcaption>
-</figure>
 
 功能面按「工作台」而不是「聊天窗」来铺：
 
