@@ -1,143 +1,145 @@
 ---
-title: "d-token：给 AI 编码 Agent 装一块本地上下文控制面"
-description: "记录 d-token 的想法、架构和实测。为什么要在 Agent 和模型服务商之间插一层本地服务，Tauri 2 + Rust 怎么做路由、回执和配置安全，以及一次真实请求省下 33,705 token 的前后。"
+title: "d-token：上下文离开本机之前，先过一道<em>控制面</em>"
+description: "核心不是省 token 的脚本，而是本地控制面：压缩冗余、显式路由、每请求一张回执、配置可回退。单次真实请求物理减少 33,705 token。"
 date: "2026.09.17"
-readTime: "8 分钟阅读"
-tag: "工具链"
+readTime: "11 分钟阅读"
+tag: "d-token"
 category: "AI"
-tags: ["AI Coding", "Tauri", "Rust", "Token 优化", "本地工具"]
+tags: ["d-token", "Rust", "Tauri", "Token", "Local-first"]
 tagFilters:
-  "AI Coding": "ai"
-  "Tauri": "full-stack"
+  "d-token": "ai"
   "Rust": "full-stack"
-  "Token 优化": "ai"
-  "本地工具": "full-stack"
+  "Tauri": "full-stack"
+  "Token": "ai"
+  "Local-first": "ai"
 image: "illu-d-token.webp"
-imageAlt: "本地 Token 控制面插画"
+imageAlt: "d-token 本地控制面"
 imageWidth: 1536
 imageHeight: 922
-badge: "Project"
-sideNote: "d-token · Tauri 2 ·<br/>Rust · Context · Receipt"
-caption: "<b>Local control plane visual.</b>(CityGenius, MMXXVI)"
-authorMeta: "大学生 · 全栈开发者 · 本地工具实践者"
+badge: "d-token"
+sideNote: "d-token · Local Control Plane ·<br/>compress · route · receipt"
+caption: "<b>Context before it leaves.</b>(CityGenius, MMXXVI)"
+authorMeta: "大学生 · 全栈开发者 · AI 工具链探索者"
 featured: false
 related:
-  - date: "2026.08.30"
-    title: "多 Agent 编排：用 agent-mcp 把任务拆开跑"
-    desc: "从 spawn 到收敛，记录一次多 Agent 协作实验。"
-    tag: "Agent · 编排"
+  - date: "2026.09.17"
+    title: "agent-mcp：把各种 Agent CLI 收进一个工作池"
+    desc: "主 Agent 只拆解汇合，执行交给控制面。"
+    tag: "Agent MCP · AI"
     slug: "project-agent-mcp"
-  - date: "2026.05.15"
-    title: "用 Vibe Coding 三天搞定一个全栈 AI 应用"
-    desc: "从想法到上线，记录 scholar-ai 的开发过程。"
-    tag: "Vibe Coding · AI"
-    slug: "vibe-coding-3-days"
-  - date: "2026.05.21"
-    title: "从桌面应用到 Claude Skill"
-    desc: "把设计系统应用拆成可复用的 Skill 逻辑。"
-    tag: "Claude Code · Skill"
-    slug: "open-design-to-skill"
+  - date: "2026.09.17"
+    title: "ompweb：给 omp 一个本地工作台"
+    desc: "Local-first，读会话文件，不重写 Agent。"
+    tag: "ompweb · Local-first"
+    slug: "project-ompweb"
+  - date: "2026.09.17"
+    title: "eduevidence：没有证据，就不设计新研究"
+    desc: "九阶段协议与 Evidence Graph。"
+    tag: "EduEvidence · Skill"
+    slug: "project-eduevidence"
 ---
 
-上个月我对账单的时候愣了一下：AI 编码的花费又涨了一截，但我几乎说不清多出来的钱花在哪。翻会话记录，更难受——问题其实就摆在眼前：Agent 会把同一个文件、同一段工具日志、同一批 search 结果，在一次任务里反复塞进上下文。你知道它在重复，但你拿不出证据。
+打开账单，数字在涨，但说不清花在哪。
 
-## 问题
+同一批文件，上一轮刚喂过模型，这一轮又原样重发。工具日志、搜索结果、重复的 README 片段……上下文像漏水的桶。所谓「优化」有没有用，没有回执可以对账。
 
-一开始我以为写几个脚本就能解决：压缩重复日志、过滤大文件、把上游地址固定住。真做下去发现脚本只能修单点。
+d-token 要回答三个问题：
 
-配置改坏了没人知道。请求被静默切到另一个服务商，测试结果对不上，你还在怀疑是不是自己 prompt 写坏了。「省了多少」只能靠感觉——感觉这个东西，在账单面前一文不值。
+1. 这些 token 花在了哪里？
+2. 哪个 Provider 真的处理了请求？
+3. 压缩是否真的发生了，而不是「感觉更省了」？
 
-三个很基本的问题始终答不上来：这些 token 花在了哪个请求？真正走的是哪个 Provider？我做的「优化」到底有没有生效？
+## 核心思想
 
-账单只给你一个总额。Agent 日志要么太吵，要么根本没记路由。服务商 dashboard 有自己的统计口径，和本地看到的对不上。你夹在中间，两边都说不清。
+README 的定位很干脆：**面向 AI 编码 Agent 的本地上下文控制面**。
 
-我试过在 prompt 里写「请不要重复粘贴文件」，也试过换更省的模型。前者管不住工具调用，后者只是把单价压低了，冗余还在。真正缺的不是聪明的 Agent，是一块能看见请求的控制面。
+它运行在「你正在用的 Agent」和「你配置的模型服务商」之间。在上下文**离开本机之前**压缩冗余，保持路由**显式**，并让配置变更**可恢复**——而不是一堆脚本和猜测。
 
-所以有了 d-token 的想法：**在 Agent 和模型服务商之间，放一层跑在本机的控制面**。不是再包一层聊天 UI，而是让每个请求在离开本机前被看见、被压缩、被路由，并留下证据。
-
-<div class="info-card">
-<div class="ic-title">项目概览</div>
-<ul>
-<li><strong>项目名：</strong>d-token</li>
-<li><strong>技术栈：</strong>Tauri 2 / Rust / React</li>
-<li><strong>定位：</strong>面向 AI 编码 Agent 的本地上下文控制面</li>
-<li><strong>当前版本：</strong>0.2.0-beta.1（未签名预发布）</li>
-<li><strong>GitHub：</strong><a href="https://github.com/37chengshan/d-token" target="_blank" rel="noreferrer noopener">37chengshan/d-token</a></li>
-</ul>
-</div>
-
-## 为什么本地
-
-把压缩和路由放到云端看起来更省事，省得自己维护桌面应用。但有几件事我没法接受。
-
-第一是源码和完整 prompt 要先离开本机，才能被「优化」。第二是出了问题只能等服务商 dashboard 更新，中间那段黑盒时间帮不上忙。第三是配置变更没法精确回滚——你改坏了，只能干等或者重装。
-
-d-token 选择本地优先：设置、诊断、请求元数据和回退记录都留在本机。普通日志不主动保存完整 prompt、完整 response、源码正文或 API key。模型服务商仍然会收到你主动发出的请求，这一点产品里也没有回避。
-
-另一条硬约束是**显式路由**。每个请求都走明确路径到你配置的上游，绝不静默切换服务商。
-
-听起来偏执。但静默 fallback 是最让人崩溃的一种故障：你以为在测 A，其实流量走了 B。测试红了，你对着 A 的配置查了半天，B 甚至都没出现在日志里。
-
-<figure class="illu">
-  <img src="/citygenius-blog/assets/illu-d-token.webp" alt="插图" width="1536" height="922" loading="lazy" />
-</figure>
-
-## 实现
-
-架构上我尽量收敛：**Rust runtime 拥有路由、压缩、配置事务和运行事实**；Tauri 2 提供本地桥接和桌面窗口；前端（React）只消费结果、负责交互，不根据页面状态自行推断「已连接」。
-
-这个分工是被坑出来的。早期有一版前端自己根据「配置文件里写着某个 provider」就显示已连接，结果服务根本没起来。后来规则变死：状态只认 runtime 给的事实，前端不发明真相。
-
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/diagram-d-token.webp" alt="方法论示意" width="1536" height="922" loading="lazy" />
-  <figcaption>结构示意</figcaption>
-</figure>
-
-请求链路大致是：
-
-```text
-Agent 请求
-  → loopback 协议入口（Chat / Responses / Anthropic Messages）
-  → 路由决策（Provider / 模型 / 协议 / endpoint）
-  → 上下文压缩与校验
-  → 转发上游，采集用量
-  → 写入 Optimization Receipt 与事件账本
-  → 桌面端概览 / 分析 / Doctor 展示同一事实
+```
+AI 编程 Agent
+     ↓
+   d-token   连接 · 优化 · 路由 · 观察
+     ↓
+ 你配置的模型服务商
 ```
 
-三件在实现里反复较真的事。
+三条硬原则：
 
-**路由必须可解释。** 每个请求只有一个路由决策。未知模型保持明确默认行为，不猜凭据、不换 Provider。cc-switch 这类外部配置源只读跟随，d-token 不写它们的数据库——别人家的配置坏了，不该算在我头上。
+- **本地优先**：秘密不进普通日志；控制面跑在本机。
+- **显式路由**：每个请求走明确路径，绝不静默切换服务商。
+- **每请求一张回执**：来源 Agent、路由、变换、Local / Provider Token、恢复状态。
 
-**每次请求一张回执。** 来源 Agent、实际路由、做了哪些变换、本地与 Provider 各自的 token、是否可恢复——都绑在同一条 request 上。没有证据就不显示节省。这条写进了产品规则，省得自己骗自己。
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/real-d-token-hero.webp" alt="d-token 控制面" width="1400" height="787" loading="lazy" />
+  <figcaption>官方示意：Agent → d-token → 你配置的上游。</figcaption>
+</figure>
 
-**配置安全比功能炫更重要。** 改 Agent 配置的流程固定为：预览 → 脱敏 Diff → 备份 → 验证 → 可回退。失败时精确回滚原始字节。某个 Agent 配置失败，只回退它自己，不连坐已经成功的项。凭据进系统凭据库，配置里只存引用。
+## 问题：账单在涨，对账靠猜
 
-桌面端用 Tauri 2，是因为要管服务生命周期、系统凭据库和文件事务这些浏览器做不了的事。核心逻辑放 Rust workspace 里拆成 proxy、router、compress、event-ledger、config、doctor 等 crate，避免前后端各写一套真相。
+AI 编码 Agent 会一遍又一遍重发相同的文件、日志和工具输出。token 账单悄悄增长，但：
 
-状态语义也钉死了。`detected` 只表示发现了文件或进程；`configured` 表示配置里写着，但没证明真实流量；`connected` 必须至少有一条真实请求经过；`verified` 要有当前有效证据。这四个词以前在 UI 里混着用过，现在谁都不许越级显示。
+- 说不清哪个会话最烧钱
+- 说不清「优化」是否生效
+- 配置改坏了，回不去
 
-## 实测
+这不是再写一个 prompt 工程技巧能解决的。需要一层**看得见、可回退**的基础设施。
 
-目前能公开核对的一条数据是：**单次真实路由请求物理减少 33,705 token**（实测，2026-08-04）。
+## 为什么必须是本地
 
-这只是单点证据，不是长期均值，也不等于账单上的最终数字。本地估算、上游用量和账单本来就应该分开记——把它们混成一个「节省率」，迟早会把自己骗进去。
+上下文里有源码路径、密钥边界、公司内部结构。压缩和路由如果放在第三方黑盒里，你就把「可见性」也交出去了。
 
-但它确认了一件事：压缩路径不是空转的。冗余确实可以被拿掉，而任务含义还在。
+d-token 把设置、诊断、请求元数据、回退记录都留在本机。普通日志不会主动保存完整 prompt、完整 response、源代码正文、API key。你选的服务商仍会收到你主动发出的请求——但中间多了一层你自己掌控的门。
 
-真实模型验收用的是 OpenCode 免费 MiMo，把同一条请求上的路由、压缩和脱敏事件对上账。HTTP 429、只完成路由、仅有本地测试，都不能写成「真实压缩通过」。这条标准一开始写得很严，后来发现它挡掉了好几次自我感动——有一次本地测试全绿，上了真实链路才发现压缩器在某个 codec 上直接 passthrough，「节省」全是空的。
+<figure class="illu">
+  <img src="/citygenius-blog/assets/scenario-context-funnel.webp" alt="上下文漏斗" width="1400" height="858" loading="lazy" />
+  <figcaption>在离开本机之前，先压一刀，并留下回执。</figcaption>
+</figure>
 
-## 还没做完
+## 实现：Rust 拥有事实，Tauri 只做桥
 
-写这篇的时候项目是 `0.2.0-beta.1`，公开未签名预发布，不是已签名安装包。对着路线图和 PRD 看，缺口仍然很多：
+桌面端是 **Tauri 2 + Rust core**。Rust 侧负责连接状态、路由决策、压缩管线、回执；前端只做展示与安全配置流程。
 
-- **上下文连续性**（跨 Agent Context Relay、Session Cache）还在规划，跨 Agent 复用同项目上下文的证据链没闭环；
-- **Headroom 能力矩阵**要求逐项具备真实请求、错误路径和回滚证据，目前只有安全子集在生产路径上；
-- **视觉压缩**默认停在 shadow/metadata 边界，没有确切模型能力、质量、成本和恢复证据前，不会开启真实内容替换；
-- **签名与双平台**：macOS Developer ID / notarization 和 Windows Authenticode 都是发布前的 MUST，现在还只是本机候选。
+配置变更不是「保存即生效」，而是：**预览 → 脱敏 Diff → 备份 → 验证 → 回退**。出问题可以诊断、修复、恢复——README 管这叫「配置的医生」。
 
-更底层的教训是：在 AI 编码工具链里做中间层，**诚实比功能表重要**。`detected` 不能显示成 `connected`，`configured` 不能冒充 `verified`，本地测试通过也不能写成「真实压缩通过」。
+状态语义也刻意分开写：
 
-这些规则一开始觉得繁琐，后来发现正是它们让「省了 token」这句话站得住。
+- `detected` ≠ `configured` ≠ `connected` ≠ `verified`
+- 测试通过 ≠ 「真实压缩通过」
 
-d-token 还在路上。如果你也在被 Agent 的上下文开销困扰，欢迎来看看仓库，提 issue 或者直接骂架构都行。
+更底层的教训是：在 AI 工具链里做中间层，**诚实比功能表重要**。
+
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/real-d-token-routing.svg" alt="显式路由管线" width="1400" height="787" loading="lazy" />
+  <figcaption>官方管线图：优化与路由都是显式步骤，可观察。</figcaption>
+</figure>
+
+## 实测：一次请求少了 33,705 token
+
+README 记录的数字是：**单次真实路由请求物理减少 33,705 token**（实测，2026-08-04）。
+
+这不是「平均省 30%」的营销话术，而是一次可复现的实测点。回执里能看到 Local Token 与 Provider Token 的对比——省了多少，写在纸上，不靠感觉。
+
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/real-d-token-receipt.svg" alt="Optimization Receipt" width="1400" height="787" loading="lazy" />
+  <figcaption>Optimization Receipt：每次请求一张单。</figcaption>
+</figure>
+
+## 还没做完的
+
+当前 **`0.2.0-beta.1`**，公开未签名预发布（macOS ARM64 / Windows x64）。未签名构建可能触发系统安全警告——请核对仓库与哈希，不要绕过系统保护。
+
+路线图上还有：
+
+- v0.3：跨 Agent Context Relay、Session Cache、cc-switch 跟随 / 锁定 / 观察
+- v0.4：多 Agent 适配、低风险自动修复、稳定签名
+
+深度压缩、Headroom 类集成、完整签名分发，都还在路上。
+
+```bash
+git clone https://github.com/37chengshan/d-token.git
+cd d-token/code/apps/desktop
+npm ci
+npm run tauri:dev
+```
+
+主仓库：[37chengshan/d-token](https://github.com/37chengshan/d-token)。
