@@ -203,12 +203,7 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         .article-body { max-width: none; margin: 0; }
       }
       @media (max-width: 760px) {
-        .article-body .prose figure.illu,
-        .article-body .prose figure.illu.left {
-          float: none;
-          width: min(100%, 220px);
-          margin: 1em auto 1.2em;
-        }
+        .article-shell { padding: 0 16px; }
       }
       .article-author {
         display: flex;
@@ -280,26 +275,29 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         line-height: 1.35;
         text-transform: none;
       }
-      /* figures: full reading column, OpenAI style */
+      /* figures: full reading column, never overflow */
       .article-body .prose figure.illu,
       .article-body .prose figure.illu.left,
       .article-body .prose figure.illu.method {
         float: none !important;
         width: 100% !important;
-        max-width: none !important;
-        margin: 2em 0 2.2em !important;
+        max-width: 100% !important;
+        margin: 1.75em 0 2em !important;
         clear: both;
+        box-sizing: border-box;
+        overflow: hidden;
       }
       .article-body .prose figure.illu img,
       .article-body .prose figure.illu.left img,
       .article-body .prose figure.illu.method img {
         width: 100% !important;
-        max-width: none !important;
+        max-width: 100% !important;
         height: auto !important;
         display: block;
-        border-radius: 12px;
+        border-radius: 10px;
         border: 1px solid var(--line);
         background: var(--bone);
+        object-fit: contain;
       }
       .article-body .prose figure.illu figcaption {
         font-family: var(--sans);
@@ -307,23 +305,6 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         line-height: 1.55;
         color: var(--ink-mute);
         margin-top: 12px;
-        text-indent: 0;
-        text-align: left;
-      }
-      .article-body .prose figure.illu img {
-        width: 100%;
-        height: auto;
-        display: block;
-        border-radius: 8px;
-        border: 1px solid var(--line);
-        background: var(--bone);
-      }
-      .article-body .prose figure.illu figcaption {
-        font-family: var(--sans);
-        font-size: 12.5px;
-        line-height: 1.45;
-        color: var(--ink-faint);
-        margin-top: 8px;
         text-indent: 0;
         text-align: left;
       }
@@ -556,12 +537,6 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         .article-header .about-art img { height: auto; object-fit: contain; }
       }
       @media (max-width: 760px) {
-        .article-body .prose figure.illu,
-        .article-body .prose figure.illu.left {
-          float: none;
-          width: 100%;
-          margin: 1.2em 0 1.4em;
-        }
         .article-shell { padding: 0 16px; }
       }
       @media (max-width: 560px) {
@@ -703,6 +678,31 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       margin-bottom: 1.45em !important;
       line-height: 1.85 !important;
       text-align: left !important;
+    }
+    /* Markdown figures lack Astro scope attrs — must be global */
+    .article-body .prose figure.illu,
+    .article-body .prose figure.illu.left,
+    .article-body .prose figure.illu.method {
+      float: none !important;
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 1.75em 0 2em !important;
+      clear: both !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+    .article-body .prose figure.illu img,
+    .article-body .prose figure.illu.left img,
+    .article-body .prose figure.illu.method img {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      display: block !important;
+      border-radius: 10px !important;
+      border: 1px solid rgba(21, 20, 15, 0.12) !important;
+      background: #f7f1de !important;
+      object-fit: contain !important;
     }
   </style>
 </BaseLayout>
