@@ -34,18 +34,18 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
     <style>
       /* ===== ARTICLE HEADER — Anthropic-style centered ===== */
       .article-header {
-        padding: 36px 0 28px;
+        padding: 20px 0 12px;
         border-bottom: none;
       }
       .article-header .header-shell {
         max-width: 920px;
-        padding: 0 24px 8px;
+        padding: 0 24px 0;
         text-align: center;
       }
       .article-header .header-grid {
         display: block;
       }
-      .article-header .header-media { min-width: 0; margin: 28px auto 0; max-width: 760px; }
+      .article-header .header-media { min-width: 0; margin: 18px auto 0; max-width: 720px; }
       .article-header .header-copy { min-width: 0; padding-top: 0; }
       .article-header .back-link {
         display: inline-flex;
@@ -55,7 +55,7 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         font-size: 13px;
         color: var(--ink-faint);
         text-decoration: none;
-        margin-bottom: 28px;
+        margin-bottom: 14px;
         transition: color 0.18s ease;
       }
       .article-header .back-link:hover { color: var(--coral); }
@@ -149,8 +149,8 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         gap: 0;
         justify-content: stretch;
         align-items: start;
-        padding: 8px 40px 0;
-        max-width: 1280px;
+        padding: 0 32px 0;
+        max-width: 1200px;
         margin: 0 auto;
       }
       .article-toc {
@@ -242,7 +242,7 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       }
 
       /* ===== ARTICLE BODY (OpenAI-blog reading measure) ===== */
-      .article-body { padding: 24px 0 64px; }
+      .article-body { padding: 12px 0 48px; }
       .article-body .prose {
         font-family: var(--body);
         font-size: 17.5px;
@@ -262,10 +262,10 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         font-family: var(--sans);
         font-style: normal;
         font-weight: 700;
-        font-size: 30px;
+        font-size: 28px;
         letter-spacing: -0.02em;
         color: var(--ink);
-        margin: 2.6em 0 0.95em;
+        margin: 1.8em 0 0.7em;
         line-height: 1.25;
       }
       .article-body .prose h2 em { font-family: var(--serif); font-style: italic; font-weight: 500; }
@@ -484,7 +484,7 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       .share-row a:hover { color: var(--coral); border-bottom-color: var(--coral); }
 
       /* ===== RELATED ===== */
-      .related { padding: 80px 0; border-top: 1px solid var(--line); }
+      .related { padding: 40px 0 56px; border-top: 1px solid var(--line); }
       .related h3 {
         font-family: var(--sans);
         font-size: 11px;
@@ -702,9 +702,9 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
     }
     .article-body .prose figure.illu.method {
       float: none !important;
-      width: min(100%, 400px) !important;
-      max-width: 400px !important;
-      margin: 1.5em auto !important;
+      width: min(100%, 380px) !important;
+      max-width: 380px !important;
+      margin: 1em auto 1.1em !important;
     }
     .article-body .prose figure.illu.method img {
       width: 100% !important;
@@ -712,8 +712,8 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       height: auto !important;
     }
     .article-body .prose p {
-      margin-bottom: 1.65em !important;
-      line-height: 1.88 !important;
+      margin-bottom: 1.35em !important;
+      line-height: 1.82 !important;
       text-align: left !important;
     }
   </style>
