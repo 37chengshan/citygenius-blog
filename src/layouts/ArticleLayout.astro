@@ -32,23 +32,21 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
 >
   <Fragment slot="head">
     <style>
-      /* ===== ARTICLE HEADER ===== */
+      /* ===== ARTICLE HEADER — Anthropic-style centered ===== */
       .article-header {
-        padding: 80px 0 60px;
-        border-bottom: 1px solid var(--line);
+        padding: 36px 0 28px;
+        border-bottom: none;
       }
       .article-header .header-shell {
-        max-width: 1360px;
-        padding: 0 64px 48px;
+        max-width: 920px;
+        padding: 0 24px 8px;
+        text-align: center;
       }
       .article-header .header-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
-        gap: clamp(28px, 4vw, 56px);
-        align-items: start;
+        display: block;
       }
-      .article-header .header-media { position: relative; min-width: 0; }
-      .article-header .header-copy { min-width: 0; padding-top: 8px; }
+      .article-header .header-media { min-width: 0; margin: 28px auto 0; max-width: 760px; }
+      .article-header .header-copy { min-width: 0; padding-top: 0; }
       .article-header .back-link {
         display: inline-flex;
         align-items: center;
@@ -57,7 +55,7 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         font-size: 13px;
         color: var(--ink-faint);
         text-decoration: none;
-        margin-bottom: 36px;
+        margin-bottom: 28px;
         transition: color 0.18s ease;
       }
       .article-header .back-link:hover { color: var(--coral); }
@@ -65,33 +63,133 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       .article-meta-top {
         display: flex;
         align-items: center;
-        gap: 16px;
+        justify-content: center;
+        gap: 14px;
         font-family: var(--sans);
-        font-size: 11px;
-        letter-spacing: 0.16em;
+        font-size: 12px;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
         color: var(--ink-faint);
-        margin-bottom: 24px;
+        margin-bottom: 18px;
       }
-      .article-meta-top .tag { color: var(--coral); font-weight: 600; }
+      .article-meta-top .tag { color: var(--ink); font-weight: 600; letter-spacing: 0.08em; text-transform: none; font-size: 13px; }
       .article-header h1 {
         font-family: var(--sans);
-        font-size: clamp(36px, 4.6vw, 58px);
-        font-weight: 800;
-        letter-spacing: -0.026em;
-        line-height: 1.05;
-        margin-bottom: 24px;
+        font-size: clamp(32px, 4vw, 48px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin: 0 auto 18px;
         max-width: 16ch;
+        text-wrap: balance;
       }
       .article-header h1 em { font-family: var(--serif); font-style: italic; font-weight: 500; }
       .article-header h1 .dot { color: var(--coral); }
       .article-header .lead {
         font-family: var(--body);
-        font-size: 18px;
-        line-height: 1.55;
+        font-size: 17px;
+        line-height: 1.65;
         color: var(--ink-soft);
-        max-width: 48ch;
-        margin-bottom: 32px;
+        max-width: 42ch;
+        margin: 0 auto 28px;
+        text-align: center;
+      }
+      .article-header .article-author {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding-top: 0;
+        border-top: none;
+        text-align: left;
+      }
+      .article-header .about-art {
+        position: relative;
+        width: 100%;
+        max-width: none;
+        aspect-ratio: 16 / 10;
+        padding-right: 0;
+        padding-bottom: 0;
+      }
+      .article-header .about-art img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        object-fit: cover;
+        object-position: center center;
+        border-radius: 16px;
+      }
+      .article-header .about-side-note {
+        position: absolute;
+        right: 14px;
+        top: 14px;
+        text-align: right;
+        font-family: var(--sans);
+        font-size: 10.5px;
+        line-height: 1.45;
+        color: rgba(21, 20, 15, 0.55);
+        letter-spacing: 0.04em;
+        max-width: 18ch;
+      }
+      .article-header .about-side-note b { display: none; }
+      .article-header .about-caption {
+        margin-top: 10px;
+        text-align: center;
+        font-family: var(--sans);
+        font-size: 12px;
+        color: var(--ink-faint);
+        letter-spacing: 0.04em;
+      }
+
+      /* ===== BODY + FLOATING TOC ===== */
+      .article-shell {
+        display: grid;
+        grid-template-columns: 160px minmax(0, 680px);
+        gap: 48px;
+        justify-content: center;
+        align-items: start;
+        padding: 8px 24px 0;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .article-toc {
+        position: sticky;
+        top: 72px;
+        padding-top: 8px;
+        font-family: var(--sans);
+      }
+      .article-toc .toc-label {
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-bottom: 14px;
+      }
+      .article-toc ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 10px;
+      }
+      .article-toc a {
+        display: block;
+        font-size: 13px;
+        line-height: 1.35;
+        color: var(--ink-mute);
+        text-decoration: none;
+        border-left: 2px solid transparent;
+        padding-left: 10px;
+        transition: color 0.18s ease, border-color 0.18s ease;
+      }
+      .article-toc a:hover,
+      .article-toc a.is-active {
+        color: var(--ink);
+        border-left-color: var(--ink);
+      }
+      @media (max-width: 1100px) {
+        .article-shell { grid-template-columns: 1fr; gap: 0; max-width: 680px; }
+        .article-toc { display: none; }
       }
       .article-author {
         display: flex;
@@ -173,53 +271,76 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       }
       .article-header .about-caption b { color: var(--ink); display: block; }
 
-      /* ===== ARTICLE BODY ===== */
-      .article-body { padding: 80px 0; }
+      /* ===== ARTICLE BODY (OpenAI-blog reading measure) ===== */
+      .article-body { padding: 24px 0 64px; }
       .article-body .prose {
         font-family: var(--body);
-        font-size: 17px;
-        line-height: 1.85;
+        font-size: 16.5px;
+        line-height: 1.75;
         color: var(--ink-soft);
+        max-width: none;
+      }
+      .article-body .prose p {
+        margin: 0 0 1.15em;
         text-align: justify;
         text-justify: inter-ideograph;
         word-break: break-word;
+        text-indent: 0;
       }
-      .article-body .prose p {
-        margin: 0 0 1.6em;
-        max-width: 65ch;
-        text-indent: 2em;
-        text-align: justify;
-        text-align-last: left;
+      .article-body .prose p + p { margin-top: 0; }
+      .article-body .prose h2 {
+        font-family: var(--sans);
+        font-style: normal;
+        font-weight: 700;
+        font-size: 24px;
+        letter-spacing: -0.015em;
+        color: var(--ink);
+        margin: 2.4em 0 0.75em;
+        line-height: 1.3;
       }
-      .article-body .prose p + p { margin-top: 0.15em; }
-      .article-body .prose h2 + p,
-      .article-body .prose h3 + p { text-indent: 0; }
+      .article-body .prose h2 em { font-family: var(--serif); font-style: italic; font-weight: 500; }
+      .article-body .prose h3 {
+        font-family: var(--sans);
+        font-size: 14px;
+        font-weight: 650;
+        letter-spacing: 0.02em;
+        color: var(--ink);
+        margin: 1.8em 0 0.55em;
+        line-height: 1.4;
+        text-transform: none;
+      }
       .article-body .prose figure.illu {
-        margin: 8px 0 28px;
-        width: min(42%, 320px);
+        margin: 0.4em 0 1.2em;
+        width: min(38%, 220px);
         float: right;
         clear: right;
-        margin-left: 28px;
+        margin-left: 1.5em;
         margin-right: 0;
       }
       .article-body .prose figure.illu.left {
         float: left;
         clear: left;
         margin-left: 0;
-        margin-right: 28px;
+        margin-right: 1.5em;
+      }
+      .article-body .prose figure.illu.method {
+        float: none;
+        width: min(100%, 560px);
+        max-width: 100%;
+        margin: 1.6em auto 1.8em;
       }
       .article-body .prose figure.illu img {
         width: 100%;
         height: auto;
         display: block;
-        border-radius: 10px;
+        border-radius: 8px;
         border: 1px solid var(--line);
         background: var(--bone);
       }
       .article-body .prose figure.illu figcaption {
         font-family: var(--sans);
-        font-size: 12px;
-        line-height: 1.5;
+        font-size: 12.5px;
+        line-height: 1.45;
         color: var(--ink-faint);
         margin-top: 8px;
         text-indent: 0;
@@ -229,27 +350,6 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         content: '';
         display: table;
         clear: both;
-      }
-      .article-body .prose h2 {
-        font-family: var(--serif);
-        font-style: italic;
-        font-weight: 500;
-        font-size: 30px;
-        letter-spacing: -0.01em;
-        color: var(--ink);
-        margin: 72px 0 20px;
-        line-height: 1.15;
-      }
-      .article-body .prose h2 em { font-style: normal; font-weight: 700; font-family: var(--sans); }
-      .article-body .prose h3 {
-        font-family: var(--sans);
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--ink-faint);
-        margin: 48px 0 12px;
-        line-height: 1.4;
       }
       .article-body .prose blockquote {
         border-left: 3px solid var(--coral);
@@ -463,63 +563,48 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       }
 
       /* article-specific overrides */
-      .nav-cta::after { content: '→'; color: inherit; font-size: 13px; }
+      .nav-cta::after { content: ''; }
       .foot-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
 
       /* responsive */
-      @media (max-width: 1280px) {
-        .article-header .header-shell { padding: 0 44px 48px; }
-      }
       @media (max-width: 880px) {
-        .article-header .header-shell { padding: 0 24px 36px; }
-        .article-header .header-grid { grid-template-columns: 1fr; gap: 24px; }
-        .article-header .header-copy { order: 2; padding-top: 0; }
-        .article-header .header-media { order: 1; }
-        .related-grid { grid-template-columns: 1fr; }
+        .article-header .header-shell { padding: 0 20px 8px; }
         .article-header h1 { max-width: none; }
-        .article-header .about-art { padding-right: 0; padding-bottom: 0; aspect-ratio: auto; }
-        .article-header .about-art img { height: auto; max-height: none; object-fit: contain; border-radius: 0; }
-        .article-header .about-side-note,
+        .related-grid { grid-template-columns: 1fr; }
+        .article-header .about-art { aspect-ratio: auto; }
+        .article-header .about-art img { height: auto; object-fit: contain; }
+      }
       @media (max-width: 760px) {
         .article-body .prose figure.illu,
         .article-body .prose figure.illu.left {
           float: none;
           width: 100%;
-          margin: 20px 0 28px;
+          margin: 1.2em 0 1.4em;
         }
-        .article-body .prose p { max-width: none; }
-      }
-      .article-header .about-caption { position: static; max-width: none; text-align: left; margin-top: 14px; }
-        .article-header .about-side-note b { margin: 0 0 10px; }
+        .article-shell { padding: 0 16px; }
       }
       @media (max-width: 560px) {
-        .article-header .header-shell { padding: 0 16px 32px; }
+        .article-header .header-shell { padding: 0 16px 8px; }
+        .article-header { padding: 24px 0 12px; }
       }
     </style>
   </Fragment>
 
-  {/* ARTICLE HEADER */}
+  {/* ARTICLE HEADER — centered Anthropic layout */}
   <header class='article-header'>
     <div class='container header-shell'>
       <div class='header-grid'>
-        <div class='header-media'>
-          <div class='about-art' data-reveal='scale'>
-            <img src={assetUrl(image)} alt={imageAlt} width={Astro.props.imageWidth} height={Astro.props.imageHeight} decoding='async' fetchpriority='high' />
-            <div class='about-side-note'><b></b><Fragment set:html={sideNote} /></div>
-            <div class='about-caption'><Fragment set:html={caption} /></div>
-          </div>
-        </div>
         <div class='header-copy'>
           <a class='back-link' href={withBase('/article/')} data-reveal>返回文章列表</a>
           <div class='article-meta-top' data-reveal>
             <span class='tag'>{tag}</span>
-            <span>·</span>
+          </div>
+          <h1 data-reveal><Fragment set:html={title} /><span class='dot'>.</span></h1>
+          <div class='article-meta-top' data-reveal style='margin-bottom:22px;'>
             <span>{date}</span>
             <span>·</span>
             <span>{readTime}</span>
           </div>
-          <h1 data-reveal><Fragment set:html={title} /><span class='dot'>.</span></h1>
-          <p class='lead' data-reveal>{description}</p>
           <div class='article-author' data-reveal>
             <span class='avatar'>C</span>
             <div class='info'>
@@ -528,18 +613,29 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
             </div>
           </div>
         </div>
+        <div class='header-media'>
+          <div class='about-art' data-reveal='scale'>
+            <img src={assetUrl(image)} alt={imageAlt} width={Astro.props.imageWidth} height={Astro.props.imageHeight} decoding='async' fetchpriority='high' />
+            <div class='about-side-note'><Fragment set:html={sideNote} /></div>
+          </div>
+          <div class='about-caption'><Fragment set:html={caption} /></div>
+        </div>
       </div>
     </div>
   </header>
 
-  {/* ARTICLE BODY */}
-  <article class='article-body'>
-    <div class='container narrow'>
+  {/* BODY + FLOATING TOC */}
+  <div class='article-shell'>
+    <aside class='article-toc' aria-label='目录' data-reveal>
+      <div class='toc-label'>目录</div>
+      <ul data-toc-list></ul>
+    </aside>
+    <article class='article-body' style='padding-top:24px;'>
       <div class='prose' data-reveal>
         <slot />
       </div>
-    </div>
-  </article>
+    </article>
+  </div>
 
   {/* ARTICLE FOOTER */}
   <div class='article-footer'>
@@ -573,4 +669,36 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       </div>
     </div>
   </section>
+
+  <script>
+    (function () {
+      var list = document.querySelector('[data-toc-list]');
+      var prose = document.querySelector('.article-body .prose');
+      if (!list || !prose) return;
+      var heads = Array.prototype.slice.call(prose.querySelectorAll('h2'));
+      if (!heads.length) return;
+      heads.forEach(function (h, i) {
+        if (!h.id) h.id = 'section-' + (i + 1);
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent.replace(/\.$/, '');
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+      var links = Array.prototype.slice.call(list.querySelectorAll('a'));
+      function onScroll() {
+        var y = window.scrollY + 96;
+        var active = 0;
+        for (var i = 0; i < heads.length; i++) {
+          if (heads[i].offsetTop <= y) active = i;
+        }
+        for (var j = 0; j < links.length; j++) {
+          links[j].classList.toggle('is-active', j === active);
+        }
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
 </BaseLayout>

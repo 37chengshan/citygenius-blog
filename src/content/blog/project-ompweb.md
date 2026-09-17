@@ -13,7 +13,7 @@ tagFilters:
   "Electron": "full-stack"
   "MCP": "ai"
   "PTY": "full-stack"
-image: "illu-ompweb.webp"
+image: "diagram-ompweb.webp"
 imageAlt: "Agent Web 工作区插画"
 imageWidth: 1536
 imageHeight: 1024
@@ -61,8 +61,8 @@ related:
 
 ## 关键决定：不重写 Agent，只读它的会话文件
 
-<figure class="illu">
-  <img src="/citygenius-blog/assets/illu-ompweb.webp" alt="本地会话工作区" width="1536" height="1024" loading="lazy" />
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/diagram-ompweb.webp" alt="本地会话工作区" width="1536" height="1024" loading="lazy" />
   <figcaption>Web 只是壳，会话权威仍在本地 Agent。</figcaption>
 </figure>
 
@@ -80,8 +80,8 @@ ompweb 最重要的架构原则是一句话：**OMP 仍然是唯一权威**。�
 
 ## 实现：Next.js 一套代码，Web 和桌面共用
 
-<figure class="illu left">
-  <img src="/citygenius-blog/assets/illu-ompweb.webp" alt="session tree 与 Web 工作区" width="1536" height="1024" loading="lazy" />
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/diagram-ompweb.webp" alt="session tree 与 Web 工作区" width="1536" height="1024" loading="lazy" />
   <figcaption>会话树、PTY、文件预览拼成一个工作台。</figcaption>
 </figure>
 

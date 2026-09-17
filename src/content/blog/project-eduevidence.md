@@ -12,7 +12,7 @@ tagFilters:
   "教育决策": "ai"
   "Evidence Graph": "ai"
   "Python": "full-stack"
-image: "illu-eduevidence.webp"
+image: "diagram-eduevidence.webp"
 imageAlt: "证据研究引擎插画"
 imageWidth: 1536
 imageHeight: 1024
@@ -62,8 +62,8 @@ EduEvidence 的起点就一句话：我不想再让模型自由发挥研究结�
 
 ## 实现路径：先定契约，再谈 Agent
 
-<figure class="illu">
-  <img src="/citygenius-blog/assets/illu-eduevidence.webp" alt="证据检索与 Evidence Graph" width="1536" height="1024" loading="lazy" />
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/diagram-eduevidence.webp" alt="证据检索与 Evidence Graph" width="1536" height="1024" loading="lazy" />
   <figcaption>检索片段只是线索，证据必须可追溯。</figcaption>
 </figure>
 

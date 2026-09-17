@@ -145,22 +145,16 @@ const ogImage = new URL(assetUrl(image), site);
   (function () {
     var nav = document.getElementById('nav');
     if (!nav) return;
-    var SHOW_TOP = 100;
-    var DELTA = 6;
+    var COMPACT_AT = 24;
     var lastY = window.scrollY || 0;
     function onScroll() {
       var y = window.scrollY || 0;
-      var d = y - lastY;
-      if (y <= SHOW_TOP) {
-        nav.classList.remove('is-hidden');
-      } else if (d > DELTA) {
-        nav.classList.add('is-hidden');
-      } else if (d < -DELTA) {
-        nav.classList.remove('is-hidden');
-      }
+      if (y > COMPACT_AT) nav.classList.add('is-compact');
+      else nav.classList.remove('is-compact');
       lastY = y;
     }
     window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
   })();
 </script>
 
@@ -316,6 +310,7 @@ body::before {
   background: var(--paper);
   transform: translateY(0);
   transition: transform 360ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    padding 280ms ease,
     box-shadow 220ms ease,
     border-color 220ms ease;
   border-bottom: 1px solid transparent;
@@ -326,6 +321,29 @@ body::before {
   pointer-events: none;
   box-shadow: none;
 }
+.nav.is-compact {
+  padding: 10px 0;
+  border-bottom-color: rgba(21, 20, 15, 0.08);
+  box-shadow: 0 10px 30px -24px rgba(21, 20, 15, 0.35);
+}
+.nav.is-compact .brand span:not(.brand-mark) { display: none; }
+.nav.is-compact .brand-meta { display: none; }
+.nav.is-compact .brand-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.nav.is-compact .nav-links { gap: 22px; }
+.nav.is-compact .nav-links a { font-size: 13px; color: var(--ink); }
+.nav.is-compact .nav-cta {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  padding: 8px 14px;
+}
+.nav.is-compact .nav-cta::after { content: ''; }
 .nav-inner {
   display: flex;
   align-items: center;

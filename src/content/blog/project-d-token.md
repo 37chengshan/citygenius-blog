@@ -12,7 +12,7 @@ tagFilters:
   "Rust": "full-stack"
   "Token 优化": "ai"
   "本地工具": "full-stack"
-image: "illu-d-token.webp"
+image: "diagram-d-token.webp"
 imageAlt: "本地 Token 控制面插画"
 imageWidth: 1536
 imageHeight: 1024
@@ -60,8 +60,8 @@ related:
 
 ## 为什么必须是「本地」控制面
 
-<figure class="illu left">
-  <img src="/citygenius-blog/assets/illu-d-token.webp" alt="本地上下文压缩与路由" width="1536" height="1024" loading="lazy" />
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/diagram-d-token.webp" alt="本地上下文压缩与路由" width="1536" height="1024" loading="lazy" />
   <figcaption>上下文在离开本机前先被压缩和路由。</figcaption>
 </figure>
 
