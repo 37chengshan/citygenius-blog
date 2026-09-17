@@ -34,7 +34,7 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
     <style>
       /* ===== ARTICLE HEADER — Anthropic-style centered ===== */
       .article-header {
-        padding: 20px 0 12px;
+        padding: 8px 0 4px;
         border-bottom: none;
       }
       .article-header .header-shell {
@@ -55,7 +55,7 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         font-size: 13px;
         color: var(--ink-faint);
         text-decoration: none;
-        margin-bottom: 14px;
+        margin-bottom: 10px;
         transition: color 0.18s ease;
       }
       .article-header .back-link:hover { color: var(--coral); }
@@ -153,6 +153,10 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         max-width: 1200px;
         margin: 0 auto;
       }
+      /* squeeze chrome above the article */
+      .topbar { display: none !important; }
+      .nav { padding-top: 10px !important; padding-bottom: 10px !important; }
+      .nav .brand-meta { display: none !important; }
       .article-toc {
         position: sticky;
         top: 72px;
