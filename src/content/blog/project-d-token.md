@@ -49,8 +49,6 @@ d-token 要回答三个问题：
 2. 哪个 Provider 真的处理了请求？
 3. 压缩是否真的发生了，而不是「感觉更省了」？
 
-## 核心思想
-
 README 的定位很干脆：**面向 AI 编码 Agent 的本地上下文控制面**。
 
 它运行在「你正在用的 Agent」和「你配置的模型服务商」之间。在上下文**离开本机之前**压缩冗余，保持路由**显式**，并让配置变更**可恢复**——而不是一堆脚本和猜测。
@@ -71,10 +69,10 @@ AI 编程 Agent
 
 <figure class="illu method">
   <img src="/citygenius-blog/assets/real-d-token-hero.webp" alt="d-token 控制面" width="1400" height="787" loading="lazy" />
-  <figcaption>官方示意：Agent → d-token → 你配置的上游。</figcaption>
+  <figcaption>请求路径：编码 Agent → 本地控制面 → 已配置的模型服务商。</figcaption>
 </figure>
 
-## 问题：账单在涨，对账靠猜
+## 问题
 
 AI 编码 Agent 会一遍又一遍重发相同的文件、日志和工具输出。token 账单悄悄增长，但：
 
@@ -84,18 +82,17 @@ AI 编码 Agent 会一遍又一遍重发相同的文件、日志和工具输出�
 
 这不是再写一个 prompt 工程技巧能解决的。需要一层**看得见、可回退**的基础设施。
 
-## 为什么必须是本地
-
+本地是前提，不是可选项。
 上下文里有源码路径、密钥边界、公司内部结构。压缩和路由如果放在第三方黑盒里，你就把「可见性」也交出去了。
 
 d-token 把设置、诊断、请求元数据、回退记录都留在本机。普通日志不会主动保存完整 prompt、完整 response、源代码正文、API key。你选的服务商仍会收到你主动发出的请求——但中间多了一层你自己掌控的门。
 
-<figure class="illu">
+<figure class="illu method">
   <img src="/citygenius-blog/assets/scenario-context-funnel.webp" alt="上下文漏斗" width="1400" height="858" loading="lazy" />
-  <figcaption>在离开本机之前，先压一刀，并留下回执。</figcaption>
+  <figcaption>上下文在离开本机前经过压缩，并生成 Optimization Receipt。</figcaption>
 </figure>
 
-## 实现：Rust 拥有事实，Tauri 只做桥
+## 做法
 
 桌面端是 **Tauri 2 + Rust core**。Rust 侧负责连接状态、路由决策、压缩管线、回执；前端只做展示与安全配置流程。
 
@@ -110,10 +107,10 @@ d-token 把设置、诊断、请求元数据、回退记录都留在本机。普
 
 <figure class="illu method">
   <img src="/citygenius-blog/assets/real-d-token-routing.svg" alt="显式路由管线" width="1400" height="787" loading="lazy" />
-  <figcaption>官方管线图：优化与路由都是显式步骤，可观察。</figcaption>
+  <figcaption>优化与路由为显式阶段，每阶段可观察、可对账。</figcaption>
 </figure>
 
-## 实测：一次请求少了 33,705 token
+## 结果
 
 README 记录的数字是：**单次真实路由请求物理减少 33,705 token**（实测，2026-08-04）。
 
@@ -121,10 +118,8 @@ README 记录的数字是：**单次真实路由请求物理减少 33,705 token*
 
 <figure class="illu method">
   <img src="/citygenius-blog/assets/real-d-token-receipt.svg" alt="Optimization Receipt" width="1400" height="787" loading="lazy" />
-  <figcaption>Optimization Receipt：每次请求一张单。</figcaption>
+  <figcaption>单次请求回执记录路由、变换与 token 对比。</figcaption>
 </figure>
-
-## 还没做完的
 
 当前 **`0.2.0-beta.1`**，公开未签名预发布（macOS ARM64 / Windows x64）。未签名构建可能触发系统安全警告——请核对仓库与哈希，不要绕过系统保护。
 

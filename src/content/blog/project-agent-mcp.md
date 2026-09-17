@@ -45,8 +45,6 @@ related:
 
 这不是「模型不够强」。这是**没有人做调度**。
 
-## 核心思想
-
 agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」，而是把任意 CLI 收成一个**可派发、可监控、可续接、可终止的工作池**。
 
 主 Agent 只做两件事：**拆解**和**汇合**。
@@ -55,14 +53,14 @@ agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」�
 
 <figure class="illu method">
   <img src="/citygenius-blog/assets/real-agent-mcp-orchestration.webp" alt="agent-mcp 编排示意" width="1400" height="787" loading="lazy" />
-  <figcaption>真实编排图：主 Agent 拆任务，控制面派发到不同 CLI。</figcaption>
+  <figcaption>控制面将任务派发至多个 Agent CLI，Run 为唯一执行单位。</figcaption>
 </figure>
 
 另一个原则是：**按任务匹配底座**。
 
 读密集探索丢给快底座（omp / pi / grok），深推理规划丢给强底座（claude）。成本与质量现场匹配，而不是「全家都用同一个模型」。
 
-## 问题：可控地多开，比多开难得多
+## 问题
 
 多开几个终端很简单。难的是：
 
@@ -74,12 +72,12 @@ agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」�
 
 各家 CLI 还互不相通：有的吐 JSONL，有的只吐纯文本，usage 字段名完全不同，resume 有的支持有的不支持。如果不管这些差异，多 Agent 只会把混乱放大。
 
-<figure class="illu">
+<figure class="illu method">
   <img src="/citygenius-blog/assets/scenario-agent-dispatch.webp" alt="任务分发场景" width="1400" height="858" loading="lazy" />
-  <figcaption>人应该当调度员，不该当盯梢的。</figcaption>
+  <figcaption>主 Agent 负责拆解与汇合；派发、等待与容错交给基础设施。</figcaption>
 </figure>
 
-## 做法：控制面，不是再造一个 Agent
+## 做法
 
 对外 agent-mcp 是一组 **MCP 工具**。任何支持 MCP 的宿主都能挂上。常用的几件：
 
@@ -96,20 +94,18 @@ agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」�
 
 <figure class="illu method">
   <img src="/citygenius-blog/assets/real-agent-mcp-routing.webp" alt="路由与适配器" width="1400" height="787" loading="lazy" />
-  <figcaption>适配器把差异挡在控制面外，上层只看到统一的 Run。</figcaption>
+  <figcaption>适配器归一化各 CLI 的事件流与会话标识。</figcaption>
 </figure>
 
 DeepSeek Harness 也做了原生接入：一行 `insert` patch，34 个工具以 `mcp__agentmcp__*` 全量注册；daemon 未起自动拉起，断线指数退避重连。
 
-## 踩坑
-
-**不要默认什么都拆。** 我早期版本遇到小事也 spawn 一堆子 Agent，协调开销比任务本身还大。后来才有复杂度分级门。
+约束很实际。**不要默认什么都拆。** 我早期版本遇到小事也 spawn 一堆子 Agent，协调开销比任务本身还大。后来才有复杂度分级门。
 
 **适配层比想象脏。** headless 模式、事件流、resume、权限参数，每家一套。归一化才是真正的工程量。
 
 **控制面做厚了，调试会变重。** 出问题时要同时看主 Agent、daemon 日志、子进程。这对个人项目偏重，还在砍。
 
-## 现在能干什么
+## 现状
 
 写完之后，我的工作流变了：以前是「我自己盯」，现在是「拆完、派出去、循环 wait、汇合」。
 
@@ -119,8 +115,7 @@ DeepSeek Harness 也做了原生接入：一行 `insert` patch，34 个工具以
 
 当前 **v4.0.0a1**：34 个 MCP 工具，589 个测试通过。它没有让我「多快好省」，但确实把我从盯终端里解放出来了。
 
-## 还差什么
-
+局限仍在。
 项目仍是 alpha。适配器实测率不均匀；沙箱目前主要是「统一策略翻译到各 CLI 自己的参数」，不是真隔离；跨厂商审查在复杂合并场景还要再踩。
 
 下一步优先补适配器实测、把策略真正拦在执行点上，再简化上手路径。

@@ -47,8 +47,6 @@ related:
 
 EduEvidence 要做的，是把「决策问题」变成「有证据支撑、可试点、可评估」的答案，而不是一段更长的摘要。
 
-## 核心思想
-
 README 的产品句是：**From Research Questions to Evidence-Based Decisions.**
 
 交付形态是 **AI Agent Skill**；Skill 里面跑的是 **EduEvidence Research Engine**——持久、可审计，把决策问题压成证据接地的回答。
@@ -70,10 +68,10 @@ README 的产品句是：**From Research Questions to Evidence-Based Decisions.*
 
 <figure class="illu method">
   <img src="/citygenius-blog/assets/real-edu-workflow.svg" alt="EduEvidence 研究工作流" width="1400" height="800" loading="lazy" />
-  <figcaption>官方研究工作流：问题 → 证据 → Gap → 设计 → 数据 → 决策。</figcaption>
+  <figcaption>完整研究周期：从问题框定到证据接地的决策更新。</figcaption>
 </figure>
 
-## 问题：模型很会写，但很会编
+## 问题
 
 教育决策有三个坑：
 
@@ -83,7 +81,7 @@ README 的产品句是：**From Research Questions to Evidence-Based Decisions.*
 
 CHI 2023 和 PNAS 2025 这类真实研究提醒我们：AI 辅助编码在短任务上可能提效，在迁移与无监督场景也可能拖后腿。没有边界条件的「全面提效」是不可用的决策输入。
 
-## 方法：九阶段，而不是一次性长文
+## 方法
 
 引擎把完整研究周期拆开：
 
@@ -102,10 +100,10 @@ CHI 2023 和 PNAS 2025 这类真实研究提醒我们：AI 辅助编码在短任
 
 <figure class="illu method">
   <img src="/citygenius-blog/assets/real-edu-graph.webp" alt="Evidence Graph 与 Studio" width="1400" height="952" loading="lazy" />
-  <figcaption>Research Studio：证据图与报告身份，本地可跑。</figcaption>
+  <figcaption>Evidence Graph 与报告库；图 revision 不可变，报告为投影。</figcaption>
 </figure>
 
-## 落地：Skill 装进宿主，引擎留在 Python
+## 做法
 
 安装后，Claude Code / Cursor / Codex / OMP 等宿主可以在「教学决策」类问题上自动加载 Skill。
 
@@ -118,13 +116,11 @@ Native Core **只依赖 Python 标准库**，不需要 Agent MCP，也不需要 
 
 检索通道分零配置（OpenAlex / Semantic Scholar / CrossRef…）与密钥通道（Sciverse 等）。Sciverse 用来拿引用级定位；再进 Graph 做结构化。
 
-## 教训：诚实比「看起来很强」重要
+## 结果
 
 - **Benchmark 仿真 ≠ 实证。** `benchmarks/results/` 只是模拟 harness；第一轮实证是 B2 vs B3（10 题 × 3 重复），不能写成「全面碾压」。
 - **四态比二值难卖，但更有用。** 「证据不足」是合法结论，不是失败。
 - **投影可变，事实层不可变。** 报告可以重排；Graph revision 一旦落地就不该被悄悄改写。
-
-## 现状
 
 当前 **6.2.0**。Landing / Research Studio / Deep Research 对比页都可以直接打开。示例报告：
 

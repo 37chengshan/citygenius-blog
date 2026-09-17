@@ -262,41 +262,53 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
         font-family: var(--sans);
         font-style: normal;
         font-weight: 700;
-        font-size: 28px;
-        letter-spacing: -0.02em;
+        font-size: clamp(28px, 3.2vw, 40px);
+        letter-spacing: -0.035em;
         color: var(--ink);
-        margin: 1.8em 0 0.7em;
-        line-height: 1.25;
+        margin: 3.2em 0 1.1em;
+        line-height: 1.15;
+        max-width: 18ch;
       }
       .article-body .prose h2 em { font-family: var(--serif); font-style: italic; font-weight: 500; }
       .article-body .prose h3 {
         font-family: var(--sans);
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 650;
         letter-spacing: -0.01em;
         color: var(--ink);
-        margin: 2em 0 0.7em;
+        margin: 2em 0 0.65em;
         line-height: 1.35;
         text-transform: none;
       }
-      .article-body .prose figure.illu {
-        margin: 0.25em 0 0.9em;
-        width: 168px;
-        float: right;
-        clear: right;
-        margin-left: 1.25em;
-        margin-right: 0;
-      }
-      .article-body .prose figure.illu.left {
-        float: left;
-        clear: left;
-        margin-left: 0;
-        margin-right: 1.25em;
-      }
+      /* figures: full reading column, OpenAI style */
+      .article-body .prose figure.illu,
+      .article-body .prose figure.illu.left,
       .article-body .prose figure.illu.method {
-        float: none;
-        width: min(100%, 420px);
-        margin: 1.4em auto 1.5em;
+        float: none !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 2em 0 2.2em !important;
+        clear: both;
+      }
+      .article-body .prose figure.illu img,
+      .article-body .prose figure.illu.left img,
+      .article-body .prose figure.illu.method img {
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        display: block;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--bone);
+      }
+      .article-body .prose figure.illu figcaption {
+        font-family: var(--sans);
+        font-size: 13.5px;
+        line-height: 1.55;
+        color: var(--ink-mute);
+        margin-top: 12px;
+        text-indent: 0;
+        text-align: left;
       }
       .article-body .prose figure.illu img {
         width: 100%;
@@ -687,33 +699,9 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
       border-left-color: #15140f !important;
       font-weight: 600;
     }
-    .article-body .prose figure.illu {
-      width: 168px !important;
-      max-width: 168px !important;
-      float: right;
-      clear: right;
-      margin: 0.35em 0 0.9em 1.25em !important;
-    }
-    .article-body .prose figure.illu img {
-      width: 168px !important;
-      max-width: 168px !important;
-      height: auto !important;
-      display: block;
-    }
-    .article-body .prose figure.illu.method {
-      float: none !important;
-      width: min(100%, 380px) !important;
-      max-width: 380px !important;
-      margin: 1em auto 1.1em !important;
-    }
-    .article-body .prose figure.illu.method img {
-      width: 100% !important;
-      max-width: 400px !important;
-      height: auto !important;
-    }
     .article-body .prose p {
-      margin-bottom: 1.35em !important;
-      line-height: 1.82 !important;
+      margin-bottom: 1.45em !important;
+      line-height: 1.85 !important;
       text-align: left !important;
     }
   </style>

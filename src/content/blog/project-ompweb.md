@@ -47,8 +47,6 @@ related:
 
 我不是想换掉 omp。我是想要一张**桌子**：把已经存在的会话、终端、文件、MCP 状态摊开看。
 
-## 核心思想
-
 ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、本地优先的 Web 工作区与原生桌面应用**。
 
 关键设计只有一条——
@@ -69,10 +67,10 @@ ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、
 
 <figure class="illu method">
   <img src="/citygenius-blog/assets/real-ompweb-arch.webp" alt="ompweb 架构" width="1400" height="920" loading="lazy" />
-  <figcaption>真实架构图：Web / 桌面共用工作区，底下仍是本地 OMP。</figcaption>
+  <figcaption>Web 与桌面共享工作区；会话权威仍在本地 OMP 进程。</figcaption>
 </figure>
 
-## 问题：终端 Agent 的天花板
+## 问题
 
 终端有三个天花板：
 
@@ -82,7 +80,7 @@ ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、
 
 如果重写一个 Agent，你就分裂了生态。ompweb 选择站在 omp 旁边，而不是对面。
 
-## 做法：一套代码，Web 和桌面
+## 做法
 
 技术栈是 **Next.js 16 + Electron 44**，Node ≥ 22.19。
 
@@ -94,7 +92,7 @@ ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、
 
 <figure class="illu method">
   <img src="/citygenius-blog/assets/real-ompweb-ui.webp" alt="ompweb 界面" width="1400" height="875" loading="lazy" />
-  <figcaption>浅色界面：会话树 + 对话 + 侧栏，从终端长成工作区。</figcaption>
+  <figcaption>会话树、对话区与侧栏构成的工作台界面。</figcaption>
 </figure>
 
 功能面按「工作台」而不是「聊天窗」来铺：
@@ -106,15 +104,11 @@ ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、
 - 代码与富媒体预览
 - Git 多 worktree 切换
 
-## 踩坑
-
-**写路径要故意窄。** 会话权威在 OMP；ompweb 只保留 rename / archive / delete / branch-parent 这类低风险操作。什么都想写，就会和 live 进程打架。
+边界很清楚。**写路径要故意窄。** 会话权威在 OMP；ompweb 只保留 rename / archive / delete / branch-parent 这类低风险操作。什么都想写，就会和 live 进程打架。
 
 **SDK 边界要守住。** OMP SDK 是 Bun-only，Node/Next 服务不能图省事直接 import。活儿必须走 `omp --mode rpc-ui`。
 
 **架构会变厚。** 加 host daemon 之后调试面变大——UI、Next、host、omp 四层。这是 local-first 的代价，文档和默认安全（loopback / 密码）必须跟上。
-
-## 现状
 
 可 `npx` 一键体验，也有 Releases 安装包（mac / Windows / Linux）。MIT 许可，上游脉络来自 pi-web / oh-my-pi 生态。
 

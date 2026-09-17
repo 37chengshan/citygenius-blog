@@ -8,11 +8,17 @@
 - Prefer short natural Chinese. Student voice. No AI-marketing slogans (赋能 / 闭环 / 抓手 / 超能力).
 - If a section needs explanation, write it as product voice a stranger understands; otherwise delete the sentence and show the content.
 
-## Article typography
+## Article structure (MANDATORY)
 
-- Paragraphs: generous spacing (`margin-bottom ≈ 1.5–1.7em`), `text-align: justify`, `line-height ≈ 1.85` for CJK.
-- Side illustrations: `figure.illu` float right; `figure.illu.left` float left; un-float on narrow screens.
-- Assets under `public/assets/`, prefer `.webp`. Prefix URLs with `/citygenius-blog/` (Pages project base).
+- Max **4 section titles** (`##`), short nouns only: 问题 / 做法 / 结果 / 现状. No colon subtitles (禁止「问题：xxx」).
+- Fold lessons/pitfalls into body prose; do not invent 踩坑/核心思想/还差什么 headers.
+- **figcaption** is reader-facing scientific description of the image (like OpenAI). Forbidden: 「真实编排图」「官方示意」「从终端长成工作区」这种编辑部/交接腔.
+- Opening: 2–3 concrete paragraphs, no section header before 问题.
+- Body measure: left-aligned, ~17.5px, line-height ~1.88, paragraph margin ~1.35–1.65em.
+- h2: sans 800 / 32px, clearly distinct from body.
+- At least 2 body figures + hero cover. Prefer real architecture assets from the project repo.
+- Body figures are **full reading-column width** (same as text). No tiny floats. class="illu method"
+
 
 ## Frontmatter
 
