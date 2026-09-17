@@ -16,7 +16,7 @@ tagFilters:
 image: "illu-ompweb.webp"
 imageAlt: "Agent Web 工作区插画"
 imageWidth: 1536
-imageHeight: 1024
+imageHeight: 922
 badge: "Project"
 sideNote: "ompweb · oh-my-pi ·<br/>Next.js · Electron · PTY · MCP"
 caption: "<b>Local-first agent workspace.</b>(CityGenius, MMXXVI)"
@@ -44,9 +44,11 @@ related:
 
 我用 [oh-my-pi](https://github.com/can1357/oh-my-pi)（命令行里叫 `omp`）写代码已经有一阵子了。终端本身完全够跑任务：模型能调、工具能执行、会话也存在本地。真正难受的是另一件事——**信息都埋在滚动的文本里**。
 
-开三个终端窗口对应三个项目是常态；想找上周某次「从这里继续」的分叉点，只能靠 `grep` 会话文件；子 Agent 在后台跑到哪一步、烧了多少 token，基本靠猜。终端 Agent 的瓶颈不在智能，在**可观察性和可导航性**。
+开三个终端窗口对应三个项目是常态。想找上周某次「从这里继续」的分叉点，只能靠 `grep` 会话文件。子 Agent 在后台跑到哪一步、烧了多少 token，基本靠猜。PTY 一多，窗口布局本身就变成负担。
 
-于是就有了 ompweb：一个本地优先的 Web / 桌面工作台，专门服务 omp，不另起炉灶再造一个 Agent 运行时。
+更具体一点：期末前我同时改一个课程大作业和两个 side project。主对话跑着重构，子 Agent 在扫依赖，Git worktree 又切到另一条分支。终端不是不能用，是我需要同时看见四件事的进度，而一个滚动缓冲区只能看见最后二十行。
+
+终端 Agent 的瓶颈不在智能，在**可观察性和可导航性**。于是就有了 ompweb：一个本地优先的 Web / 桌面工作台，专门服务 omp，不另起炉灶再造一个 Agent 运行时。
 
 <div class="info-card">
 <div class="ic-title">项目概览</div>
@@ -61,16 +63,9 @@ related:
 
 ## 关键决定：不重写 Agent，只读它的会话文件
 
-<figure class="illu">
-  <img src="/citygenius-blog/assets/illu-ompweb.webp" alt="插图" width="1536" height="1024" loading="lazy" />
-</figure>
-
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/diagram-ompweb.webp" alt="方法论示意" width="1536" height="1024" loading="lazy" />
-  <figcaption>结构示意</figcaption>
-</figure>
-
 ompweb 最重要的架构原则是一句话：**OMP 仍然是唯一权威**。会话、凭证、模型配置、插件，全部属于用户本机已安装的 `omp` 和 `~/.omp/agent/`。UI 不建第二套数据格式，也不碰 `agent.db` 里的鉴权数据。
+
+这条边界不是洁癖。我自己就走过弯路：早期想给会话加「草稿层」，结果和正在写 JSONL 的活进程抢文件，分支一乱整条历史都不可信。后来规则变死——浏览走磁盘，执行走 RPC，写操作尽量窄。
 
 具体接法很朴素：
 
@@ -80,10 +75,20 @@ ompweb 最重要的架构原则是一句话：**OMP 仍然是唯一权威**。�
 
 这里有个绕不开的技术约束：OMP 的 SDK 包是 Bun-only 的 TypeScript，直接 `import` 进 Node/Next 服务端会跑不起来。所以生产代码刻意**不依赖**这些包，只认 CLI 边界和磁盘上的公开格式。能做就做，做不了就先不做，而不是偷偷模拟一份。
 
-顺带说明来源：这个 UI 不是从零长出来的。它源自 [agegr/pi-web](https://github.com/agegr/pi-web)（MIT），ompweb 作为面向 OMP 的下游继续维护——保留许可与署名，选择性吸收上游修复，但不会假设 Pi 专用的实现能原样 merge。这和「给 omp 贡献一个界面」是同一件事的两种说法：上游的 UI 想法值得学，运行时边界却必须按 omp 自己的格式重画一遍。
+顺带说明来源：这个 UI 不是从零长出来的。它源自 [agegr/pi-web](https://github.com/agegr/pi-web)（MIT），ompweb 作为面向 OMP 的下游继续维护——保留许可与署名，选择性吸收上游修复，但不会假设 Pi 专用的实现能原样 merge。
 
-## 实现：Next.js 一套代码，Web 和桌面共用
+## 架构：Next.js 一套代码，Web 和桌面共用
+
 对外有三种启动方式：`npx @37chengshan/ompweb@latest` 直接开浏览器（默认 `127.0.0.1:30177`）、Electron 打包成带托盘的桌面应用、或者克隆仓库 `npm run dev` 本地改。
+
+<figure class="illu">
+  <img src="/citygenius-blog/assets/illu-ompweb.webp" alt="插图" width="1536" height="922" loading="lazy" />
+</figure>
+
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/diagram-ompweb.webp" alt="方法论示意" width="1536" height="922" loading="lazy" />
+  <figcaption>结构示意</figcaption>
+</figure>
 
 功能上我最在意四块：
 
@@ -103,7 +108,8 @@ ompweb 最重要的架构原则是一句话：**OMP 仍然是唯一权威**。�
 
 ## 现状
 
-目前 ompweb 已经能在 Web 模式和 Electron 桌面端稳定使用：会话树、分支 fork、PTY、Git worktree 切换、富媒体预览（代码高亮 / KaTeX / Mermaid / PDF / DOCX）、主题工作室和中英日三语都在。质量侧有 450+ 单测，`npm run release:check` 串起 typecheck、lint、test 和 build。日常我更多用 Web 模式：一条 `npx` 命令起来，浏览器标签就是工作台；需要托盘常驻和独立窗口时再切桌面端。
+目前 ompweb 已经能在 Web 模式和 Electron 桌面端稳定使用：会话树、分支 fork、PTY、Git worktree 切换、富媒体预览（代码高亮 / KaTeX / Mermaid / PDF / DOCX）、主题工作室和中英日三语都在。质量侧有 450+ 单测，`npm run release:check` 串起 typecheck、lint、test 和 build。
+
+日常我更多用 Web 模式：一条 `npx` 命令起来，浏览器标签就是工作台；需要托盘常驻和独立窗口时再切桌面端。
 
 对我来说，这个项目真正验证的是一件事：**给终端 Agent 做界面，价值不在「把命令行包一层皮」，而在把本地已有的状态变成可导航、可分支、可观测的工作空间。** Agent 仍然是那个 Agent，我只是终于能看见它在干什么了。
-
