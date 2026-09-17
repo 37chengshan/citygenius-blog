@@ -1,6 +1,6 @@
 ---
-title: "agent-mcp：把各种 Agent CLI 收进一个<em>工作池</em>"
-description: "核心不是多开 Agent，而是控制面：主 Agent 只拆解汇合，spawn / wait / steer / 超时 / 续接交给基础设施。CLI 按任务现场匹配——快的扫代码，强的做推理。"
+title: "agent-mcp：把 Agent CLI 收成一个工作池"
+description: "多开终端不难，难的是可控。主 Agent 只拆解汇合；派发、超时、续接交给控制面，CLI 按任务匹配。"
 date: "2026.09.17"
 readTime: "12 分钟阅读"
 tag: "Agent MCP"

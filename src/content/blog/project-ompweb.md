@@ -1,6 +1,6 @@
 ---
-title: "ompweb：不重写 Agent，只给 omp 一个<em>本地工作台</em>"
-description: "核心是 Local-first：直接读 ~/.omp/agent/sessions，OMP 仍是唯一权威。会话树、PTY、MCP 管理、Git worktree——把终端扩成工作区。"
+title: "ompweb：给 omp 一张本地工作台"
+description: "不重写 Agent，只读本地会话文件。会话树、终端、MCP、worktree 都摊在一张桌子上。"
 date: "2026.09.17"
 readTime: "11 分钟阅读"
 tag: "ompweb"

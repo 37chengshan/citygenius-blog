@@ -1,6 +1,6 @@
 ---
-title: "d-token：上下文离开本机之前，先过一道<em>控制面</em>"
-description: "核心不是省 token 的脚本，而是本地控制面：压缩冗余、显式路由、每请求一张回执、配置可回退。单次真实请求物理减少 33,705 token。"
+title: "d-token：上下文离开本机之前"
+description: "在请求发出前压缩冗余、写清路由、留下回执。一次真实请求少送 33,705 token。"
 date: "2026.09.17"
 readTime: "11 分钟阅读"
 tag: "d-token"

@@ -1,6 +1,6 @@
 ---
-title: "eduevidence：没有证据，就不设计新<em>研究</em>"
-description: "核心是证据纪律：检索片段只是定位器，不是证据。九阶段协议 + 不可变 Evidence Graph，输出 ADOPT / PILOT / REJECT / 证据不足。"
+title: "eduevidence：没有证据，就不设计新研究"
+description: "检索片段不是证据。九阶段协议 + 证据图，给出 ADOPT、试点、驳回或证据不足。"
 date: "2026.09.17"
 readTime: "12 分钟阅读"
 tag: "EduEvidence"
