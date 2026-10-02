@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { withBase } from '../lib/url';
 
 const newsUrl = withBase('/news.json');
-const headerImg = withBase('/assets/news-header.webp');
 const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
@@ -20,22 +19,48 @@ const pageSchema = {
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
     <style is:global>
-      .news-hero-img {
-        margin: 34px 0 8px;
+      main.container > section.news-page { padding: 34px 0 64px; }
+      .mod-nav {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 12px 4px;
+        margin: 24px 0 4px;
+        background: var(--paper);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      .mod-nav::-webkit-scrollbar { display: none; }
+      .mod-nav a {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: baseline;
+        gap: 8px;
+        font-family: var(--sans);
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink);
+        text-decoration: none;
         border: 1px solid var(--line);
-        border-radius: 18px;
-        overflow: hidden;
-        box-shadow: var(--shadow);
+        border-radius: 999px;
+        padding: 9px 18px;
+        background: var(--bone);
+        transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
       }
-      .news-hero-img img {
-        display: block;
-        width: 100%;
-        height: auto;
-        aspect-ratio: 3 / 1;
-        object-fit: cover;
+      .mod-nav a b {
+        font-family: var(--serif);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 12.5px;
+        color: var(--coral);
       }
-      .news-module { margin-top: 84px; }
-      .news-module:first-of-type { margin-top: 56px; }
+      .mod-nav a:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+      .news-module { margin-top: 44px; scroll-margin-top: 84px; }
+      .news-module:first-of-type { margin-top: 30px; }
       .module-head {
         display: flex;
         align-items: baseline;
@@ -117,6 +142,40 @@ const pageSchema = {
         line-height: 1.6;
         color: var(--ink-soft);
       }
+      .news-card .en-title {
+        font-family: var(--sans);
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--ink-mute);
+        margin: -4px 0 10px;
+      }
+      .news-card .take {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-left: 2px solid var(--coral);
+        background: var(--paper);
+        border-radius: 0 8px 8px 0;
+        font-size: 13px;
+        line-height: 1.65;
+        color: var(--ink-soft);
+      }
+      .news-card .take b {
+        color: var(--coral);
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        margin-right: 8px;
+      }
+      .news-card .en-sum {
+        margin-top: 12px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--ink-mute);
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
       .news-empty {
         padding: 40px 20px;
         text-align: center;
@@ -125,26 +184,27 @@ const pageSchema = {
         border: 1px dashed var(--line);
         border-radius: 14px;
       }
-      .news-updated { margin-top: 26px; }
+      .news-updated { margin: 14px 4px 0; text-align: right; }
       @media (max-width: 880px) {
         .news-grid { grid-template-columns: 1fr; }
-        .news-hero-img img { aspect-ratio: 16 / 9; }
       }
     </style>
   </Fragment>
 
   <main class="container" id="top">
-    <section class="tight">
+    <section class="tight news-page">
       <div class="sec-rule">
         <span><span class="roman">News</span> · 速览</span>
         <span class="meta-grp"><span>每 10 分钟更新</span><span class="dot-mark">●</span><span>六个板块</span></span>
       </div>
-      <span class="label">新闻速览</span>
-      <h1 class="display" style="margin: 26px 0 24px;">新闻<em>速览</em><span class="dot">.</span></h1>
-      <p class="lead">AI 科技、国际、财经、体育、娱乐，再加一个无畏契约专区。机器每 10 分钟扫一遍，来源都标在卡片上。</p>
-      <div class="news-hero-img">
-        <img src={headerImg} alt="新闻速览头图：报纸与新闻卡片插画" loading="eager" />
-      </div>
+      <nav class="mod-nav" aria-label="板块快速导航">
+        <a href="#mod-ai"><b>01</b>AI 科技</a>
+        <a href="#mod-world"><b>02</b>国际新闻</a>
+        <a href="#mod-finance"><b>03</b>财经</a>
+        <a href="#mod-sports"><b>04</b>体育</a>
+        <a href="#mod-ent"><b>05</b>娱乐</a>
+        <a href="#mod-valorant"><b>06</b>无畏契约</a>
+      </nav>
       <p class="meta news-updated" id="news-updated">正在加载…</p>
       <div id="news-modules"></div>
     </section>
@@ -171,12 +231,21 @@ const pageSchema = {
           var thumb = it.image
             ? '<div class="thumb"><img loading="lazy" src="' + esc(it.image) + '" alt="" /></div>'
             : '';
+          var enTitle = (it.en_title && it.en_title !== it.zh_title)
+            ? '<div class="en-title">' + esc(it.en_title) + '</div>' : '';
+          var take = it.zh_take
+            ? '<div class="take"><b>解读</b>' + esc(it.zh_take) + '</div>' : '';
+          var enSum = it.en_summary
+            ? '<p class="en-sum">' + esc(it.en_summary) + '</p>' : '';
           return '<a class="news-card" href="' + esc(it.link) + '" target="_blank" rel="noreferrer noopener">'
             + thumb
             + '<div class="card-body">'
-            + '<h3>' + esc(it.title) + '</h3>'
+            + '<h3>' + esc(it.zh_title || it.title) + '</h3>'
+            + enTitle
             + '<div class="news-meta">' + esc(it.published ? fmtTime(it.published) : '') + '<span class="src">' + esc(it.source || '') + '</span></div>'
-            + (it.summary ? '<p>' + esc(it.summary) + '</p>' : '')
+            + (it.zh_summary ? '<p>' + esc(it.zh_summary) + '</p>' : (it.summary ? '<p>' + esc(it.summary) + '</p>' : ''))
+            + take
+            + enSum
             + '</div></a>';
         }
         function render(data) {
@@ -192,7 +261,7 @@ const pageSchema = {
           for (var i = 0; i < categories.length; i++) {
             var c = categories[i];
             var items = c.items || [];
-            html += '<div class="news-module">'
+            html += '<div class="news-module" id="mod-' + c.key + '">'
               + '<div class="module-head"><span class="module-ix">' + pad(i + 1) + '</span>'
               + '<h2>' + esc(c.label) + '</h2>'
               + '<span class="count">' + items.length + ' 条</span></div>';
