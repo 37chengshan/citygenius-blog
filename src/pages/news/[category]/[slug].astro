@@ -22,7 +22,7 @@ export function getStaticPaths() {
       seen.add(c.id + '/' + slug);
       const sib = (j) =>
         j >= 0 && j < items.length
-          ? { slug: slugFor(items[j].link || items[j].title), en: items[j].title || '', zh: items[j].zh_title || items[j].title || '' }
+          ? { slug: slugFor(items[j].link || items[j].title), en: items[j].en_title || items[j].title || '', zh: items[j].zh_title || items[j].title || '' }
           : null;
       paths.push({
         params: { category: c.id, slug },
