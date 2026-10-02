@@ -4,7 +4,7 @@ import NewsStyles from '../../components/NewsStyles.astro';
 import { withBase } from '../../lib/url';
 import { NEWS_CATS } from '../../lib/news-cats.js';
 import { readFileSync } from 'node:fs';
-import { staticCategory, itemListSchema, slugFor } from '../../lib/news-render.js';
+import { staticCategory, itemListSchema, slugFor, snapUpdated } from '../../lib/news-render.js';
 import { illusFor, articlePath } from '../../lib/news-shared.js';
 
 export function getStaticPaths() {
@@ -29,10 +29,12 @@ const pad = (n: number) => (n < 10 ? '0' : '') + n;
 
 // 构建期快照：把 public/news.json 写进 HTML，爬虫/无 JS 抓取也能看到内容。
 let snapItems = [];
+let snapUpdatedText = '';
 try {
   const snap = JSON.parse(readFileSync(new URL('../../../public/news.json', import.meta.url), 'utf-8'));
   const c = (snap.categories || []).find((x) => x.id === category);
   snapItems = (c && c.items) || [];
+  snapUpdatedText = snap.generated_at ? snapUpdated(snap.generated_at) : '';
 } catch (e) {
   snapItems = [];
 }
@@ -62,7 +64,7 @@ const pageSchema = {
     <section class="tight news-page">
       <div class="sec-rule">
         <span class="crumb"><a href={hubHref}><span class="roman">News</span></a> · {meta.label}</span>
-        <span class="meta-grp"><span id="news-updated">正在加载…</span><span class="dot-mark">●</span><span id="news-count"></span></span>
+        <span class="meta-grp"><span id="news-updated">{snapUpdatedText}</span><span class="dot-mark">●</span><span id="news-count"></span></span>
       </div>
 
       <div class="cat-hero">

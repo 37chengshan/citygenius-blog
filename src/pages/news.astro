@@ -4,7 +4,7 @@ import NewsStyles from '../components/NewsStyles.astro';
 import { withBase } from '../lib/url';
 import { NEWS_CATS } from '../lib/news-cats.js';
 import { readFileSync } from 'node:fs';
-import { staticHub } from '../lib/news-render.js';
+import { staticHub, snapUpdated } from '../lib/news-render.js';
 import { articlePath } from '../lib/news-shared.js';
 
 const newsUrl = withBase('/news.json');
@@ -20,6 +20,8 @@ try {
   snapData = null;
 }
 const hubHtml = staticHub(cats, snapData, linkArt);
+// 构建期就把更新时间写进 HTML（爬虫可见），JS 加载后会刷新为"几分钟前"。
+const updatedText = snapData && snapData.generated_at ? snapUpdated(snapData.generated_at) : '';
 const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
@@ -45,7 +47,7 @@ const pageSchema = {
         <span class="meta-grp"><span>每日两更</span><span class="dot-mark">●</span><span>突发即时跟进</span><span class="dot-mark">●</span><span>六个板块</span></span>
       </div>
       <div class="hub-grid" id="news-hub" set:html={hubHtml} />
-      <p class="meta news-updated" id="news-updated">正在加载…</p>
+      <p class="meta news-updated" id="news-updated">{updatedText}</p>
     </section>
   </main>
 

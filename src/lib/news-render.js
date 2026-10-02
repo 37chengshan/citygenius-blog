@@ -6,6 +6,28 @@ import { esc, slugFor, articlePath, dateParts, illusFor } from './news-shared.js
 /** 文章站内链接：linkArt(catId, slug) 由调用方传入（已套 withBase）。 */
 export { slugFor, articlePath };
 
+/** 构建期"数据更新于"文本（北京时间；浏览器端 JS 加载后会刷新为相对时间）。 */
+export function snapUpdated(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  try {
+    var parts = new Intl.DateTimeFormat('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      month: 'numeric', day: 'numeric', weekday: 'short',
+      hour: 'numeric', minute: '2-digit', hour12: false,
+    }).formatToParts(d);
+    var get = function (t) {
+      for (var i = 0; i < parts.length; i++) if (parts[i].type === t) return parts[i].value;
+      return '';
+    };
+    return '数据更新于 ' + get('month') + '月' + get('day') + '日' +
+      ' ' + get('weekday') + ' ' + get('hour') + ':' + get('minute');
+  } catch (e) {
+    return '';
+  }
+}
+
 /* ---------- 卡片（静态版：绝对时间，无"几小时前"，JS 刷新后会补上） ---------- */
 function staticDateLine(pub, src) {
   if (!pub) {
