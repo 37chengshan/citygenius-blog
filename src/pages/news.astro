@@ -37,16 +37,37 @@ const pageSchema = {
 
   <Fragment slot="scripts">
     <script define:vars={{ newsUrl, cats }}>
-      import { hubCard } from '../lib/news-card.js';
       (function () {
         var hubEl = document.getElementById('news-hub');
         var updatedEl = document.getElementById('news-updated');
+        function esc(s) {
+          return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
         function fmtTime(iso) {
           try {
             return new Date(iso).toLocaleString('zh-CN', { hour12: false });
           } catch (e) {
             return iso;
           }
+        }
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+        function hubCard(ix, meta, c, href) {
+          var items = (c && c.items) || [];
+          var tops = '';
+          for (var t = 0; t < Math.min(3, items.length); t++) {
+            tops += '<li>' + esc(items[t].zh_title || items[t].title) + '</li>';
+          }
+          return '<a class="hub-card" href="' + href + '">'
+            + '<div class="hub-ix">' + pad(ix + 1) + '</div>'
+            + '<div class="hub-main">'
+            + '<div class="hub-title">' + esc(meta.label) + '<span class="count">' + items.length + ' 条</span></div>'
+            + '<div class="hub-desc">' + esc(meta.desc) + '</div>'
+            + (tops ? '<ul class="hub-tops">' + tops + '</ul>' : '')
+            + '</div>'
+            + '<div class="hub-arrow" aria-hidden="true">→</div>'
+            + '</a>';
         }
         function render(data) {
           var categories = (data && data.categories) || [];
