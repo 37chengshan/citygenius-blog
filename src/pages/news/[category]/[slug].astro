@@ -4,7 +4,8 @@ import NewsStyles from '../../../components/NewsStyles.astro';
 import { withBase } from '../../../lib/url';
 import { NEWS_CATS } from '../../../lib/news-cats.js';
 import { readFileSync } from 'node:fs';
-import { esc, slugFor, dateParts, fullTime, illusFor } from '../../../lib/news-shared.js';
+import { esc, slugFor, dateParts, fullTime, illusFor, catLabel } from '../../../lib/news-shared.js';
+import { takeHtml, readOriginHtml, artNavHtml } from '../../../lib/news-render.js';
 
 export function getStaticPaths() {
   const snap = JSON.parse(readFileSync(new URL('../../../../public/news.json', import.meta.url), 'utf-8'));
@@ -21,7 +22,7 @@ export function getStaticPaths() {
       seen.add(c.id + '/' + slug);
       const sib = (j) =>
         j >= 0 && j < items.length
-          ? { slug: slugFor(items[j].link || items[j].title), title: items[j].zh_title || items[j].title }
+          ? { slug: slugFor(items[j].link || items[j].title), en: items[j].title || '', zh: items[j].zh_title || items[j].title || '' }
           : null;
       paths.push({
         params: { category: c.id, slug },
@@ -40,23 +41,29 @@ const catHref = withBase('/news/' + category + '/');
 const prevHref = prev ? withBase('/news/' + category + '/' + prev.slug + '/') : null;
 const nextHref = next ? withBase('/news/' + category + '/' + next.slug + '/') : null;
 
-const p = dateParts(item.published);
+const catL = catLabel(category) || {};
+const catEn = catL.en || meta.label;
+
+const pEn = dateParts(item.published, 'en');
+const pZh = dateParts(item.published, 'zh') || dateParts(item.published);
+const enTitle = item.title || '';
 const zhTitle = item.zh_title || item.title;
-const zhParas = (item.zh_summary || item.summary || '').split('\n').filter((s) => s.trim());
+const enParas = (item.summary || '').split('\n').filter((s) => s.trim());
+const zhParas = (item.zh_summary || '').split('\n').filter((s) => s.trim());
 
 const newsSchema = {
   '@context': 'https://schema.org',
   '@type': 'NewsArticle',
-  headline: zhTitle,
-  inLanguage: 'zh-CN',
+  headline: enTitle,
+  inLanguage: 'en',
   datePublished: item.published || undefined,
   author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
   isBasedOn: item.link,
-  about: meta.label,
+  about: catEn,
 };
 ---
 
-<BaseLayout title={zhTitle + ' — ' + meta.label + ' — CityGenius Blog'} description={(item.zh_summary || item.summary || '').slice(0, 120)}>
+<BaseLayout title={enTitle + ' — ' + catEn + ' — CityGenius Blog'} description={(item.summary || '').slice(0, 150)}>
   <Fragment slot="head">
     <NewsStyles />
     <script type="application/ld+json" set:html={JSON.stringify(newsSchema)} />
@@ -67,70 +74,71 @@ const newsSchema = {
       <div class="sec-rule">
         <span class="crumb">
           <a href={hubHref}><span class="roman">News</span></a> ·
-          <a href={catHref}>{meta.label}</a> · 正文
+          <a href={catHref}><span class="lang-en">{catEn}</span><span class="lang-zh">{meta.label}</span></a> ·
+          <span class="lang-en">Article</span><span class="lang-zh">正文</span>
         </span>
         <span class="meta-grp"><span>{item.source}</span></span>
       </div>
 
       <article class="art">
-        <div class="art-kicker">{meta.label}</div>
-        <h1 class="art-title">{zhTitle}</h1>
-        {
-          item.en_title && item.en_title !== zhTitle && (
-            <div class="en-title art-en-title">{item.en_title}</div>
-          )
-        }
+        <div class="art-kicker"><span class="lang-en">{catEn}</span><span class="lang-zh">{meta.label}</span></div>
+        <h1 class="art-title"><span class="lang-en">{enTitle}</span><span class="lang-zh">{zhTitle}</span></h1>
         <div class="date-line">
-          {p && <span class="date-badge">{p.date}</span>}
-          {p && (
-            <span class="week">
-              {p.week} · {p.hm}
-            </span>
-          )}
-          <span class="src">{item.source}</span>
+          <div class="lang-en">
+            {pEn && <span class="date-badge">{pEn.date}</span>}
+            {pEn && <span class="week">{pEn.week} · {pEn.hm}</span>}
+            <span class="src">{item.source}</span>
+          </div>
+          <div class="lang-zh">
+            {pZh && <span class="date-badge">{pZh.date}</span>}
+            {pZh && <span class="week">{pZh.week} · {pZh.hm}</span>}
+            <span class="src">{item.source}</span>
+          </div>
         </div>
 
         <div class="illus art-illus" set:html={illusFor(item.link || item.title, meta.pal, true)} />
 
         <div class="art-body">
-          {zhParas.map((para) => (
-            <p>{para}</p>
-          ))}
+          <div class="lang-en">
+            {enParas.map((para) => (
+              <p>{para}</p>
+            ))}
+          </div>
+          <div class="lang-zh">
+            {zhParas.map((para) => (
+              <p>{para}</p>
+            ))}
+          </div>
         </div>
 
-        {
-          item.zh_take && (
-            <div class="take art-take">
-              <b>解读</b>
-              {item.zh_take}
-            </div>
-          )
-        }
-
-        {
-          (item.en_summary || item.summary) && (
-            <details class="art-en">
-              <summary>英文原文摘要</summary>
-              <p class="en-sum">{item.en_summary || item.summary}</p>
-            </details>
-          )
-        }
+        <Fragment set:html={takeHtml(item.zh_take)} />
 
         <div class="art-origin">
           <div class="art-origin-meta">
-            <span>来源：{item.source}</span>
-            {item.published && <span title={fullTime(item.published)}>发布时间：{p ? `${p.date} ${p.week} ${p.hm}` : ''}</span>}
+            <span><span class="lang-en">Source: </span><span class="lang-zh">来源：</span>{item.source}</span>
+            {item.published && (
+              <span title={fullTime(item.published, 'en')}>
+                <span class="lang-en">Published: </span><span class="lang-zh">发布时间：</span>
+                <span class="lang-en">{pEn ? `${pEn.date} ${pEn.week} ${pEn.hm}` : ''}</span><span class="lang-zh">{pZh ? `${pZh.date} ${pZh.week} ${pZh.hm}` : ''}</span>
+              </span>
+            )}
           </div>
-          <a class="read-origin" href={item.link} target="_blank" rel="noreferrer noopener">
-            阅读原文 <span aria-hidden="true">→</span>
-          </a>
+          <Fragment set:html={readOriginHtml(item.link)} />
         </div>
 
-        <nav class="cat-nav art-nav" aria-label="文章导航">
-          {prevHref ? <a href={prevHref}>← {prev.title}</a> : <span />}
-          <a href={catHref}>返回{meta.label}</a>
-          {nextHref ? <a href={nextHref}>{next.title} →</a> : <span />}
-        </nav>
+        <Fragment
+          set:html={artNavHtml({
+            prevHref,
+            prevEn: prev?.en,
+            prevZh: prev?.zh,
+            catHref,
+            catEn,
+            catZh: meta.label,
+            nextHref,
+            nextEn: next?.en,
+            nextZh: next?.zh,
+          })}
+        />
       </article>
     </section>
   </main>

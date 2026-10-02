@@ -25,15 +25,15 @@ const updatedText = snapData && snapData.generated_at ? snapUpdated(snapData.gen
 const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: '新闻速览 — CityGenius Blog',
-  description: 'AI 科技、国际新闻、财经、体育、娱乐、无畏契约六个板块，每日更新两次，突发新闻即时跟进。',
-  inLanguage: 'zh-CN',
+  name: 'News Digest — CityGenius Blog',
+  description: 'AI tech, world, finance, sports, entertainment and Valorant — six sections, updated twice daily, breaking news as it happens.',
+  inLanguage: 'en',
 };
 ---
 
 <BaseLayout
-  title="新闻速览 — CityGenius Blog"
-  description="AI 科技、国际新闻、财经、体育、娱乐、无畏契约六个板块，每日更新两次，突发新闻即时跟进。"
+  title="News Digest — CityGenius Blog"
+  description="AI tech, world, finance, sports, entertainment and Valorant — six sections, updated twice daily, breaking news as it happens."
 >
   <Fragment slot="head">
     <NewsStyles />
@@ -43,115 +43,166 @@ const pageSchema = {
   <main class="container" id="top">
     <section class="tight news-page">
       <div class="sec-rule">
-        <span><span class="roman">News</span> · 速览</span>
-        <span class="meta-grp"><span>每日两更</span><span class="dot-mark">●</span><span>突发即时跟进</span><span class="dot-mark">●</span><span>六个板块</span></span>
+        <span><span class="roman">News</span> · <span data-i18n="news.hub_kicker">Digest</span></span>
+        <span class="meta-grp"><span data-i18n="news.hub_meta1">Twice daily</span><span class="dot-mark">●</span><span data-i18n="news.hub_meta2">Breaking as it happens</span><span class="dot-mark">●</span><span data-i18n="news.hub_meta3">6 sections</span></span>
       </div>
       <div class="hub-grid" id="news-hub" set:html={hubHtml} />
-      <p class="meta news-updated" id="news-updated">{updatedText}</p>
+      <p class="meta news-updated" id="news-updated" set:html={updatedText} />
     </section>
   </main>
 
   <Fragment slot="scripts">
     <script src={newsSharedUrl}></script>
     <script define:vars={{ newsUrl, cats }}>
+      // 内联脚本禁 import（Astro 不打包，会留 bare import 致整页空白）。
+      // 共享函数走 window.NewsShared（public/news-shared.js 由 scripts/gen-news-shared.js 从 src/lib/news-shared.js 生成）。
+      // 双语：内容用 .lang-en/.lang-zh 双 span（CSS 按 html[data-lang] 显隐）；chrome 文案读当前语言直接写，另带 data-i18n 供全局语言脚本接管。
       (function () {
-        var hubEl = document.getElementById('news-hub');
-        var updatedEl = document.getElementById('news-updated');
-        function esc(s) {
-          return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        function curLang() {
+          return document.documentElement.getAttribute('data-lang') === 'zh' ? 'zh' : 'en';
         }
-        function pad(n) { return (n < 10 ? '0' : '') + n; }
-        var WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        function relTime(iso) {
-          var t = new Date(iso).getTime();
-          if (isNaN(t)) return '';
-          var diff = Date.now() - t;
-          if (diff < 0) diff = 0;
-          var m = Math.floor(diff / 60000);
-          if (m < 1) return '刚刚';
-          if (m < 60) return m + ' 分钟前';
-          var h = Math.floor(m / 60);
-          if (h < 24) return h + ' 小时前';
-          var days = Math.floor(h / 24);
-          if (days === 1) return '昨天';
-          if (days < 30) return days + ' 天前';
-          return Math.floor(days / 30) + ' 个月前';
-        }
-        function fmtUpdated(iso) {
-          var d = new Date(iso);
-          if (isNaN(d.getTime())) return iso;
-          var min = d.getMinutes();
-          return '数据更新于 ' + (d.getMonth() + 1) + '月' + d.getDate() + '日'
-            + ' ' + WEEK[d.getDay()]
-            + ' ' + d.getHours() + ':' + (min < 10 ? '0' : '') + min
-            + ' · ' + relTime(iso);
-        }
-        function hubCard(ix, meta, c, href) {
+        function init() {
+          var hubEl = document.getElementById('news-hub');
+          if (!hubEl || hubEl.dataset.newsInit) return; // 同一 DOM 只初始化一次（防 DOMContentLoaded + astro:page-load 双触发）
+          hubEl.dataset.newsInit = '1';
+          if (window.__newsHubTimer) { clearInterval(window.__newsHubTimer); window.__newsHubTimer = null; }
           var NS = window.NewsShared || null;
-          var items = (c && c.items) || [];
-          var base = newsUrl.slice(0, -'/news.json'.length);
-          var tops = '';
-          for (var t = 0; t < Math.min(3, items.length); t++) {
-            var it = items[t];
-            var title = esc(it.zh_title || it.title);
-            if (NS) {
-              var ahref = base + NS.articlePath(meta.id, NS.slugFor(it.link || it.title));
-              tops += '<li><a href="' + esc(ahref) + '">' + title + '</a></li>';
-            } else {
-              tops += '<li>' + title + '</li>';
+          var updatedEl = document.getElementById('news-updated');
+          function esc(s) {
+            if (NS && NS.esc) return NS.esc(s);
+            return String(s == null ? '' : s)
+              .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          }
+          function pad(n) { return (n < 10 ? '0' : '') + n; }
+          function langSpans(en, zh) {
+            return '<span class="lang-en">' + esc(en) + '</span><span class="lang-zh">' + esc(zh) + '</span>';
+          }
+          function catL(id) {
+            return (NS && NS.catLabel && NS.catLabel(id)) || null;
+          }
+          // 与 news-shared.js 的 relTime(iso, lang) 同逻辑的兜底（NS 缺失时用）
+          function relTime(iso, lang) {
+            if (NS && NS.relTime) return NS.relTime(iso, lang);
+            var t = new Date(iso).getTime();
+            if (isNaN(t)) return '';
+            var diff = Date.now() - t;
+            if (diff < 0) diff = 0;
+            var m = Math.floor(diff / 60000);
+            if (lang === 'en') {
+              if (m < 1) return 'just now';
+              if (m < 60) return m + (m === 1 ? ' min ago' : ' mins ago');
+              var h = Math.floor(m / 60);
+              if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+              var d = Math.floor(h / 24);
+              if (d === 1) return 'yesterday';
+              if (d < 30) return d + ' days ago';
+              var mo = Math.floor(d / 30);
+              return mo + (mo === 1 ? ' month ago' : ' months ago');
             }
+            if (m < 1) return '刚刚';
+            if (m < 60) return m + ' 分钟前';
+            var h2 = Math.floor(m / 60);
+            if (h2 < 24) return h2 + ' 小时前';
+            var d2 = Math.floor(h2 / 24);
+            if (d2 === 1) return '昨天';
+            if (d2 === 2) return '前天';
+            if (d2 < 30) return d2 + ' 天前';
+            return Math.floor(d2 / 30) + ' 个月前';
           }
-          var illus = NS ? '<div class="hub-illus" aria-hidden="true">' + NS.illusFor('hub-' + meta.id, meta.pal, false) + '</div>' : '';
-          return '<div class="hub-card" data-href="' + href + '">'
-            + '<div class="hub-ix">' + pad(ix + 1) + '</div>'
-            + '<div class="hub-main">'
-            + '<div class="hub-title"><a href="' + href + '">' + esc(meta.label) + '</a><span class="count">' + items.length + ' 条</span></div>'
-            + '<div class="hub-desc">' + esc(meta.desc) + '</div>'
-            + (tops ? '<ul class="hub-tops">' + tops + '</ul>' : '')
-            + '</div>'
-            + illus
-            + '<a class="hub-arrow" aria-hidden="true" href="' + href + '" tabindex="-1">→</a>'
-            + '</div>';
-        }
-        // 点卡片空白处进板块；点到链接则走链接
-        hubEl.addEventListener('click', function (e) {
-          if (e.target.closest('a')) return;
-          var card = e.target.closest('.hub-card');
-          if (card && card.getAttribute('data-href')) location.href = card.getAttribute('data-href');
-        });
-        function render(data) {
-          var categories = (data && data.categories) || [];
-          if (updatedEl && data && data.generated_at) {
-            updatedEl.textContent = fmtUpdated(data.generated_at);
+          function fmtUpdated(iso) {
+            var d = new Date(iso);
+            if (isNaN(d.getTime())) return esc(iso);
+            var min = d.getMinutes(), mm = (min < 10 ? '0' : '') + min;
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            var wdEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            var wdZh = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            var en = 'Updated ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + wdEn[d.getDay()] +
+              ' ' + d.getHours() + ':' + mm;
+            var relEn = relTime(iso, 'en');
+            if (relEn) en += ' · ' + relEn;
+            var zh = '数据更新于 ' + (d.getMonth() + 1) + '月' + d.getDate() + '日' +
+              ' ' + wdZh[d.getDay()] + ' ' + d.getHours() + ':' + mm;
+            var relZh = relTime(iso, 'zh');
+            if (relZh) zh += ' · ' + relZh;
+            return '<span class="lang-en">' + esc(en) + '</span><span class="lang-zh">' + esc(zh) + '</span>';
           }
-          var html = '';
-          for (var i = 0; i < cats.length; i++) {
-            var meta = cats[i];
-            var c = null;
-            for (var k = 0; k < categories.length; k++) {
-              if (categories[k].id === meta.id) {
-                c = categories[k];
-                break;
+          function hubCard(ix, meta, c, href) {
+            var items = (c && c.items) || [];
+            var base = newsUrl.slice(0, -'/news.json'.length);
+            var L = catL(meta.id) || {};
+            var labelEn = L.en || meta.label, labelZh = L.zh || meta.label;
+            var descEn = L.descEn || meta.desc, descZh = L.descZh || meta.desc;
+            var tops = '';
+            for (var t = 0; t < Math.min(3, items.length); t++) {
+              var it = items[t];
+              var inner = langSpans(it.title || '', it.zh_title || it.title || '');
+              if (NS) {
+                var ahref = base + NS.articlePath(meta.id, NS.slugFor(it.link || it.title));
+                tops += '<li><a href="' + esc(ahref) + '">' + inner + '</a></li>';
+              } else {
+                tops += '<li>' + inner + '</li>';
               }
             }
-            html += hubCard(i, meta, c, meta.href);
+            var illus = NS ? '<div class="hub-illus" aria-hidden="true">' + NS.illusFor('hub-' + meta.id, meta.pal, false) + '</div>' : '';
+            return '<div class="hub-card" data-href="' + esc(href) + '">'
+              + '<div class="hub-ix">' + pad(ix + 1) + '</div>'
+              + '<div class="hub-main">'
+              + '<div class="hub-title"><a href="' + esc(href) + '">' + langSpans(labelEn, labelZh) + '</a>'
+              + '<span class="count"><span class="lang-en">' + items.length + ' stories</span><span class="lang-zh">' + items.length + ' 条</span></span></div>'
+              + '<div class="hub-desc">' + langSpans(descEn, descZh) + '</div>'
+              + (tops ? '<ul class="hub-tops">' + tops + '</ul>' : '')
+              + '</div>'
+              + illus
+              + '<a class="hub-arrow" aria-hidden="true" href="' + esc(href) + '" tabindex="-1">→</a>'
+              + '</div>';
           }
-          hubEl.innerHTML = html;
-        }
-        function load() {
-          fetch(newsUrl + '?t=' + Date.now(), { cache: 'no-store' })
-            .then(function (r) { return r.json(); })
-            .then(render)
-            .catch(function () {
-              if (!hubEl.innerHTML.trim()) {
-                hubEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
+          // 点卡片空白处进板块；点到链接则走链接
+          hubEl.addEventListener('click', function (e) {
+            if (e.target.closest('a')) return;
+            var card = e.target.closest('.hub-card');
+            if (card && card.getAttribute('data-href')) location.href = card.getAttribute('data-href');
+          });
+          function render(data) {
+            var categories = (data && data.categories) || [];
+            if (updatedEl && data && data.generated_at) {
+              updatedEl.innerHTML = fmtUpdated(data.generated_at);
+            }
+            var html = '';
+            for (var i = 0; i < cats.length; i++) {
+              var meta = cats[i];
+              var c = null;
+              for (var k = 0; k < categories.length; k++) {
+                if (categories[k].id === meta.id) {
+                  c = categories[k];
+                  break;
+                }
               }
-            });
+              html += hubCard(i, meta, c, meta.href);
+            }
+            hubEl.innerHTML = html;
+          }
+          function load() {
+            fetch(newsUrl + '?t=' + Date.now(), { cache: 'no-store' })
+              .then(function (r) { return r.json(); })
+              .then(render)
+              .catch(function () {
+                if (!hubEl.innerHTML.trim()) {
+                  var msg = curLang() === 'zh' ? '新闻加载失败，稍后再试。' : 'Couldn\'t load the news — try again later.';
+                  hubEl.innerHTML = '<div class="news-empty" data-i18n="news.load_fail">' + esc(msg) + '</div>';
+                }
+              });
+          }
+          load();
+          window.__newsHubTimer = setInterval(load, 10 * 60 * 1000);
         }
-        load();
-        setInterval(load, 10 * 60 * 1000);
+        // ViewTransitions 翻页后重初始化；首屏直跑兜底 DOMContentLoaded 时序
+        document.addEventListener('astro:page-load', init);
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', init);
+        } else {
+          init();
+        }
       })();
     </script>
   </Fragment>

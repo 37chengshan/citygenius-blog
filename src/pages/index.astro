@@ -4,6 +4,14 @@ import { assetUrl, withBase } from '../lib/url';
 import { getCollection } from 'astro:content';
 
 const posts = await getCollection('blog');
+// English collection — falls back to zh content when a translation is missing
+const enById = new Map((await getCollection('en')).map((entry) => [entry.id, entry]));
+function enTitleOf(post: (typeof posts)[number]) {
+  return enById.get(post.id)?.data.title ?? post.data.title;
+}
+function enDescOf(post: (typeof posts)[number]) {
+  return enById.get(post.id)?.data.description ?? post.data.description;
+}
 const sortedPosts = posts.sort((a, b) => {
   if (a.data.featured && !b.data.featured) return -1;
   if (!a.data.featured && b.data.featured) return 1;
@@ -20,8 +28,8 @@ const categoryCounts = {
 ---
 
 <BaseLayout
-  title="CityGenius Blog — 一个大学生的 Vibe Coding 实验室"
-  description="CityGenius 个人博客，记录全栈开发、AI 应用、移动端开发的实践与思考。scholar-ai · macOS 原生工具 · Android 应用。"
+  title="CityGenius Blog — A College Student's Vibe Coding Lab"
+  description="CityGenius's personal blog: notes on full-stack development, AI apps, and mobile development. scholar-ai · macOS native tools · Android apps."
 >
   <Fragment slot="head">
     <style>
@@ -993,7 +1001,7 @@ const categoryCounts = {
       <div class='sec-rule'>
         <span class='roman'>I.</span>
         <span class='meta-grp'>
-          <span>首页 / Hero</span>
+          <span><span class='lang-en'>Home / Hero</span><span class='lang-zh'>首页 / Hero</span></span>
           <span class='dot-mark'>•</span>
           <span>CityGenius Blog</span>
         </span>
@@ -1002,21 +1010,21 @@ const categoryCounts = {
     </div>
     <div class='container hero-grid'>
       <div class='hero-copy'>
-        <span class='label' data-reveal>个人博客 <span class='ix'>· Nº 01</span></span>
-        <h1 class='display' data-reveal>用 <em>vibe coding</em> 构建<br/>属于自己的<span class='dot'>.</span></h1>
-        <p class='lead' data-reveal>一个热爱 Vibe Coding 的大学生，用代码把想法变成现实。从全栈 Web 应用到 macOS 原生工具，再到 Android 应用，每个项目都是一次新的实验。</p>
+        <span class='label' data-reveal><span class='lang-en'>Personal Blog</span><span class='lang-zh'>个人博客</span> <span class='ix'>· Nº 01</span></span>
+        <h1 class='display' data-reveal><span class='lang-en'>Build <em>your own</em> with<br/>vibe coding<span class='dot'>.</span></span><span class='lang-zh'>用 <em>vibe coding</em> 构建<br/>属于自己的<span class='dot'>.</span></span></h1>
+        <p class='lead' data-reveal><span class='lang-en'>A college student hooked on Vibe Coding, turning ideas into working software. From full-stack web apps to macOS native tools to Android apps — every project is a new experiment.</span><span class='lang-zh'>一个热爱 Vibe Coding 的大学生，用代码把想法变成现实。从全栈 Web 应用到 macOS 原生工具，再到 Android 应用，每个项目都是一次新的实验。</span></p>
         <div class='hero-actions' data-reveal>
-          <a class='btn btn-primary' href={withBase('/#projects')}>查看项目<span class='arrow'><svg viewBox='0 0 24 24'><path d='M5 19L19 5M19 5H8M19 5v11'/></svg></span></a>
-          <a class='btn btn-ghost' href={withBase('/article/')}>阅读文章<span class='arrow'><svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='9'/><path d='M9 12h6M12 9v6'/></svg></span></a>
+          <a class='btn btn-primary' href={withBase('/#projects')}><span class='lang-en'>View projects</span><span class='lang-zh'>查看项目</span><span class='arrow'><svg viewBox='0 0 24 24'><path d='M5 19L19 5M19 5H8M19 5v11'/></svg></span></a>
+          <a class='btn btn-ghost' href={withBase('/article/')}><span class='lang-en'>Read articles</span><span class='lang-zh'>阅读文章</span><span class='arrow'><svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='9'/><path d='M9 12h6M12 9v6'/></svg></span></a>
         </div>
         <div class='hero-stats' data-reveal>
-          <div class='stat'><span class='ring solid'>3</span><span class='stat-label'><b>项目</b>在研</span></div>
-          <div class='stat'><span class='ring'>{posts.length}</span><span class='stat-label'><b>文章</b>已发布</span></div>
-          <div class='stat'><span class='ring coral'>5</span><span class='stat-label'><b>技术栈</b>覆盖</span></div>
+          <div class='stat'><span class='ring solid'>3</span><span class='stat-label'><span class='lang-en'><b>Projects</b> in progress</span><span class='lang-zh'><b>项目</b>在研</span></span></div>
+          <div class='stat'><span class='ring'>{posts.length}</span><span class='stat-label'><span class='lang-en'><b>Articles</b> published</span><span class='lang-zh'><b>文章</b>已发布</span></span></div>
+          <div class='stat'><span class='ring coral'>5</span><span class='stat-label'><span class='lang-en'><b>Stacks</b> covered</span><span class='lang-zh'><b>技术栈</b>覆盖</span></span></div>
         </div>
         <div class='hero-foot' data-reveal>
           <span class='meta'>↳ &nbsp; Python · Swift · Kotlin · TypeScript · AI/ML</span>
-          <span class='coord'>持续更新中</span>
+          <span class='coord'><span class='lang-en'>Updated regularly</span><span class='lang-zh'>持续更新中</span></span>
         </div>
       </div>
       <div class='hero-art' data-reveal='scale'>
@@ -1041,7 +1049,7 @@ const categoryCounts = {
     <div class='container wire-inner'>
       <div class='wire-left'>
         <span class='wire-mark' aria-hidden='true'><span class='wire-pulse'></span></span>
-        <span class='wire-title'><b>当前关注</b><span>全栈 · 原生 · AI · 移动端</span></span>
+        <span class='wire-title'><b><span class='lang-en'>Now focused on</span><span class='lang-zh'>当前关注</span></b><span><span class='lang-en'>Full-stack · Native · AI · Mobile</span><span class='lang-zh'>全栈 · 原生 · AI · 移动端</span></span></span>
       </div>
       <div class='wire-rows'>
         <div class='wire-row'><div class='marquee-track' aria-hidden='true'>
@@ -1057,9 +1065,9 @@ const categoryCounts = {
         </div></div>
         <div class='wire-row reverse'><div class='marquee-track' aria-hidden='true'>
           <a class='wire-item is-link' href={withBase('/article/vibe-coding-3-days/')}><span class='wire-dot'>·</span><span class='wire-handle'>@citygenius</span><span class='wire-role'>Vibe Coding</span></a>
-          <a class='wire-item is-link' href={withBase('/#projects')}><span class='wire-dot'>·</span><span class='wire-handle'>Scholar AI</span><span class='wire-role'>学术研究</span></a>
-          <a class='wire-item is-link' href={withBase('/#projects')}><span class='wire-dot'>·</span><span class='wire-handle'>macOS Tools</span><span class='wire-role'>原生效率</span></a>
-          <a class='wire-item is-link' href={withBase('/#projects')}><span class='wire-dot'>·</span><span class='wire-handle'>Android Apps</span><span class='wire-role'>移动端</span></a>
+          <a class='wire-item is-link' href={withBase('/#projects')}><span class='wire-dot'>·</span><span class='wire-handle'>Scholar AI</span><span class='wire-role'><span class='lang-en'>Research</span><span class='lang-zh'>学术研究</span></span></a>
+          <a class='wire-item is-link' href={withBase('/#projects')}><span class='wire-dot'>·</span><span class='wire-handle'>macOS Tools</span><span class='wire-role'><span class='lang-en'>Native efficiency</span><span class='lang-zh'>原生效率</span></span></a>
+          <a class='wire-item is-link' href={withBase('/#projects')}><span class='wire-dot'>·</span><span class='wire-handle'>Android Apps</span><span class='wire-role'><span class='lang-en'>Mobile</span><span class='lang-zh'>移动端</span></span></a>
           <a class='wire-item is-link' href={withBase('/article/open-design-to-skill/')}><span class='wire-dot'>·</span><span class='wire-handle'>Latest Notes</span><span class='wire-role'>Design Skill</span></a>
           <a class='wire-item is-link' href={withBase('/article/vibe-coding-3-days/')}><span class='wire-dot'>·</span><span class='wire-handle'>@citygenius</span><span class='wire-role'>Vibe Coding</span></a>
         </div></div>
@@ -1072,25 +1080,25 @@ const categoryCounts = {
     <div class='container'>
       <div class='sec-rule'>
         <span class='roman'>II.</span>
-        <span class='meta-grp'><span>关于 / About</span><span class='dot-mark'>•</span><span>CityGenius / 个人简介</span></span>
+        <span class='meta-grp'><span class='lang-en'>About</span><span class='lang-zh'>关于 / About</span><span class='dot-mark'>•</span><span><span class='lang-en'>CityGenius / Profile</span><span class='lang-zh'>CityGenius / 个人简介</span></span></span>
         <span>002 / 006</span>
       </div>
       <div class='about-grid'>
         <div class='about-copy' data-reveal>
-          <span class='label'>关于我 <span class='ix'>· Nº 02</span></span>
-          <h2 class='display'>一个相信 <em>代码即表达</em> 的大学生<span class='dot'>.</span></h2>
-          <p class='lead'>我是 CityGenius，一名在校大学生，热爱 Vibe Coding，用代码将灵感快速变为可用的产品。我相信最好的学习方式是动手做，每个项目都是一次从 0 到 1 的探索。</p>
-          <p class='lead' style='font-size:16px;'>从 Python 全栈开发到 Swift 原生应用，从 Kotlin Android 开发到 AI 模型集成，我享受在不同技术栈之间切换的乐趣。这个博客记录我的开发历程、技术思考和踩坑经验。</p>
+          <span class='label'><span class='lang-en'>About me</span><span class='lang-zh'>关于我</span> <span class='ix'>· Nº 02</span></span>
+          <h2 class='display'><span class='lang-en'>A student who believes <em>code is expression</em><span class='dot'>.</span></span><span class='lang-zh'>一个相信 <em>代码即表达</em> 的大学生<span class='dot'>.</span></span></h2>
+          <p class='lead'><span class='lang-en'>I'm CityGenius, a college student who loves Vibe Coding — turning sparks of ideas into working products fast. I learn best by building; every project is a zero-to-one exploration.</span><span class='lang-zh'>我是 CityGenius，一名在校大学生，热爱 Vibe Coding，用代码将灵感快速变为可用的产品。我相信最好的学习方式是动手做，每个项目都是一次从 0 到 1 的探索。</span></p>
+          <p class='lead' style='font-size:16px;'><span class='lang-en'>From Python full-stack to Swift native apps, from Kotlin Android to AI model integration — I enjoy jumping between stacks. This blog documents my builds, my thinking, and the pits I fell into along the way.</span><span class='lang-zh'>从 Python 全栈开发到 Swift 原生应用，从 Kotlin Android 开发到 AI 模型集成，我享受在不同技术栈之间切换的乐趣。这个博客记录我的开发历程、技术思考和踩坑经验。</span></p>
           <div class='footer-row'>
             <span class='mark'>C</span>
-            <span>全栈开发 · AI 应用 · 移动端</span>
-            <span class='stamp'><span>持续探索中</span><span style='color: var(--ink);'>Est. 2024</span></span>
+            <span><span class='lang-en'>Full-stack · AI apps · Mobile</span><span class='lang-zh'>全栈开发 · AI 应用 · 移动端</span></span>
+            <span class='stamp'><span><span class='lang-en'>Still exploring</span><span class='lang-zh'>持续探索中</span></span><span style='color: var(--ink);'>Est. 2024</span></span>
           </div>
         </div>
         <div class='about-art' data-reveal='right'>
           <img src={assetUrl('about.webp')} alt='CityGenius about artwork' width='1254' height='1254' loading='lazy' decoding='async' />
-          <div class='about-side-note'><b></b>从 Python 到 Swift，<br/>从 Android 到 AI，<br/>把不同技术栈<br/>连接成一个持续演化的<br/>个人实验室。</div>
-          <div class='about-caption'><b>全栈开发 · AI 应用 · 移动端.</b>(CityGenius, MMXXVI)</div>
+          <div class='about-side-note'><b></b><span class='lang-en'>From Python to Swift,<br/>from Android to AI —<br/>wiring different stacks<br/>into one evolving<br/>personal lab.</span><span class='lang-zh'>从 Python 到 Swift，<br/>从 Android 到 AI，<br/>把不同技术栈<br/>连接成一个持续演化的<br/>个人实验室。</span></div>
+          <div class='about-caption'><b><span class='lang-en'>Full-stack · AI apps · Mobile.</span><span class='lang-zh'>全栈开发 · AI 应用 · 移动端.</span></b>(CityGenius, MMXXVI)</div>
         </div>
       </div>
     </div>
@@ -1101,7 +1109,7 @@ const categoryCounts = {
     <div class='container'>
       <div class='sec-rule'>
         <span class='roman'>III.</span>
-        <span class='meta-grp'><span>项目 / Projects</span><span class='dot-mark'>•</span><span>3 个在研项目</span></span>
+        <span class='meta-grp'><span class='lang-en'>Projects</span><span class='lang-zh'>项目 / Projects</span><span class='dot-mark'>•</span><span><span class='lang-en'>3 projects in progress</span><span class='lang-zh'>3 个在研项目</span></span></span>
         <span>003 / 006</span>
       </div>
       <div class='capabilities-grid'>
@@ -1111,14 +1119,14 @@ const categoryCounts = {
           <div class='ribbon'><b>CITYGENIUS</b> &nbsp;·&nbsp; PROJECTS MATRIX &nbsp;·&nbsp; 2026</div>
         </div>
         <div class='capabilities-copy' data-reveal>
-          <span class='label'>项目展示 <span class='ix'>· Nº 03</span></span>
-          <h2 class='display'>每个项目，都是一次 <em>从零到一</em> 的探索<span class='dot'>.</span></h2>
-          <p class='lead'>从学术研究工具到生产力应用，用代码解决真实问题。</p>
+          <span class='label'><span class='lang-en'>Projects</span><span class='lang-zh'>项目展示</span> <span class='ix'>· Nº 03</span></span>
+          <h2 class='display'><span class='lang-en'>Every project is a <em>zero-to-one</em> exploration<span class='dot'>.</span></span><span class='lang-zh'>每个项目，都是一次 <em>从零到一</em> 的探索<span class='dot'>.</span></span></h2>
+          <p class='lead'><span class='lang-en'>From research tools to productivity apps — solving real problems with code.</span><span class='lang-zh'>从学术研究工具到生产力应用，用代码解决真实问题。</span></p>
           <div class='cards'>
-            <div class='card' data-reveal><div class='num'>01<span class='tag'>Full-Stack · AI</span></div><h3>Scholar AI</h3><p>学术研究辅助工具，利用 AI 帮助研究者高效检索、整理和分析学术文献。支持多语言翻译和智能摘要。</p></div>
-            <div class='card' data-reveal><div class='num'>02<span class='tag'>macOS · Native</span></div><h3>macOS 原生工具</h3><p>为 macOS 打造的效率工具，利用原生 API 提供流畅体验，深度整合系统功能，追求交互细节。</p></div>
-            <div class='card' data-reveal><div class='num'>03<span class='tag'>Android · Apps</span></div><h3>Android 应用集</h3><p>多个 Android 应用项目，覆盖文件格式转换、AI 图片处理、多语言翻译等功能，兼顾美感与实用性。</p></div>
-            <div class='card' data-reveal><div class='num'>Stack<span class='tag'>Core</span></div><h3>技术栈</h3><p>Python / FastAPI / React / Swift / AppKit / Kotlin / Jetpack Compose / TFLite / RAG.</p></div>
+            <div class='card' data-reveal><div class='num'>01<span class='tag'>Full-Stack · AI</span></div><h3>Scholar AI</h3><p><span class='lang-en'>A research companion that helps scholars search, organize, and analyze papers with AI. Multilingual translation and smart summaries included.</span><span class='lang-zh'>学术研究辅助工具，利用 AI 帮助研究者高效检索、整理和分析学术文献。支持多语言翻译和智能摘要。</span></p></div>
+            <div class='card' data-reveal><div class='num'>02<span class='tag'>macOS · Native</span></div><h3><span class='lang-en'>macOS Native Tools</span><span class='lang-zh'>macOS 原生工具</span></h3><p><span class='lang-en'>Efficiency tools built for macOS — native APIs, buttery interactions, deep system integration.</span><span class='lang-zh'>为 macOS 打造的效率工具，利用原生 API 提供流畅体验，深度整合系统功能，追求交互细节。</span></p></div>
+            <div class='card' data-reveal><div class='num'>03<span class='tag'>Android · Apps</span></div><h3><span class='lang-en'>Android App Collection</span><span class='lang-zh'>Android 应用集</span></h3><p><span class='lang-en'>A collection of Android apps: file conversion, on-device AI imaging, multilingual translation — pretty and practical.</span><span class='lang-zh'>多个 Android 应用项目，覆盖文件格式转换、AI 图片处理、多语言翻译等功能，兼顾美感与实用性。</span></p></div>
+            <div class='card' data-reveal><div class='num'>Stack<span class='tag'>Core</span></div><h3><span class='lang-en'>Stack</span><span class='lang-zh'>技术栈</span></h3><p>Python / FastAPI / React / Swift / AppKit / Kotlin / Jetpack Compose / TFLite / RAG.</p></div>
           </div>
         </div>
       </div>
@@ -1130,15 +1138,15 @@ const categoryCounts = {
     <div class='container'>
       <div class='sec-rule'>
         <span class='roman'>IV.</span>
-        <span class='meta-grp'><span>文章 / Articles</span><span class='dot-mark'>•</span><span>开发笔记</span></span>
+        <span class='meta-grp'><span data-i18n='home.articlesLabel'>Articles</span><span class='dot-mark'>•</span><span data-i18n='home.articlesNote'>Dev notes</span></span>
         <span>004 / 006</span>
       </div>
       <div class='labs-head'>
         <div data-reveal>
-          <span class='label'>写作索引 <span class='ix'>· Nº 04</span></span>
-          <h2 class='display' style='margin-top:30px;'>从实践中<em>提炼</em>，在代码里<em>发现</em><span class='dot'>.</span></h2>
+          <span class='label'><span data-i18n='home.writingIndex'>Writing index</span> <span class='ix'>· Nº 04</span></span>
+          <h2 class='display' style='margin-top:30px;'><span data-i18n='home.writingTitle'>Distilled from <em>practice</em>, discovered in <em>code</em></span><span class='dot'>.</span></h2>
         </div>
-        <div class='pills' data-reveal='right' role='tablist' aria-label='文章分类'>
+        <div class='pills' data-reveal='right' role='tablist' aria-label='Filter articles'>
           <button class='pill active' type='button' data-filter='all' aria-pressed='true'>All<span class='count'>{String(categoryCounts.all).padStart(2, '0')}</span></button>
           <button class='pill' type='button' data-filter='ai' aria-pressed='false'>AI<span class='count'>{String(categoryCounts.ai).padStart(2, '0')}</span></button>
           <button class='pill' type='button' data-filter='macos' aria-pressed='false'>macOS<span class='count'>{String(categoryCounts.macos).padStart(2, '0')}</span></button>
@@ -1148,7 +1156,7 @@ const categoryCounts = {
       </div>
       <div class='labs-meta'>
         <span class='ring' data-labs-count>{String(categoryCounts.all).padStart(2, '0')}</span>
-        <div class='meta-text'><b>Latest notes</b>技术博客 · 项目复盘<br/>AI 工具链 · 设计思考<br/>持续沉淀</div>
+        <div class='meta-text' data-i18n='home.latestNotes'><b>Latest notes</b>Tech blog · project retrospectives<br/>AI tooling · design thinking<br/>Ongoing notes</div>
       </div>
       <div class='labs-grid'>
         {sortedPosts.map((post) => (
@@ -1158,8 +1166,9 @@ const categoryCounts = {
               <img src={assetUrl(post.data.image)} alt={post.data.imageAlt} width={post.data.imageWidth} height={post.data.imageHeight} loading='lazy' decoding='async' />
             </div>
             <div class='num-row'><span>{post.data.date}</span><span>{post.data.category}</span></div>
-            <h4>{post.data.title}</h4>
-            <p>{post.data.description}</p>
+            <h4><span class='lang-en'>{enTitleOf(post)}</span><span class='lang-zh'>{post.data.title}</span></h4>
+            <p class='lang-en'>{enDescOf(post)}</p>
+            <p class='lang-zh'>{post.data.description}</p>
             <a class='arrow-mark' href={withBase(`/article/${post.id}/`)} aria-label='Open article'>
               <svg viewBox='0 0 24 24'><path d='M5 19L19 5M19 5H8M19 5v11'/></svg>
             </a>
@@ -1174,28 +1183,28 @@ const categoryCounts = {
     <div class='container'>
       <div class='sec-rule'>
         <span class='roman'>V.</span>
-        <span class='meta-grp'><span>精选 / Featured</span><span class='dot-mark'>•</span><span>编辑推荐</span></span>
+        <span class='meta-grp'><span class='lang-en'>Featured</span><span class='lang-zh'>精选 / Featured</span><span class='dot-mark'>•</span><span><span class='lang-en'>Editor's picks</span><span class='lang-zh'>编辑推荐</span></span></span>
         <span>005 / 006</span>
       </div>
       <div class='method-head'>
         <div data-reveal>
-          <span class='label'>精选文章 <span class='ix'>· Nº 05</span></span>
-          <h2 class='display' style='margin-top:30px;'>从 <em>项目</em> 到 <em>方法</em><span class='dot'>.</span></h2>
+          <span class='label'><span class='lang-en'>Featured</span><span class='lang-zh'>精选文章</span> <span class='ix'>· Nº 05</span></span>
+          <h2 class='display' style='margin-top:30px;'><span class='lang-en'>From <em>projects</em> to <em>method</em><span class='dot'>.</span></span><span class='lang-zh'>从 <em>项目</em> 到 <em>方法</em><span class='dot'>.</span></span></h2>
         </div>
         <div class='right' data-reveal='right'>
           <span class='plus'>+</span>
-          <p>精选一篇主文，和两条延伸阅读。</p>
+          <p><span class='lang-en'>One feature piece, plus further reading.</span><span class='lang-zh'>精选一篇主文，和两条延伸阅读。</span></p>
         </div>
       </div>
       <div class='method-grid'>
-        <div class='method-step' data-reveal><div class='num'>01</div><h4>主文</h4><p>用 Vibe Coding 三天搞定一个全栈 AI 应用，从需求描述到 MVP 上线的完整记录。</p><div class='img'><img src={assetUrl('method-1.webp')} alt='' width='1254' height='1254' loading='lazy' decoding='async' /></div></div>
-        <div class='method-step' data-reveal><div class='num'>02</div><h4>心得</h4><p>不要一次描述整个页面。拆成小组件、逐个约束，AI 的输出质量会明显提升。</p><div class='img'><img src={assetUrl('method-2.webp')} alt='' width='1254' height='1254' loading='lazy' decoding='async' /></div></div>
-        <div class='method-step' data-reveal><div class='num'>03</div><h4>限制</h4><p>复杂业务逻辑、性能关键路径、底层机制理解，仍然需要开发者亲自把关与修正。</p><div class='img'><img src={assetUrl('method-3.webp')} alt='' width='1254' height='1254' loading='lazy' decoding='async' /></div></div>
-        <div class='method-step' data-reveal><div class='num'>04</div><h4>延伸</h4><p>继续把这种开发方法迁移到 macOS 原生工具、Android 应用和本地 AI 集成场景里。</p><div class='img'><img src={assetUrl('method-4.webp')} alt='' width='1254' height='1254' loading='lazy' decoding='async' /></div></div>
+        <div class='method-step' data-reveal><div class='num'>01</div><h4><span class='lang-en'>Feature</span><span class='lang-zh'>主文</span></h4><p><span class='lang-en'>Shipping a full-stack AI app in 3 days with Vibe Coding — the full log from spec to MVP.</span><span class='lang-zh'>用 Vibe Coding 三天搞定一个全栈 AI 应用，从需求描述到 MVP 上线的完整记录。</span></p><div class='img'><img src={assetUrl('method-1.webp')} alt='' width='1254' height='1254' loading='lazy' decoding='async' /></div></div>
+        <div class='method-step' data-reveal><div class='num'>02</div><h4><span class='lang-en'>Takeaway</span><span class='lang-zh'>心得</span></h4><p><span class='lang-en'>Don't describe the whole page at once. Break it into small components with tight constraints — output quality jumps.</span><span class='lang-zh'>不要一次描述整个页面。拆成小组件、逐个约束，AI 的输出质量会明显提升。</span></p><div class='img'><img src={assetUrl('method-2.webp')} alt='' width='1254' height='1254' loading='lazy' decoding='async' /></div></div>
+        <div class='method-step' data-reveal><div class='num'>03</div><h4><span class='lang-en'>Limits</span><span class='lang-zh'>限制</span></h4><p><span class='lang-en'>Complex business logic, perf-critical paths, deep mechanism understanding — still needs a human in the loop.</span><span class='lang-zh'>复杂业务逻辑、性能关键路径、底层机制理解，仍然需要开发者亲自把关与修正。</span></p><div class='img'><img src={assetUrl('method-3.webp')} alt='' width='1254' height='1254' loading='lazy' decoding='async' /></div></div>
+        <div class='method-step' data-reveal><div class='num'>04</div><h4><span class='lang-en'>Next</span><span class='lang-zh'>延伸</span></h4><p><span class='lang-en'>Carrying this approach into macOS native tools, Android apps, and on-device AI.</span><span class='lang-zh'>继续把这种开发方法迁移到 macOS 原生工具、Android 应用和本地 AI 集成场景里。</span></p><div class='img'><img src={assetUrl('method-4.webp')} alt='' width='1254' height='1254' loading='lazy' decoding='async' /></div></div>
       </div>
       <div class='method-foot'>
-        <div class='left'><span class='ring'></span><span>项目驱动学习，内容反哺项目。</span></div>
-        <div class='right'><a href={withBase('/article/vibe-coding-3-days/')}>阅读全文</a></div>
+        <div class='left'><span class='ring'></span><span><span class='lang-en'>Projects drive learning; writing feeds back into projects.</span><span class='lang-zh'>项目驱动学习，内容反哺项目。</span></span></div>
+        <div class='right'><a href={withBase('/article/vibe-coding-3-days/')}><span class='lang-en'>Read the full piece</span><span class='lang-zh'>阅读全文</span></a></div>
       </div>
     </div>
   </section>
@@ -1206,29 +1215,29 @@ const categoryCounts = {
       <div class='work-rule'>
         <span class='roman'>VI.</span>
         <span style='display:inline-flex;gap:24px;'>
-          <span>联系 / Contact</span>
+          <span class='lang-en'>Contact</span><span class='lang-zh'>联系 / Contact</span>
           <span style='color:var(--coral);'>•</span>
-          <span>开始对话</span>
+          <span><span class='lang-en'>Start a conversation</span><span class='lang-zh'>开始对话</span></span>
         </span>
         <span>006 / 006</span>
       </div>
       <div class='work-grid'>
         <div class='work-copy' data-reveal>
-          <span class='label'>联系方式</span>
-          <h2>一起 build 点 <em>什么</em><span class='dot'>.</span></h2>
-          <a class='work-link' href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>GitHub 主页</a>
+          <span class='label'><span class='lang-en'>Contact</span><span class='lang-zh'>联系方式</span></span>
+          <h2><span class='lang-en'>Let's build <em>something</em> together<span class='dot'>.</span></span><span class='lang-zh'>一起 build 点 <em>什么</em><span class='dot'>.</span></span></h2>
+          <a class='work-link' href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'><span class='lang-en'>GitHub profile</span><span class='lang-zh'>GitHub 主页</span></a>
         </div>
         <a class='work-card' data-reveal href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>
           <div class='label-row'><span class='small-label'>Primary</span><span class='index'>GitHub</span></div>
           <h3>@37chengshan</h3>
-          <p>对我的项目感兴趣？想交流 Vibe Coding 的经验？或者只是想聊聊技术？这里是最直接的入口。</p>
+          <p><span class='lang-en'>Into my projects? Want to trade Vibe Coding notes? Or just talk tech? This is the front door.</span><span class='lang-zh'>对我的项目感兴趣？想交流 Vibe Coding 的经验？或者只是想聊聊技术？这里是最直接的入口。</span></p>
           <div class='img'><img src={assetUrl('work-1.webp')} alt='' width='889' height='1770' loading='lazy' decoding='async' /></div>
           <div class='meta-row'><span class='year'>Open Source</span><span>Always On</span></div>
         </a>
         <a class='work-card alt' data-reveal href='mailto:hello@citygenius.dev'>
           <div class='label-row'><span class='small-label'>Secondary</span><span class='index'>Email</span></div>
           <h3>hello@citygenius.dev</h3>
-          <p>如果你想合作、提建议，或者只是想继续深入聊某个项目，邮件会更适合展开。</p>
+          <p><span class='lang-en'>For collabs, suggestions, or a deeper thread on any project — email gives us more room.</span><span class='lang-zh'>如果你想合作、提建议，或者只是想继续深入聊某个项目，邮件会更适合展开。</span></p>
           <div class='img'><img src={assetUrl('work-2.webp')} alt='' width='941' height='1672' loading='lazy' decoding='async' /></div>
           <div class='meta-row'><span class='year'>Direct</span><span>Reply</span></div>
         </a>
@@ -1241,14 +1250,14 @@ const categoryCounts = {
     <div class='container'>
       <div class='cta-grid'>
         <div data-reveal>
-          <span class='label'>保持联系 <span class='ix'>· CityGenius</span></span>
-          <h2 class='display'>把 <em>想法</em> 继续做成 <em>作品</em><span class='dot'>.</span></h2>
-          <p class='lead'>欢迎从 GitHub 或邮件找我，聊项目、聊技术都行。</p>
+          <span class='label'><span class='lang-en'>Stay in touch</span><span class='lang-zh'>保持联系</span> <span class='ix'>· CityGenius</span></span>
+          <h2 class='display'><span class='lang-en'>Turn <em>ideas</em> into <em>work</em><span class='dot'>.</span></span><span class='lang-zh'>把 <em>想法</em> 继续做成 <em>作品</em><span class='dot'>.</span></span></h2>
+          <p class='lead'><span class='lang-en'>Find me on GitHub or by email — projects, tech, anything.</span><span class='lang-zh'>欢迎从 GitHub 或邮件找我，聊项目、聊技术都行。</span></p>
           <div class='cta-actions'>
-            <a class='btn btn-primary' href={withBase('/article/vibe-coding-3-days/')}>阅读全文<span class='arrow'><svg viewBox='0 0 24 24'><path d='M5 19L19 5M19 5H8M19 5v11'/></svg></span></a>
-            <a class='email-pill' href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>访问 GitHub<span class='arrow-circle'>→</span></a>
+            <a class='btn btn-primary' href={withBase('/article/vibe-coding-3-days/')}><span class='lang-en'>Read the feature</span><span class='lang-zh'>阅读全文</span><span class='arrow'><svg viewBox='0 0 24 24'><path d='M5 19L19 5M19 5H8M19 5v11'/></svg></span></a>
+            <a class='email-pill' href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'><span class='lang-en'>Visit GitHub</span><span class='lang-zh'>访问 GitHub</span><span class='arrow-circle'>→</span></a>
           </div>
-          <div class='cta-foot'><span class='stamp'>● Live</span><span>CityGenius Blog / 2026</span><span style='margin-left:auto;'>Vibe Coding · 全栈 · AI</span></div>
+          <div class='cta-foot'><span class='stamp'>● Live</span><span>CityGenius Blog / 2026</span><span style='margin-left:auto;'><span class='lang-en'>Vibe Coding · Full-stack · AI</span><span class='lang-zh'>Vibe Coding · 全栈 · AI</span></span></div>
         </div>
         <div class='cta-art' data-reveal='right'>
           <img src={assetUrl('cta.webp')} alt='CityGenius closing artwork' width='1254' height='1254' loading='lazy' decoding='async' />

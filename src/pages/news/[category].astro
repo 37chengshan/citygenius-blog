@@ -4,8 +4,8 @@ import NewsStyles from '../../components/NewsStyles.astro';
 import { withBase } from '../../lib/url';
 import { NEWS_CATS } from '../../lib/news-cats.js';
 import { readFileSync } from 'node:fs';
-import { staticCategory, itemListSchema, slugFor, snapUpdated } from '../../lib/news-render.js';
-import { illusFor, articlePath } from '../../lib/news-shared.js';
+import { staticCategory, itemListSchema, slugFor, snapUpdated, catNavHtml, totalHtml } from '../../lib/news-render.js';
+import { illusFor, articlePath, catLabel } from '../../lib/news-shared.js';
 
 export function getStaticPaths() {
   return NEWS_CATS.map((c) => ({ params: { category: c.id } }));
@@ -40,20 +40,23 @@ try {
 }
 const snap = staticCategory(category, snapItems, meta.pal, linkArt);
 const heroIllus = illusFor('hero-' + category, meta.pal, true);
+const catL = catLabel(category) || {};
+const catEn = catL.en || meta.label;
+const catDescEn = catL.descEn || meta.desc;
 
 const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: meta.label + ' — 新闻速览 — CityGenius Blog',
-  description: meta.desc + '，每日更新两次，突发新闻即时跟进。',
-  inLanguage: 'zh-CN',
-  mainEntity: itemListSchema(meta.label, snapItems),
+  name: catEn + ' — News Digest — CityGenius Blog',
+  description: catDescEn + '. Updated twice daily, breaking news as it happens.',
+  inLanguage: 'en',
+  mainEntity: itemListSchema(meta.label, snapItems, catEn),
 };
 ---
 
 <BaseLayout
-  title={meta.label + ' — 新闻速览 — CityGenius Blog'}
-  description={meta.desc + '，每日更新两次，突发新闻即时跟进。'}
+  title={catEn + ' — News Digest — CityGenius Blog'}
+  description={catDescEn + '. Updated twice daily, breaking news as it happens.'}
 >
   <Fragment slot="head">
     <NewsStyles />
@@ -63,15 +66,15 @@ const pageSchema = {
   <main class="container" id="top">
     <section class="tight news-page">
       <div class="sec-rule">
-        <span class="crumb"><a href={hubHref}><span class="roman">News</span></a> · {meta.label}</span>
-        <span class="meta-grp"><span id="news-updated">{snapUpdatedText}</span><span class="dot-mark">●</span><span id="news-count"></span></span>
+        <span class="crumb"><a href={hubHref}><span class="roman">News</span></a> · <span class="lang-en">{catEn}</span><span class="lang-zh">{meta.label}</span></span>
+        <span class="meta-grp"><span id="news-updated" set:html={snapUpdatedText} /><span class="dot-mark">●</span><span id="news-count" set:html={totalHtml(snapItems.length)} /></span>
       </div>
 
       <div class="cat-hero">
         <div class="cat-hero-copy">
           <span class="module-ix">{pad(ix + 1)}</span>
-          <h1>{meta.label}</h1>
-          <p class="cat-desc">{meta.desc}</p>
+          <h1><span class="lang-en">{catEn}</span><span class="lang-zh">{meta.label}</span></h1>
+          <p class="cat-desc"><span class="lang-en">{catDescEn}</span><span class="lang-zh">{meta.desc}</span></p>
         </div>
         <div class="cat-hero-illus" id="cat-hero-illus" aria-hidden="true" set:html={heroIllus} />
       </div>
@@ -79,11 +82,7 @@ const pageSchema = {
       <div id="news-feat" set:html={snap.feat} />
       <div class="bento" id="news-grid" style="margin-top: 18px;" set:html={snap.grid} />
 
-      <nav class="cat-nav" aria-label="板块导航">
-        <a href={prevHref}>← {prev.label}</a>
-        <a href={hubHref}>全部板块</a>
-        <a href={nextHref}>{next.label} →</a>
-      </nav>
+      <Fragment set:html={catNavHtml(prevHref, prev.id, hubHref, nextHref, next.id)} />
     </section>
   </main>
 
@@ -108,38 +107,44 @@ const pageSchema = {
         function illus(seed, wide) {
           return NS ? NS.illusFor(seed, pal, wide) : '';
         }
-        function dateLine(pub, src) {
-          var dp = NS ? NS.dateParts(pub) : null;
+        function dateLineOne(pub, src, lang) {
+          var dp = NS ? NS.dateParts(pub, lang) : null;
           if (!pub || !dp) {
             return '<div class="date-line"><span class="src">' + esc(src || '') + '</span></div>';
           }
-          var rel = NS ? NS.relTime(pub) : '';
-          return '<div class="date-line" title="' + esc(NS ? NS.fullTime(pub) : '') + '">'
+          var rel = NS ? NS.relTime(pub, lang) : '';
+          return '<div class="date-line" title="' + esc(NS ? NS.fullTime(pub, lang) : '') + '">'
             + '<span class="date-badge">' + esc(dp.date) + '</span>'
             + '<span class="week">' + esc(dp.week) + ' · ' + esc(dp.hm) + '</span>'
             + (rel ? '<span class="rel">' + esc(rel) + '</span>' : '')
             + '<span class="src">' + esc(src || '') + '</span>'
             + '</div>';
         }
+        function dateLine(pub, src) {
+          return '<div class="lang-en">' + dateLineOne(pub, src, 'en') + '</div>'
+            + '<div class="lang-zh">' + dateLineOne(pub, src, 'zh') + '</div>';
+        }
 
         function cardBody(it, tag) {
-          var enTitle = (it.en_title && it.en_title !== (it.zh_title || it.title))
-            ? '<div class="en-title">' + esc(it.en_title) + '</div>'
-            : '';
+          var zhTitle = it.zh_title || it.title || '';
+          var enTitle = it.title || '';
+          var zhSum = it.zh_summary || '';
+          var enSum = it.summary || '';
           var take = it.zh_take
-            ? '<div class="take"><b>解读</b>' + esc(it.zh_take) + '</div>'
+            ? '<div class="take"><b><span class="lang-en">Editor\'s take</span><span class="lang-zh">解读</span></b>' + esc(it.zh_take) + '</div>'
             : '';
-          var enSum = it.en_summary
-            ? '<p class="en-sum">' + esc(it.en_summary) + '</p>'
-            : '';
-          var zh = it.zh_summary || it.summary || '';
           return '<div class="card-body">'
-            + '<' + tag + '>' + esc(it.zh_title || it.title) + '</' + tag + '>'
-            + enTitle
-            + dateLine(it.published, it.source)
-            + (zh ? '<p>' + esc(zh) + '</p>' : '')
+            + '<div class="lang-en">'
+            + '<' + tag + '>' + esc(enTitle) + '</' + tag + '>'
+            + dateLineOne(it.published, it.source, 'en')
+            + (enSum ? '<p>' + esc(enSum) + '</p>' : '')
+            + '</div>'
+            + '<div class="lang-zh">'
+            + '<' + tag + '>' + esc(zhTitle) + '</' + tag + '>'
+            + dateLineOne(it.published, it.source, 'zh')
+            + (zhSum ? '<p>' + esc(zhSum) + '</p>' : '')
             + take
-            + enSum
+            + '</div>'
             + '</div>';
         }
         function featCard(it) {
@@ -160,8 +165,19 @@ const pageSchema = {
             + '<div class="illus">' + illus(it.link || it.title, false) + '</div>'
             + cardBody(it, 'h3') + '</a>';
         }
-        function dayDiv(dp) {
-          return '<div class="day-div"><span>' + esc(dp.date) + ' ' + esc(dp.week) + '</span></div>';
+        function dayDiv(iso) {
+          var zen = NS ? NS.dateParts(iso, 'en') : null;
+          var zzh = NS ? NS.dateParts(iso, 'zh') : (NS ? NS.dateParts(iso) : null);
+          var en = zen ? zen.date + ' ' + zen.week : '';
+          var zh = zzh ? zzh.date + ' ' + zzh.week : '';
+          return '<div class="day-div"><span><span class="lang-en">' + esc(en) + '</span>'
+            + '<span class="lang-zh">' + esc(zh) + '</span></span></div>';
+        }
+
+        function applyLang() {
+          if (window.__cg && window.__cg.applyI18n) {
+            window.__cg.applyI18n(document.documentElement.dataset.lang || 'en');
+          }
         }
 
         function render(data) {
@@ -174,19 +190,23 @@ const pageSchema = {
             }
           }
           var items = (c && c.items) || [];
-          if (countEl) countEl.textContent = '共 ' + items.length + ' 条';
+          if (countEl) countEl.innerHTML = '<span class="lang-en">' + items.length + ' stories</span><span class="lang-zh">共 ' + items.length + ' 条</span>';
           if (updatedEl && data && data.generated_at) {
             var g = data.generated_at;
-            var dp = NS ? NS.dateParts(g) : null;
-            var rel = NS ? NS.relTime(g) : '';
-            updatedEl.textContent = dp
-              ? '数据更新于 ' + dp.date + ' ' + dp.week + ' ' + dp.hm + (rel ? ' · ' + rel : '')
-              : '数据更新于 ' + g;
+            var dpe = NS ? NS.dateParts(g, 'en') : null;
+            var dpz = NS ? NS.dateParts(g, 'zh') : (NS ? NS.dateParts(g) : null);
+            var relE = NS ? NS.relTime(g, 'en') : '';
+            var relZ = NS ? NS.relTime(g, 'zh') : '';
+            updatedEl.innerHTML = dpe
+              ? '<span class="lang-en">Updated ' + esc(dpe.date) + ', ' + esc(dpe.week) + ' ' + esc(dpe.hm) + (relE ? ' · ' + esc(relE) : '') + '</span>'
+                + '<span class="lang-zh">数据更新于 ' + esc(dpz.date) + ' ' + esc(dpz.week) + ' ' + esc(dpz.hm) + (relZ ? ' · ' + esc(relZ) : '') + '</span>'
+              : 'Updated ' + esc(g);
           }
           if (heroIllusEl && NS) heroIllusEl.innerHTML = NS.illusFor('hero-' + catId, pal, true);
           if (!items.length) {
             if (!featEl.innerHTML.trim() && !gridEl.innerHTML.trim()) {
-              gridEl.innerHTML = '<div class="news-empty">这个板块的新闻正在抓取，稍后再来看看。</div>';
+              gridEl.innerHTML = '<div class="news-empty"><span data-i18n="news.load_fail">Couldn\'t load the news — try again later.</span></div>';
+              applyLang();
             }
             return;
           }
@@ -198,13 +218,14 @@ const pageSchema = {
             var dp2 = NS ? NS.dateParts(items[i].published) : null;
             var dk = dp2 ? dp2.key : '';
             if (dk && dk !== lastDay) {
-              html += dayDiv(dp2);
+              html += dayDiv(items[i].published);
               lastDay = dk;
             }
             var sp = SPANS[(i - 1) % SPANS.length];
             html += bentoCard(items[i], sp + (sp === 'wide' ? '' : i % 2 === 0 ? ' off' : ''));
           }
           gridEl.innerHTML = html;
+          applyLang();
         }
         function load() {
           fetch(newsUrl + '?t=' + Date.now(), { cache: 'no-store' })
@@ -212,7 +233,8 @@ const pageSchema = {
             .then(render)
             .catch(function () {
               if (!gridEl.innerHTML.trim() && !featEl.innerHTML.trim()) {
-                gridEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
+                gridEl.innerHTML = '<div class="news-empty"><span data-i18n="news.load_fail">Couldn\'t load the news — try again later.</span></div>';
+                applyLang();
               }
             });
         }
