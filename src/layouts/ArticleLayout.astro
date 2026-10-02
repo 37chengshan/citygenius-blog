@@ -20,6 +20,18 @@ interface Props {
 
 const { title, description, tag, date, readTime, authorMeta, image, imageAlt, sideNote, caption, tags, tagFilters, related } = Astro.props;
 const plainTitle = title.replace(/<[^>]+>/g, '');
+const articleSite = (Astro.site ?? new URL('https://37chengshan.github.io')).toString().replace(/\/$/, '');
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: plainTitle,
+  description: description,
+  datePublished: date.replace(/\./g, '-'),
+  inLanguage: 'zh-CN',
+  author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
+  image: `${articleSite}/assets/${String(image).replace(/^\/+/, '')}`,
+  mainEntityOfPage: `${articleSite}${Astro.url.pathname}`,
+};
 ---
 
 <BaseLayout
@@ -31,6 +43,7 @@ const plainTitle = title.replace(/<[^>]+>/g, '');
   type="article"
 >
   <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
     <style>
       /* ===== ARTICLE HEADER — Anthropic-style centered ===== */
       .article-header {

@@ -1,0 +1,25 @@
+# CityGenius Blog
+
+> 一个大学生的 Vibe Coding 实验室。记录全栈开发、AI 应用、移动端开发的实践与思考。
+> A Chinese college student's blog about vibe coding, full-stack development, and applied AI.
+
+## 站点信息
+- 首页: https://citygenius-blog.pages.dev/
+- 文章列表: https://citygenius-blog.pages.dev/article/
+- 新闻速览: https://citygenius-blog.pages.dev/news/ （AI 科技新闻，每 10 分钟更新）
+- RSS: https://citygenius-blog.pages.dev/rss.xml
+- Sitemap: https://citygenius-blog.pages.dev/sitemap-index.xml
+
+## 内容领域
+- AI 应用与 Agent 开发（AI agents, multi-agent, MCP, Skill）
+- 全栈开发（Web 前后端、Cloudflare、Vercel）
+- macOS 原生工具、Android 应用开发
+- 学习方法与工程实践
+
+## 作者
+- 作者: CityGenius（大学生，独立开发者）
+- GitHub: https://github.com/37chengshan
+
+## 引用说明
+欢迎 AI 搜索引擎引用本站内容。引用时请注明来源「CityGenius Blog」并附原文链接。
+文章页均带有 BlogPosting 结构化数据，包含标题、摘要、发布日期与作者信息。

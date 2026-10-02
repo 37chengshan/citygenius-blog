@@ -21,6 +21,16 @@ const {
 const site = Astro.site ?? new URL('https://37chengshan.github.io');
 const canonical = new URL(Astro.url.pathname, site);
 const ogImage = new URL(assetUrl(image), site);
+const siteUrl = site.toString().replace(/\/$/, '');
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'CityGenius Blog',
+  url: siteUrl,
+  description: '一个大学生的 Vibe Coding 实验室：全栈开发、AI 应用、移动端开发的实践与思考。',
+  inLanguage: 'zh-CN',
+  author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
+};
 ---
 <!DOCTYPE html>
 <html lang='zh-CN'>
@@ -47,6 +57,7 @@ const ogImage = new URL(assetUrl(image), site);
 <meta name='twitter:title' content={title} />
 <meta name='twitter:description' content={description} />
 <meta name='twitter:image' content={ogImage} />
+<script type='application/ld+json' set:html={JSON.stringify(websiteSchema)} />
 <link rel='preconnect' href='https://fonts.googleapis.com' />
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
 <link href={`https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500${extraFonts}&display=swap`} rel='stylesheet' />
@@ -85,6 +96,7 @@ const ogImage = new URL(assetUrl(image), site);
         <li><a href={withBase('/#about')}>关于</a></li>
         <li><a href={withBase('/#projects')}>项目</a></li>
         <li><a href={withBase('/article/')}>文章</a></li>
+        <li><a href={withBase('/news/')}>新闻</a></li>
         <li><a href={withBase('/#contact')}>联系</a></li>
       </ul>
     </nav>
@@ -104,7 +116,7 @@ const ogImage = new URL(assetUrl(image), site);
         <a href={withBase('/#top')} class='brand'><span class='brand-mark'>C</span><span>CityGenius</span></a>
         <p style='margin-top:18px;'>一个大学生的 Vibe Coding 实验室。记录全栈开发、AI 应用、移动端开发的实践与思考。开源爱好者，欢迎交流。</p>
       </div>
-      <div class='foot-col'><h5>导航</h5><ul><li><a href={withBase('/#top')}>首页</a></li><li><a href={withBase('/#about')}>关于</a></li><li><a href={withBase('/#projects')}>项目</a></li><li><a href={withBase('/article/')}>文章</a></li></ul></div>
+      <div class='foot-col'><h5>导航</h5><ul><li><a href={withBase('/#top')}>首页</a></li><li><a href={withBase('/#about')}>关于</a></li><li><a href={withBase('/#projects')}>项目</a></li><li><a href={withBase('/article/')}>文章</a></li><li><a href={withBase('/news/')}>新闻</a></li></ul></div>
       <div class='foot-col'><h5>项目</h5><ul><li><a href={withBase('/#projects')}>Scholar AI</a></li><li><a href={withBase('/#projects')}>macOS 工具</a></li><li><a href={withBase('/#projects')}>Android 应用</a></li><li><a href={withBase('/article/vibe-coding-3-days/')}>最新文章</a></li></ul></div>
       <div class='foot-col'><h5>社交</h5><ul><li><a href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>GitHub</a></li><li><a href='https://x.com/' target='_blank' rel='noreferrer noopener'>Twitter / X</a></li><li><a href='mailto:hello@citygenius.dev'>Email</a></li></ul></div>
     </div>
