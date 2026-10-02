@@ -1,5 +1,6 @@
 ---
 import { assetUrl, withBase } from '../lib/url';
+import { ViewTransitions } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -30,8 +31,8 @@ const websiteSchema = {
   '@type': 'WebSite',
   name: 'CityGenius Blog',
   url: siteUrl,
-  description: '一个大学生的 Vibe Coding 实验室：全栈开发、AI 应用、移动端开发的实践与思考。',
-  inLanguage: 'zh-CN',
+  description: "A college student's Vibe Coding lab: notes on full-stack development, AI apps, and mobile development.",
+  inLanguage: 'en',
   author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
 };
 const personSchema = {
@@ -44,8 +45,10 @@ const personSchema = {
 };
 ---
 <!DOCTYPE html>
-<html lang='zh-CN'>
+<html data-lang='en' lang='en'>
 <head>
+<script>try{document.documentElement.dataset.lang=localStorage.getItem('cg-lang')||'en'}catch(e){document.documentElement.dataset.lang='en'}</script>
+<ViewTransitions />
 <meta charset='utf-8' />
 <meta name='viewport' content='width=device-width, initial-scale=1' />
 <title>{title}</title>
@@ -57,7 +60,7 @@ const personSchema = {
 <link rel='icon' href={withBase('/assets/hero.webp')} type='image/webp' />
 <link rel='alternate' type='application/rss+xml' title='CityGenius Blog RSS' href={withBase('/rss.xml')} />
 <meta property='og:site_name' content='CityGenius Blog' />
-<meta property='og:locale' content='zh_CN' />
+<meta property='og:locale' content='en_US' />
 <meta property='og:type' content={type} />
 <meta property='og:title' content={title} />
 <meta property='og:description' content={description} />
@@ -78,16 +81,16 @@ const personSchema = {
 <body>
 
 <div class='side-rail right'><span class='rail-text'>CityGenius Blog — Vol. 01 · 2026</span></div>
-<div class='side-rail left'><span class='rail-text'>Vibe Coding · 全栈开发 · AI 应用</span></div>
+<div class='side-rail left'><span class='rail-text' data-i18n='rail.topics'>Vibe Coding · Full-stack · AI Apps</span></div>
 <div class='shell'>
 
-<div class='topbar'>
+<div class='topbar reveal reveal-hero'>
   <div class='container topbar-inner'>
     <span><span class='pulse'></span> <b>CityGenius</b> <span class='coral'>Blog</span></span>
     <span class='mid'>
       <span>Vol. 01 / Issue Nº 03</span>
       <span>·</span>
-      <span>Vibe Coding · 全栈 · AI</span>
+      <span data-i18n='topbar.topics'>Vibe Coding · Full-stack · AI</span>
     </span>
     <span class='right'>
       <span class='coord'>{issueDate}</span>
@@ -101,18 +104,19 @@ const personSchema = {
     <a href={withBase('/#top')} class='brand'>
       <span class='brand-mark'>C</span>
       <span>CityGenius</span>
-      <span class='brand-meta'><b>个人博客</b>大学生 · 开发者</span>
+      <span class='brand-meta'><b data-i18n='brand.tag1'>Personal Blog</b><span data-i18n='brand.tag2'>Student · Developer</span></span>
     </a>
     <nav>
       <ul class='nav-links'>
-        <li><a href={withBase('/#about')}>关于</a></li>
-        <li><a href={withBase('/#projects')}>项目</a></li>
-        <li><a href={withBase('/article/')}>文章</a></li>
-        <li><a href={withBase('/news/')}>新闻</a></li>
-        <li><a href={withBase('/#contact')}>联系</a></li>
+        <li><a href={withBase('/#about')} data-i18n='nav.about'>About</a></li>
+        <li><a href={withBase('/#projects')} data-i18n='nav.projects'>Projects</a></li>
+        <li><a href={withBase('/article/')} data-i18n='nav.articles'>Articles</a></li>
+        <li><a href={withBase('/news/')} data-i18n='nav.news'>News</a></li>
+        <li><a href={withBase('/#contact')} data-i18n='nav.contact'>Contact</a></li>
       </ul>
     </nav>
     <div class='nav-side'>
+      <button class='lang-toggle' type='button' aria-label='Switch language / 切换语言'><span class='lang-opt active' data-setlang='en'>EN</span><span class='lang-sep'>|</span><span class='lang-opt' data-setlang='zh'>中文</span></button>
       <a class='nav-cta' href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>GitHub</a>
       <span class='status-dot'></span>
     </div>
@@ -126,13 +130,13 @@ const personSchema = {
     <div class='foot-grid'>
       <div class='foot-brand'>
         <a href={withBase('/#top')} class='brand'><span class='brand-mark'>C</span><span>CityGenius</span></a>
-        <p style='margin-top:18px;'>一个大学生的 Vibe Coding 实验室。记录全栈开发、AI 应用、移动端开发的实践与思考。开源爱好者，欢迎交流。</p>
+        <p style='margin-top:18px;' data-i18n='foot.intro'>A college student's Vibe Coding lab. I write about full-stack dev, AI apps, and mobile development. Open-source fan — say hi.</p>
       </div>
-      <div class='foot-col'><h5>导航</h5><ul><li><a href={withBase('/#top')}>首页</a></li><li><a href={withBase('/#about')}>关于</a></li><li><a href={withBase('/#projects')}>项目</a></li><li><a href={withBase('/article/')}>文章</a></li><li><a href={withBase('/news/')}>新闻</a></li></ul></div>
-      <div class='foot-col'><h5>项目</h5><ul><li><a href={withBase('/#projects')}>Scholar AI</a></li><li><a href={withBase('/#projects')}>macOS 工具</a></li><li><a href={withBase('/#projects')}>Android 应用</a></li><li><a href={withBase('/article/vibe-coding-3-days/')}>最新文章</a></li></ul></div>
-      <div class='foot-col'><h5>社交</h5><ul><li><a href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>GitHub</a></li><li><a href='https://x.com/' target='_blank' rel='noreferrer noopener'>Twitter / X</a></li><li><a href='mailto:hello@citygenius.dev'>Email</a></li></ul></div>
+      <div class='foot-col'><h5 data-i18n='foot.explore'>Explore</h5><ul><li><a href={withBase('/#top')} data-i18n='nav.home'>Home</a></li><li><a href={withBase('/#about')} data-i18n='nav.about'>About</a></li><li><a href={withBase('/#projects')} data-i18n='nav.projects'>Projects</a></li><li><a href={withBase('/article/')} data-i18n='nav.articles'>Articles</a></li><li><a href={withBase('/news/')} data-i18n='nav.news'>News</a></li></ul></div>
+      <div class='foot-col'><h5 data-i18n='foot.projects'>Projects</h5><ul><li><a href={withBase('/#projects')}>Scholar AI</a></li><li><a href={withBase('/#projects')} data-i18n='foot.macos'>macOS Tools</a></li><li><a href={withBase('/#projects')} data-i18n='foot.android'>Android Apps</a></li><li><a href={withBase('/article/vibe-coding-3-days/')} data-i18n='foot.latest'>Latest Article</a></li></ul></div>
+      <div class='foot-col'><h5 data-i18n='foot.social'>Social</h5><ul><li><a href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>GitHub</a></li><li><a href='https://x.com/' target='_blank' rel='noreferrer noopener'>Twitter / X</a></li><li><a href='mailto:hello@citygenius.dev'>Email</a></li></ul></div>
     </div>
-    <div class='foot-bottom'><span>© 2026 CityGenius. Vibe Coding with intent.</span><span>Vol. 01 · 持续更新中</span></div>
+    <div class='foot-bottom'><span>© 2026 CityGenius. Vibe Coding with intent.</span><span data-i18n='foot.status'>Vol. 01 · Updated regularly</span></div>
     <div class='foot-mega'><div class='word' data-reveal='rise-lg'>City<em>Genius</em>.</div></div>
   </div>
 </footer>
@@ -183,6 +187,127 @@ const personSchema = {
 </script>
 
 <slot name="scripts" />
+
+<script>
+  import { setLang, getLang, applyI18n } from '../lib/i18n.js';
+
+  (function () {
+    window.__cg = window.__cg || {};
+    var S = window.__cg;
+
+    /* ---------- i18n ---------- */
+    S.applyI18n = applyI18n;
+    S.setLang = setLang;
+    function initLang() {
+      var lang = getLang();
+      document.documentElement.dataset.lang = lang;
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+      applyI18n(lang);
+    }
+    function initLangToggle() {
+      if (S.langBound) return;
+      S.langBound = true;
+      document.addEventListener('click', function (e) {
+        var opt = e.target.closest ? e.target.closest('.lang-toggle .lang-opt') : null;
+        if (opt) setLang(opt.dataset.setlang);
+      });
+    }
+
+    /* ---------- difference-blend custom cursor ---------- */
+    function initCursor() {
+      var fine = window.matchMedia('(pointer: fine)').matches;
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!fine || reduced) return;
+      var dot = document.querySelector('.cursor-dot');
+      var ring = document.querySelector('.cursor-ring');
+      if (!dot) {
+        dot = document.createElement('div');
+        dot.className = 'cursor-dot';
+        dot.setAttribute('aria-hidden', 'true');
+        ring = document.createElement('div');
+        ring.className = 'cursor-ring';
+        ring.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(dot);
+        document.body.appendChild(ring);
+      }
+      S.cursor = S.cursor || { x: -100, y: -100, dx: -100, dy: -100, rx: -100, ry: -100, hover: false };
+      S.cursor.dot = dot;
+      S.cursor.ring = ring;
+      document.documentElement.classList.add('cursor-on');
+      if (!S.cursorBound) {
+        S.cursorBound = true;
+        var HOVER_SEL = 'a, button, .hub-card, [data-hover]';
+        document.addEventListener('mousemove', function (e) {
+          S.cursor.x = e.clientX;
+          S.cursor.y = e.clientY;
+        }, { passive: true });
+        document.addEventListener('mouseover', function (e) {
+          if (e.target.closest && e.target.closest(HOVER_SEL)) S.cursor.hover = true;
+        }, { passive: true });
+        document.addEventListener('mouseout', function (e) {
+          if (e.target.closest && e.target.closest(HOVER_SEL)) S.cursor.hover = false;
+        }, { passive: true });
+      }
+      if (!S.cursorRunning) {
+        S.cursorRunning = true;
+        var tick = function () {
+          var c = S.cursor;
+          c.dx += (c.x - c.dx) * 0.4;
+          c.dy += (c.y - c.dy) * 0.4;
+          c.rx += (c.x - c.rx) * 0.14;
+          c.ry += (c.y - c.ry) * 0.14;
+          var s = c.hover ? 1.6 : 1;
+          c.dot.style.transform = 'translate3d(' + c.dx + 'px,' + c.dy + 'px,0) translate(-50%,-50%)';
+          c.ring.style.transform = 'translate3d(' + c.rx + 'px,' + c.ry + 'px,0) translate(-50%,-50%) scale(' + s + ')';
+          c.ring.classList.toggle('is-hover', c.hover);
+          requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    }
+
+    /* ---------- entrance reveal ---------- */
+    function initReveal() {
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced) {
+        document.querySelectorAll('.reveal:not(.in)').forEach(function (el) { el.classList.add('in'); });
+        return;
+      }
+      var hero = document.querySelectorAll('.reveal-hero:not(.in)');
+      window.setTimeout(function () {
+        hero.forEach(function (el) { el.classList.add('in'); });
+      }, 60);
+      var els = document.querySelectorAll('.reveal:not(.reveal-hero):not(.in):not([data-cg-obs])');
+      if (!('IntersectionObserver' in window)) {
+        els.forEach(function (el) { el.classList.add('in'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        });
+      }, { threshold: 0.15 });
+      els.forEach(function (el) { el.dataset.cgObs = '1'; io.observe(el); });
+    }
+
+    function initAll() {
+      initLang();
+      initLangToggle();
+      initCursor();
+      initReveal();
+    }
+
+    // Guarded: body scripts don't re-run after a ViewTransition navigation,
+    // so re-init on astro:page-load; the guard keeps a single rAF loop.
+    if (!S.baseInit) {
+      S.baseInit = true;
+      document.addEventListener('DOMContentLoaded', initAll);
+      document.addEventListener('astro:page-load', initAll);
+    }
+  })();
+</script>
 
 </body>
 </html>
@@ -715,6 +840,100 @@ footer {
   }
   .nav { transition: none !important; }
   .marquee-track { animation: none; }
+}
+
+/* ===== View Transitions (page swap) ===== */
+::view-transition-old(root) { animation: cg-page-out 300ms ease both; }
+::view-transition-new(root) { animation: cg-page-in 320ms ease both; }
+@keyframes cg-page-out {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(12px); }
+}
+@keyframes cg-page-in {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ===== bilingual visibility ===== */
+html[data-lang='zh'] .lang-en { display: none !important; }
+html:not([data-lang='zh']) .lang-zh { display: none !important; }
+
+/* ===== language toggle pill ===== */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lang-toggle .lang-opt {
+  padding: 5px 10px;
+  border-radius: 999px;
+  transition: background 160ms ease, color 160ms ease;
+}
+.lang-toggle .lang-opt.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.lang-toggle .lang-sep { opacity: 0.35; font-weight: 400; }
+
+/* ===== difference-blend custom cursor ===== */
+.cursor-dot,
+.cursor-ring {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+}
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+}
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  transition: border-width 180ms ease;
+}
+.cursor-ring.is-hover { border-width: 3px; }
+@media (pointer: fine) {
+  html.cursor-on, html.cursor-on * { cursor: none !important; }
+  html.cursor-on .cursor-dot,
+  html.cursor-on .cursor-ring { display: block; }
+}
+
+/* ===== entrance reveal (opt-in utility) ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--d, 0s);
+}
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* responsive base */
