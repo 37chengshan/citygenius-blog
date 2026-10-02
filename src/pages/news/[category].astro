@@ -4,7 +4,8 @@ import NewsStyles from '../../components/NewsStyles.astro';
 import { withBase } from '../../lib/url';
 import { NEWS_CATS } from '../../lib/news-cats.js';
 import { readFileSync } from 'node:fs';
-import { staticCategory, itemListSchema, makeIllus } from '../../lib/news-render.js';
+import { staticCategory, itemListSchema, slugFor } from '../../lib/news-render.js';
+import { illusFor, articlePath } from '../../lib/news-shared.js';
 
 export function getStaticPaths() {
   return NEWS_CATS.map((c) => ({ params: { category: c.id } }));
@@ -16,8 +17,17 @@ const meta = NEWS_CATS[ix];
 const prev = NEWS_CATS[(ix + NEWS_CATS.length - 1) % NEWS_CATS.length];
 const next = NEWS_CATS[(ix + 1) % NEWS_CATS.length];
 
+const newsUrl = withBase('/news.json');
+const newsSharedUrl = withBase('/news-shared.js');
+const hubHref = withBase('/news/');
+const prevHref = withBase('/news/' + prev.id + '/');
+const nextHref = withBase('/news/' + next.id + '/');
+const artBase = withBase('/news/' + category + '/');
+const linkArt = (catId, slug) => withBase(articlePath(catId, slug));
+
+const pad = (n: number) => (n < 10 ? '0' : '') + n;
+
 // 构建期快照：把 public/news.json 写进 HTML，爬虫/无 JS 抓取也能看到内容。
-// news.json 由流水线每轮刷新（见 NEWS_WORKFLOW.md），构建时读到的是最新快照。
 let snapItems = [];
 try {
   const snap = JSON.parse(readFileSync(new URL('../../../public/news.json', import.meta.url), 'utf-8'));
@@ -26,15 +36,8 @@ try {
 } catch (e) {
   snapItems = [];
 }
-const snap = staticCategory(snapItems, meta.pal);
-const heroIllus = makeIllus('hero-' + category, meta.pal, true);
-
-const newsUrl = withBase('/news.json');
-const hubHref = withBase('/news/');
-const prevHref = withBase('/news/' + prev.id + '/');
-const nextHref = withBase('/news/' + next.id + '/');
-
-const pad = (n: number) => (n < 10 ? '0' : '') + n;
+const snap = staticCategory(category, snapItems, meta.pal, linkArt);
+const heroIllus = illusFor('hero-' + category, meta.pal, true);
 
 const pageSchema = {
   '@context': 'https://schema.org',
@@ -83,8 +86,10 @@ const pageSchema = {
   </main>
 
   <Fragment slot="scripts">
-    <script define:vars={{ newsUrl, catId: category, pal: meta.pal }}>
+    <script src={newsSharedUrl}></script>
+    <script define:vars={{ newsUrl, catId: category, pal: meta.pal, artBase }}>
       (function () {
+        var NS = window.NewsShared || null;
         var gridEl = document.getElementById('news-grid');
         var featEl = document.getElementById('news-feat');
         var heroIllusEl = document.getElementById('cat-hero-illus');
@@ -92,134 +97,31 @@ const pageSchema = {
         var countEl = document.getElementById('news-count');
 
         function esc(s) {
-          return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          return NS ? NS.esc(s) : String(s == null ? '' : s);
         }
-
-        /* ---------- 日期时间 ---------- */
-        var WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        function dObj(iso) {
-          var d = new Date(iso);
-          return isNaN(d.getTime()) ? null : d;
+        function artHref(it) {
+          var slug = NS ? NS.slugFor(it.link || it.title) : '';
+          return artBase + slug + '/';
         }
-        function fmtDate(iso) {
-          var d = dObj(iso);
-          return d ? (d.getMonth() + 1) + '月' + d.getDate() + '日' : '';
-        }
-        function fmtWeek(iso) {
-          var d = dObj(iso);
-          return d ? WEEK[d.getDay()] : '';
-        }
-        function fmtHM(iso) {
-          var d = dObj(iso);
-          if (!d) return '';
-          var m = d.getMinutes();
-          return d.getHours() + ':' + (m < 10 ? '0' : '') + m;
-        }
-        function fullTime(iso) {
-          try {
-            return new Date(iso).toLocaleString('zh-CN', { hour12: false });
-          } catch (e) {
-            return iso || '';
-          }
-        }
-        function relTime(iso) {
-          var d = dObj(iso);
-          if (!d) return '';
-          var diff = Date.now() - d.getTime();
-          if (diff < 0) diff = 0;
-          var m = Math.floor(diff / 60000);
-          if (m < 1) return '刚刚';
-          if (m < 60) return m + ' 分钟前';
-          var h = Math.floor(m / 60);
-          if (h < 24) return h + ' 小时前';
-          var days = Math.floor(h / 24);
-          if (days === 1) return '昨天';
-          if (days === 2) return '前天';
-          if (days < 30) return days + ' 天前';
-          return Math.floor(days / 30) + ' 个月前';
-        }
-        function dayKey(iso) {
-          var d = dObj(iso);
-          return d ? d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() : '';
+        function illus(seed, wide) {
+          return NS ? NS.illusFor(seed, pal, wide) : '';
         }
         function dateLine(pub, src) {
-          if (!pub) {
+          var dp = NS ? NS.dateParts(pub) : null;
+          if (!pub || !dp) {
             return '<div class="date-line"><span class="src">' + esc(src || '') + '</span></div>';
           }
-          return '<div class="date-line" title="' + esc(fullTime(pub)) + '">'
-            + '<span class="date-badge">' + esc(fmtDate(pub)) + '</span>'
-            + '<span class="week">' + esc(fmtWeek(pub)) + ' · ' + esc(fmtHM(pub)) + '</span>'
-            + '<span class="rel">' + esc(relTime(pub)) + '</span>'
+          var rel = NS ? NS.relTime(pub) : '';
+          return '<div class="date-line" title="' + esc(NS ? NS.fullTime(pub) : '') + '">'
+            + '<span class="date-badge">' + esc(dp.date) + '</span>'
+            + '<span class="week">' + esc(dp.week) + ' · ' + esc(dp.hm) + '</span>'
+            + (rel ? '<span class="rel">' + esc(rel) + '</span>' : '')
             + '<span class="src">' + esc(src || '') + '</span>'
             + '</div>';
         }
 
-        /* ---------- 生成式插画（种子随机，每篇唯一） ---------- */
-        function xmur3(str) {
-          for (var i = 0, h = 1779033703 ^ str.length; i < str.length; i++) {
-            h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-            h = (h << 13) | (h >>> 19);
-          }
-          return function () {
-            h = Math.imul(h ^ (h >>> 16), 2246822507);
-            h = Math.imul(h ^ (h >>> 13), 3266489909);
-            return (h ^= h >>> 16) >>> 0;
-          };
-        }
-        function mulberry32(a) {
-          return function () {
-            a |= 0; a = (a + 0x6d2b79f5) | 0;
-            var t = Math.imul(a ^ (a >>> 15), 1 | a);
-            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-          };
-        }
-        function blobPath(R, cx, cy, r) {
-          var pts = [], n = 8, i, a, rr;
-          for (i = 0; i < n; i++) {
-            a = (i / n) * Math.PI * 2;
-            rr = r * (0.7 + R() * 0.55);
-            pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * 0.85]);
-          }
-          var d = 'M' + pts[0][0].toFixed(1) + ',' + pts[0][1].toFixed(1);
-          for (i = 0; i < n; i++) {
-            var p = pts[i], q = pts[(i + 1) % n];
-            d += ' Q' + p[0].toFixed(1) + ',' + p[1].toFixed(1)
-              + ' ' + ((p[0] + q[0]) / 2).toFixed(1) + ',' + ((p[1] + q[1]) / 2).toFixed(1);
-          }
-          return d + 'Z';
-        }
-        function makeIllus(seed, wide) {
-          var R = mulberry32(xmur3(String(seed || 'news'))());
-          var W = wide ? 760 : 400, H = wide ? 300 : 250;
-          var paper = pal[0], accent = pal[1], soft = pal[2], ink = pal[3];
-          var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="插图">';
-          s += '<rect width="' + W + '" height="' + H + '" fill="' + paper + '"/>';
-          s += '<path d="' + blobPath(R, W * (0.15 + R() * 0.7), H * (0.2 + R() * 0.5), Math.min(W, H) * (0.16 + R() * 0.14)) + '" fill="' + soft + '" opacity="0.6"/>';
-          s += '<path d="' + blobPath(R, W * (0.3 + R() * 0.4), H * (0.35 + R() * 0.3), Math.min(W, H) * (0.3 + R() * 0.2)) + '" fill="' + accent + '" opacity="0.9"/>';
-          var rx = W * (0.08 + R() * 0.75), ry = H * (0.12 + R() * 0.6), rr = 16 + R() * 44;
-          s += '<circle cx="' + rx.toFixed(0) + '" cy="' + ry.toFixed(0) + '" r="' + rr.toFixed(0) + '" fill="none" stroke="' + ink + '" stroke-width="' + (2.5 + R() * 3.5).toFixed(1) + '" opacity="0.75"/>';
-          s += '<circle cx="' + (W * (0.1 + R() * 0.8)).toFixed(0) + '" cy="' + (H * (0.1 + R() * 0.8)).toFixed(0) + '" r="' + (8 + R() * 16).toFixed(0) + '" fill="' + ink + '" opacity="0.85"/>';
-          var y0 = H * (0.15 + R() * 0.7), dd = 'M-20,' + y0.toFixed(0), x;
-          for (x = 0; x <= W; x += 48) {
-            dd += ' Q' + (x + 24).toFixed(0) + ',' + (y0 + (R() * 52 - 26)).toFixed(0) + ' ' + (x + 48).toFixed(0) + ',' + y0.toFixed(0);
-          }
-          s += '<path d="' + dd + '" fill="none" stroke="' + accent + '" stroke-width="3.5" stroke-linecap="round" opacity="0.55"/>';
-          var gx = W * (0.55 + R() * 0.3), gy = H * (0.1 + R() * 0.2), r2, c2;
-          for (r2 = 0; r2 < 3; r2++) {
-            for (c2 = 0; c2 < 4; c2++) {
-              s += '<circle cx="' + (gx + c2 * 16).toFixed(0) + '" cy="' + (gy + r2 * 16).toFixed(0) + '" r="3" fill="' + ink + '" opacity="0.45"/>';
-            }
-          }
-          s += '</svg>';
-          return s;
-        }
-
-        /* ---------- 卡片 ---------- */
         function cardBody(it, tag) {
-          var enTitle = (it.en_title && it.en_title !== it.zh_title)
+          var enTitle = (it.en_title && it.en_title !== (it.zh_title || it.title))
             ? '<div class="en-title">' + esc(it.en_title) + '</div>'
             : '';
           var take = it.zh_take
@@ -241,20 +143,25 @@ const pageSchema = {
         function featCard(it) {
           var art = it.image
             ? '<div class="illus"><img loading="lazy" src="' + esc(it.image) + '" alt=""/></div>'
-            : '<div class="illus">' + makeIllus(it.link || it.title, false) + '</div>';
-          return '<a class="feat" href="' + esc(it.link) + '" target="_blank" rel="noreferrer noopener">'
+            : '<div class="illus">' + illus(it.link || it.title, false) + '</div>';
+          return '<a class="feat" href="' + esc(artHref(it)) + '">'
             + art + cardBody(it, 'h2') + '</a>';
         }
+        var SPANS = ['sp7', 'sp5', 'sp5', 'sp7', 'wide', 'sp4', 'sp8', 'sp8', 'sp4', 'sp6', 'sp6'];
         function bentoCard(it, cls) {
-          return '<a class="news-card ' + cls + '" href="' + esc(it.link) + '" target="_blank" rel="noreferrer noopener">'
-            + '<div class="illus">' + makeIllus(it.link || it.title, false) + '</div>'
+          if (cls === 'wide') {
+            return '<a class="news-card wide" href="' + esc(artHref(it)) + '">'
+              + '<div class="illus">' + illus(it.link || it.title, false) + '</div>'
+              + cardBody(it, 'h3') + '</a>';
+          }
+          return '<a class="news-card ' + cls + '" href="' + esc(artHref(it)) + '">'
+            + '<div class="illus">' + illus(it.link || it.title, false) + '</div>'
             + cardBody(it, 'h3') + '</a>';
         }
-        function dayDiv(iso) {
-          return '<div class="day-div"><span>' + esc(fmtDate(iso)) + ' ' + esc(fmtWeek(iso)) + '</span></div>';
+        function dayDiv(dp) {
+          return '<div class="day-div"><span>' + esc(dp.date) + ' ' + esc(dp.week) + '</span></div>';
         }
 
-        /* ---------- 渲染 ---------- */
         function render(data) {
           var categories = (data && data.categories) || [];
           var c = null;
@@ -268,26 +175,32 @@ const pageSchema = {
           if (countEl) countEl.textContent = '共 ' + items.length + ' 条';
           if (updatedEl && data && data.generated_at) {
             var g = data.generated_at;
-            updatedEl.textContent = '数据更新于 ' + fmtDate(g) + ' ' + fmtWeek(g) + ' ' + fmtHM(g) + ' · ' + relTime(g);
+            var dp = NS ? NS.dateParts(g) : null;
+            var rel = NS ? NS.relTime(g) : '';
+            updatedEl.textContent = dp
+              ? '数据更新于 ' + dp.date + ' ' + dp.week + ' ' + dp.hm + (rel ? ' · ' + rel : '')
+              : '数据更新于 ' + g;
           }
-          if (heroIllusEl) heroIllusEl.innerHTML = makeIllus('hero-' + catId, true);
+          if (heroIllusEl && NS) heroIllusEl.innerHTML = NS.illusFor('hero-' + catId, pal, true);
           if (!items.length) {
-            featEl.innerHTML = '';
-            gridEl.innerHTML = '<div class="news-empty">这个板块的新闻正在抓取，稍后再来看看。</div>';
+            if (!featEl.innerHTML.trim() && !gridEl.innerHTML.trim()) {
+              gridEl.innerHTML = '<div class="news-empty">这个板块的新闻正在抓取，稍后再来看看。</div>';
+            }
             return;
           }
           featEl.innerHTML = featCard(items[0]);
-          var spans = ['sp8', 'sp4', 'sp4', 'sp8', 'sp4', 'sp4', 'sp4', 'sp6', 'sp6', 'sp5', 'sp7'];
           var html = '';
-          var lastDay = dayKey(items[0].published);
+          var first = NS ? NS.dateParts(items[0].published) : null;
+          var lastDay = first ? first.key : '';
           for (var i = 1; i < items.length; i++) {
-            var dk = dayKey(items[i].published);
+            var dp2 = NS ? NS.dateParts(items[i].published) : null;
+            var dk = dp2 ? dp2.key : '';
             if (dk && dk !== lastDay) {
-              html += dayDiv(items[i].published);
+              html += dayDiv(dp2);
               lastDay = dk;
             }
-            var cls = spans[(i - 1) % spans.length] + (i % 2 === 0 ? ' off' : '');
-            html += bentoCard(items[i], cls);
+            var sp = SPANS[(i - 1) % SPANS.length];
+            html += bentoCard(items[i], sp + (sp === 'wide' ? '' : i % 2 === 0 ? ' off' : ''));
           }
           gridEl.innerHTML = html;
         }
@@ -296,7 +209,6 @@ const pageSchema = {
             .then(function (r) { return r.json(); })
             .then(render)
             .catch(function () {
-              // 拉取失败时保留构建期静态快照（至少有内容可看）
               if (!gridEl.innerHTML.trim() && !featEl.innerHTML.trim()) {
                 gridEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
               }

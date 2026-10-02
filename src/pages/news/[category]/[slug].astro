@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import NewsStyles from '../../../components/NewsStyles.astro';
+import { withBase } from '../../../lib/url';
+import { NEWS_CATS } from '../../../lib/news-cats.js';
+import { readFileSync } from 'node:fs';
+import { esc, slugFor, dateParts, fullTime, illusFor } from '../../../lib/news-shared.js';
+
+export function getStaticPaths() {
+  const snap = JSON.parse(readFileSync(new URL('../../../../public/news.json', import.meta.url), 'utf-8'));
+  const paths = [];
+  const seen = new Set();
+  for (const c of snap.categories || []) {
+    const meta = NEWS_CATS.find((x) => x.id === c.id);
+    if (!meta) continue;
+    const items = c.items || [];
+    items.forEach((it, i) => {
+      let slug = slugFor(it.link || it.title);
+      let n = 2;
+      while (seen.has(c.id + '/' + slug)) slug = slugFor(it.link || it.title) + '-' + n++;
+      seen.add(c.id + '/' + slug);
+      const sib = (j) =>
+        j >= 0 && j < items.length
+          ? { slug: slugFor(items[j].link || items[j].title), title: items[j].zh_title || items[j].title }
+          : null;
+      paths.push({
+        params: { category: c.id, slug },
+        props: { item: it, meta, prev: sib(i - 1), next: sib(i + 1) },
+      });
+    });
+  }
+  return paths;
+}
+
+const { category, slug } = Astro.params;
+const { item, meta, prev, next } = Astro.props;
+
+const hubHref = withBase('/news/');
+const catHref = withBase('/news/' + category + '/');
+const prevHref = prev ? withBase('/news/' + category + '/' + prev.slug + '/') : null;
+const nextHref = next ? withBase('/news/' + category + '/' + next.slug + '/') : null;
+
+const p = dateParts(item.published);
+const zhTitle = item.zh_title || item.title;
+const zhParas = (item.zh_summary || item.summary || '').split('\n').filter((s) => s.trim());
+
+const newsSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: zhTitle,
+  inLanguage: 'zh-CN',
+  datePublished: item.published || undefined,
+  author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
+  isBasedOn: item.link,
+  about: meta.label,
+};
+---
+
+<BaseLayout title={zhTitle + ' — ' + meta.label + ' — CityGenius Blog'} description={(item.zh_summary || item.summary || '').slice(0, 120)}>
+  <Fragment slot="head">
+    <NewsStyles />
+    <script type="application/ld+json" set:html={JSON.stringify(newsSchema)} />
+  </Fragment>
+
+  <main class="container" id="top">
+    <section class="tight news-page">
+      <div class="sec-rule">
+        <span class="crumb">
+          <a href={hubHref}><span class="roman">News</span></a> ·
+          <a href={catHref}>{meta.label}</a> · 正文
+        </span>
+        <span class="meta-grp"><span>{item.source}</span></span>
+      </div>
+
+      <article class="art">
+        <div class="art-kicker">{meta.label}</div>
+        <h1 class="art-title">{zhTitle}</h1>
+        {
+          item.en_title && item.en_title !== zhTitle && (
+            <div class="en-title art-en-title">{item.en_title}</div>
+          )
+        }
+        <div class="date-line">
+          {p && <span class="date-badge">{p.date}</span>}
+          {p && (
+            <span class="week">
+              {p.week} · {p.hm}
+            </span>
+          )}
+          <span class="src">{item.source}</span>
+        </div>
+
+        <div class="illus art-illus" set:html={illusFor(item.link || item.title, meta.pal, true)} />
+
+        <div class="art-body">
+          {zhParas.map((para) => (
+            <p>{para}</p>
+          ))}
+        </div>
+
+        {
+          item.zh_take && (
+            <div class="take art-take">
+              <b>解读</b>
+              {item.zh_take}
+            </div>
+          )
+        }
+
+        {
+          (item.en_summary || item.summary) && (
+            <details class="art-en">
+              <summary>英文原文摘要</summary>
+              <p class="en-sum">{item.en_summary || item.summary}</p>
+            </details>
+          )
+        }
+
+        <div class="art-origin">
+          <div class="art-origin-meta">
+            <span>来源：{item.source}</span>
+            {item.published && <span title={fullTime(item.published)}>发布时间：{p ? `${p.date} ${p.week} ${p.hm}` : ''}</span>}
+          </div>
+          <a class="read-origin" href={item.link} target="_blank" rel="noreferrer noopener">
+            阅读原文 <span aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <nav class="cat-nav art-nav" aria-label="文章导航">
+          {prevHref ? <a href={prevHref}>← {prev.title}</a> : <span />}
+          <a href={catHref}>返回{meta.label}</a>
+          {nextHref ? <a href={nextHref}>{next.title} →</a> : <span />}
+        </nav>
+      </article>
+    </section>
+  </main>
+</BaseLayout>
