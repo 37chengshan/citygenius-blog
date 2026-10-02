@@ -19,7 +19,7 @@ const pageSchema = {
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
-    <style>
+    <style is:global>
       .news-hero-img {
         margin: 34px 0 8px;
         border: 1px solid var(--line);
