@@ -3,90 +3,132 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { withBase } from '../lib/url';
 
 const newsUrl = withBase('/news.json');
+const headerImg = withBase('/assets/news-header.webp');
 const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: '新闻速览 — CityGenius Blog',
-  description: 'AI 科技、国际新闻、娱乐新闻速览，每 10 分钟更新一次。',
+  description: 'AI 科技、国际新闻、财经、体育、娱乐、无畏契约新闻速览，每 10 分钟更新一次。',
   inLanguage: 'zh-CN',
 };
 ---
 
 <BaseLayout
   title="新闻速览 — CityGenius Blog"
-  description="AI 科技、国际新闻、娱乐新闻速览，每 10 分钟更新一次。"
+  description="AI 科技、国际新闻、财经、体育、娱乐、无畏契约新闻速览，每 10 分钟更新一次。"
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
     <style>
-      .news-tabs {
-        display: flex;
-        gap: 12px;
-        margin-top: 36px;
-        flex-wrap: wrap;
-      }
-      .news-tab {
-        font-family: var(--sans);
-        font-size: 14px;
-        font-weight: 600;
-        padding: 10px 22px;
-        border-radius: 999px;
+      .news-hero-img {
+        margin: 34px 0 8px;
         border: 1px solid var(--line);
-        background: transparent;
-        color: var(--ink-soft);
-        cursor: pointer;
-        transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
       }
-      .news-tab:hover { border-color: var(--ink); }
-      .news-tab.active {
-        background: var(--ink);
-        color: var(--paper);
-        border-color: var(--ink);
-      }
-      .news-list { display: grid; gap: 18px; margin-top: 28px; }
-      .news-card {
+      .news-hero-img img {
         display: block;
-        padding: 26px 28px;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 3 / 1;
+        object-fit: cover;
+      }
+      .news-module { margin-top: 84px; }
+      .news-module:first-of-type { margin-top: 56px; }
+      .module-head {
+        display: flex;
+        align-items: baseline;
+        gap: 20px;
+        border-top: 1px solid var(--line);
+        padding-top: 22px;
+        margin-bottom: 30px;
+      }
+      .module-ix {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 30px;
+        color: var(--coral);
+        line-height: 1;
+      }
+      .module-head h2 {
+        font-family: var(--sans);
+        font-weight: 800;
+        font-size: clamp(26px, 3vw, 38px);
+        letter-spacing: -0.02em;
+      }
+      .module-head .count {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-faint);
+        letter-spacing: 0.08em;
+        white-space: nowrap;
+      }
+      .news-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .news-card {
+        display: flex;
+        flex-direction: column;
         border: 1px solid var(--line);
         border-radius: 14px;
         background: var(--bone);
         text-decoration: none;
         color: var(--ink);
+        overflow: hidden;
         transition: transform 0.18s ease, box-shadow 0.18s ease;
       }
       .news-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+      .news-card .thumb {
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        background: var(--paper-dark);
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .news-card .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .news-card .card-body { padding: 22px 24px 24px; }
       .news-card h3 {
         font-family: var(--sans);
-        font-size: 19px;
+        font-size: 17px;
         font-weight: 700;
         letter-spacing: -0.01em;
-        line-height: 1.4;
+        line-height: 1.45;
         margin-bottom: 10px;
       }
       .news-card .news-meta {
         font-family: var(--sans);
-        font-size: 11px;
+        font-size: 10.5px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         color: var(--coral);
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
       .news-card .news-meta .src { color: var(--ink-faint); margin-left: 10px; letter-spacing: 0.06em; }
       .news-card p {
-        font-size: 14.5px;
-        line-height: 1.65;
+        font-size: 13.5px;
+        line-height: 1.6;
         color: var(--ink-soft);
       }
       .news-empty {
-        padding: 60px 20px;
+        padding: 40px 20px;
         text-align: center;
         color: var(--ink-mute);
         font-size: 15px;
+        border: 1px dashed var(--line);
+        border-radius: 14px;
       }
       .news-updated { margin-top: 26px; }
-      @media (max-width: 560px) {
-        .news-card { padding: 20px; }
-        .news-card h3 { font-size: 17px; }
+      @media (max-width: 880px) {
+        .news-grid { grid-template-columns: 1fr; }
+        .news-hero-img img { aspect-ratio: 16 / 9; }
       }
     </style>
   </Fragment>
@@ -95,25 +137,24 @@ const pageSchema = {
     <section class="tight">
       <div class="sec-rule">
         <span><span class="roman">News</span> · 速览</span>
-        <span class="meta-grp"><span>每 10 分钟更新</span><span class="dot-mark">●</span><span>AI · 国际 · 娱乐</span></span>
+        <span class="meta-grp"><span>每 10 分钟更新</span><span class="dot-mark">●</span><span>六个板块</span></span>
       </div>
       <span class="label">新闻速览</span>
       <h1 class="display" style="margin: 26px 0 24px;">新闻<em>速览</em><span class="dot">.</span></h1>
-      <p class="lead">AI 科技、国际新闻、娱乐三个板块，机器每 10 分钟扫一遍，源头都在卡片上标着。</p>
+      <p class="lead">AI 科技、国际、财经、体育、娱乐，再加一个无畏契约专区。机器每 10 分钟扫一遍，来源都标在卡片上。</p>
+      <div class="news-hero-img">
+        <img src={headerImg} alt="新闻速览头图：报纸与新闻卡片插画" loading="eager" />
+      </div>
       <p class="meta news-updated" id="news-updated">正在加载…</p>
-      <div class="news-tabs" id="news-tabs"></div>
-      <div class="news-list" id="news-list"></div>
+      <div id="news-modules"></div>
     </section>
   </main>
 
   <Fragment slot="scripts">
     <script define:vars={{ newsUrl }}>
       (function () {
-        var listEl = document.getElementById('news-list');
-        var tabsEl = document.getElementById('news-tabs');
+        var modulesEl = document.getElementById('news-modules');
         var updatedEl = document.getElementById('news-updated');
-        var categories = [];
-        var activeId = null;
         function esc(s) {
           return String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -125,67 +166,53 @@ const pageSchema = {
             return d.toLocaleString('zh-CN', { hour12: false });
           } catch (e) { return iso; }
         }
-        function renderTabs() {
-          var html = '';
-          for (var i = 0; i < categories.length; i++) {
-            var c = categories[i];
-            var cls = c.id === activeId ? 'news-tab active' : 'news-tab';
-            html += '<button class="' + cls + '" data-cat="' + esc(c.id) + '">' + esc(c.label) + '</button>';
-          }
-          tabsEl.innerHTML = html;
-          var btns = tabsEl.querySelectorAll('.news-tab');
-          for (var j = 0; j < btns.length; j++) {
-            btns[j].addEventListener('click', function () {
-              activeId = this.getAttribute('data-cat');
-              renderTabs();
-              renderList();
-            });
-          }
-        }
-        function renderList() {
-          var cat = null;
-          for (var i = 0; i < categories.length; i++) {
-            if (categories[i].id === activeId) { cat = categories[i]; break; }
-          }
-          var items = (cat && cat.items) || [];
-          if (!items.length) {
-            listEl.innerHTML = '<div class="news-empty">这个板块的新闻正在抓取，稍后再来看看。</div>';
-            return;
-          }
-          var html = '';
-          for (var k = 0; k < items.length; k++) {
-            var it = items[k];
-            html += '<a class="news-card" href="' + esc(it.link) + '" target="_blank" rel="noreferrer noopener">'
-              + '<h3>' + esc(it.title) + '</h3>'
-              + '<div class="news-meta">' + esc(it.published ? fmtTime(it.published) : '') + '<span class="src">' + esc(it.source || '') + '</span></div>'
-              + (it.summary ? '<p>' + esc(it.summary) + '</p>' : '')
-              + '</a>';
-          }
-          listEl.innerHTML = html;
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+        function card(it) {
+          var thumb = it.image
+            ? '<div class="thumb"><img loading="lazy" src="' + esc(it.image) + '" alt="" /></div>'
+            : '';
+          return '<a class="news-card" href="' + esc(it.link) + '" target="_blank" rel="noreferrer noopener">'
+            + thumb
+            + '<div class="card-body">'
+            + '<h3>' + esc(it.title) + '</h3>'
+            + '<div class="news-meta">' + esc(it.published ? fmtTime(it.published) : '') + '<span class="src">' + esc(it.source || '') + '</span></div>'
+            + (it.summary ? '<p>' + esc(it.summary) + '</p>' : '')
+            + '</div></a>';
         }
         function render(data) {
-          categories = (data && data.categories) || [];
+          var categories = (data && data.categories) || [];
           if (updatedEl && data && data.generated_at) {
             updatedEl.textContent = '数据更新于 ' + fmtTime(data.generated_at);
           }
           if (!categories.length) {
-            listEl.innerHTML = '<div class="news-empty">第一批新闻正在抓取，稍后再来看看。</div>';
+            modulesEl.innerHTML = '<div class="news-empty">第一批新闻正在抓取，稍后再来看看。</div>';
             return;
           }
-          var stillThere = false;
+          var html = '';
           for (var i = 0; i < categories.length; i++) {
-            if (categories[i].id === activeId) { stillThere = true; break; }
+            var c = categories[i];
+            var items = c.items || [];
+            html += '<div class="news-module">'
+              + '<div class="module-head"><span class="module-ix">' + pad(i + 1) + '</span>'
+              + '<h2>' + esc(c.label) + '</h2>'
+              + '<span class="count">' + items.length + ' 条</span></div>';
+            if (!items.length) {
+              html += '<div class="news-empty">这个板块的新闻正在抓取，稍后再来看看。</div>';
+            } else {
+              html += '<div class="news-grid">';
+              for (var k = 0; k < items.length; k++) html += card(items[k]);
+              html += '</div>';
+            }
+            html += '</div>';
           }
-          if (!stillThere) activeId = categories[0].id;
-          renderTabs();
-          renderList();
+          modulesEl.innerHTML = html;
         }
         function load() {
           fetch(newsUrl + '?t=' + Date.now(), { cache: 'no-store' })
             .then(function (r) { return r.json(); })
             .then(render)
             .catch(function () {
-              listEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
+              modulesEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
             });
         }
         load();
