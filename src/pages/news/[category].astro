@@ -3,6 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import NewsStyles from '../../components/NewsStyles.astro';
 import { withBase } from '../../lib/url';
 import { NEWS_CATS } from '../../lib/news-cats.js';
+import { readFileSync } from 'node:fs';
+import { staticCategory, itemListSchema, makeIllus } from '../../lib/news-render.js';
 
 export function getStaticPaths() {
   return NEWS_CATS.map((c) => ({ params: { category: c.id } }));
@@ -13,6 +15,19 @@ const ix = NEWS_CATS.findIndex((c) => c.id === category);
 const meta = NEWS_CATS[ix];
 const prev = NEWS_CATS[(ix + NEWS_CATS.length - 1) % NEWS_CATS.length];
 const next = NEWS_CATS[(ix + 1) % NEWS_CATS.length];
+
+// 构建期快照：把 public/news.json 写进 HTML，爬虫/无 JS 抓取也能看到内容。
+// news.json 由流水线每轮刷新（见 NEWS_WORKFLOW.md），构建时读到的是最新快照。
+let snapItems = [];
+try {
+  const snap = JSON.parse(readFileSync(new URL('../../../public/news.json', import.meta.url), 'utf-8'));
+  const c = (snap.categories || []).find((x) => x.id === category);
+  snapItems = (c && c.items) || [];
+} catch (e) {
+  snapItems = [];
+}
+const snap = staticCategory(snapItems, meta.pal);
+const heroIllus = makeIllus('hero-' + category, meta.pal, true);
 
 const newsUrl = withBase('/news.json');
 const hubHref = withBase('/news/');
@@ -25,14 +40,15 @@ const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: meta.label + ' — 新闻速览 — CityGenius Blog',
-  description: meta.desc + '，每 10 分钟更新一次。',
+  description: meta.desc + '，每日更新两次，突发新闻即时跟进。',
   inLanguage: 'zh-CN',
+  mainEntity: itemListSchema(meta.label, snapItems),
 };
 ---
 
 <BaseLayout
   title={meta.label + ' — 新闻速览 — CityGenius Blog'}
-  description={meta.desc + '，每 10 分钟更新一次。'}
+  description={meta.desc + '，每日更新两次，突发新闻即时跟进。'}
 >
   <Fragment slot="head">
     <NewsStyles />
@@ -52,11 +68,11 @@ const pageSchema = {
           <h1>{meta.label}</h1>
           <p class="cat-desc">{meta.desc}</p>
         </div>
-        <div class="cat-hero-illus" id="cat-hero-illus" aria-hidden="true"></div>
+        <div class="cat-hero-illus" id="cat-hero-illus" aria-hidden="true" set:html={heroIllus} />
       </div>
 
-      <div id="news-feat"></div>
-      <div class="bento" id="news-grid" style="margin-top: 18px;"></div>
+      <div id="news-feat" set:html={snap.feat} />
+      <div class="bento" id="news-grid" style="margin-top: 18px;" set:html={snap.grid} />
 
       <nav class="cat-nav" aria-label="板块导航">
         <a href={prevHref}>← {prev.label}</a>
@@ -280,7 +296,10 @@ const pageSchema = {
             .then(function (r) { return r.json(); })
             .then(render)
             .catch(function () {
-              gridEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
+              // 拉取失败时保留构建期静态快照（至少有内容可看）
+              if (!gridEl.innerHTML.trim() && !featEl.innerHTML.trim()) {
+                gridEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
+              }
             });
         }
         load();

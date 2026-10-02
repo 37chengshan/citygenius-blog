@@ -22,6 +22,9 @@ const site = Astro.site ?? new URL('https://37chengshan.github.io');
 const canonical = new URL(Astro.url.pathname, site);
 const ogImage = new URL(assetUrl(image), site);
 const siteUrl = site.toString().replace(/\/$/, '');
+// 顶栏日期取构建时间，避免 frozen 的旧日期造成"停更"误解
+const _bd = new Date();
+const issueDate = _bd.getFullYear() + '.' + String(_bd.getMonth() + 1).padStart(2, '0');
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
@@ -78,7 +81,7 @@ const websiteSchema = {
       <span>Vibe Coding · 全栈 · AI</span>
     </span>
     <span class='right'>
-      <span class='coord'>2026.05</span>
+      <span class='coord'>{issueDate}</span>
       <a class='topbar-link' href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>GitHub ↗</a>
     </span>
   </div>

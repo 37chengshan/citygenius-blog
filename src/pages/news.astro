@@ -3,21 +3,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsStyles from '../components/NewsStyles.astro';
 import { withBase } from '../lib/url';
 import { NEWS_CATS } from '../lib/news-cats.js';
+import { readFileSync } from 'node:fs';
+import { staticHub } from '../lib/news-render.js';
 
 const newsUrl = withBase('/news.json');
 const cats = NEWS_CATS.map((c) => ({ ...c, href: withBase('/news/' + c.id + '/') }));
+
+// 构建期快照：入口页六张板块卡片直接写进 HTML（爬虫可见），JS 加载后刷新为最新。
+let snapData = null;
+try {
+  snapData = JSON.parse(readFileSync(new URL('../../public/news.json', import.meta.url), 'utf-8'));
+} catch (e) {
+  snapData = null;
+}
+const hubHtml = staticHub(cats, snapData);
 const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: '新闻速览 — CityGenius Blog',
-  description: 'AI 科技、国际新闻、财经、体育、娱乐、无畏契约六个板块，每 10 分钟更新一次。',
+  description: 'AI 科技、国际新闻、财经、体育、娱乐、无畏契约六个板块，每日更新两次，突发新闻即时跟进。',
   inLanguage: 'zh-CN',
 };
 ---
 
 <BaseLayout
   title="新闻速览 — CityGenius Blog"
-  description="AI 科技、国际新闻、财经、体育、娱乐、无畏契约六个板块，每 10 分钟更新一次。"
+  description="AI 科技、国际新闻、财经、体育、娱乐、无畏契约六个板块，每日更新两次，突发新闻即时跟进。"
 >
   <Fragment slot="head">
     <NewsStyles />
@@ -28,9 +39,9 @@ const pageSchema = {
     <section class="tight news-page">
       <div class="sec-rule">
         <span><span class="roman">News</span> · 速览</span>
-        <span class="meta-grp"><span>每 10 分钟更新</span><span class="dot-mark">●</span><span>六个板块</span></span>
+        <span class="meta-grp"><span>每日两更</span><span class="dot-mark">●</span><span>突发即时跟进</span><span class="dot-mark">●</span><span>六个板块</span></span>
       </div>
-      <div class="hub-grid" id="news-hub"></div>
+      <div class="hub-grid" id="news-hub" set:html={hubHtml} />
       <p class="meta news-updated" id="news-updated">正在加载…</p>
     </section>
   </main>
@@ -111,7 +122,9 @@ const pageSchema = {
             .then(function (r) { return r.json(); })
             .then(render)
             .catch(function () {
-              hubEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
+              if (!hubEl.innerHTML.trim()) {
+                hubEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
+              }
             });
         }
         load();
