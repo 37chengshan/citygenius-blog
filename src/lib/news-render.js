@@ -122,16 +122,16 @@ export function staticHub(cats, data, linkArt) {
     }
     var n = ix + 1;
     html +=
-      '<a class="hub-card" href="' + esc(meta.href) + '">' +
+      '<div class="hub-card" data-href="' + esc(meta.href) + '">' +
       '<div class="hub-ix">' + (n < 10 ? '0' : '') + n + '</div>' +
       '<div class="hub-main">' +
-      '<div class="hub-title">' + esc(meta.label) + '<span class="count">' + items.length + ' 条</span></div>' +
+      '<div class="hub-title"><a href="' + esc(meta.href) + '">' + esc(meta.label) + '</a><span class="count">' + items.length + ' 条</span></div>' +
       '<div class="hub-desc">' + esc(meta.desc) + '</div>' +
       (tops ? '<ul class="hub-tops">' + tops + '</ul>' : '') +
       '</div>' +
       '<div class="hub-illus" aria-hidden="true">' + illusFor('hub-' + meta.id, meta.pal, false) + '</div>' +
-      '<div class="hub-arrow" aria-hidden="true">→</div>' +
-      '</a>';
+      '<a class="hub-arrow" aria-hidden="true" href="' + esc(meta.href) + '" tabindex="-1">→</a>' +
+      '</div>';
   }
   return html;
 }

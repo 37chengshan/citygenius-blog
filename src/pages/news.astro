@@ -102,17 +102,23 @@ const pageSchema = {
             }
           }
           var illus = NS ? '<div class="hub-illus" aria-hidden="true">' + NS.illusFor('hub-' + meta.id, meta.pal, false) + '</div>' : '';
-          return '<a class="hub-card" href="' + href + '">'
+          return '<div class="hub-card" data-href="' + href + '">'
             + '<div class="hub-ix">' + pad(ix + 1) + '</div>'
             + '<div class="hub-main">'
-            + '<div class="hub-title">' + esc(meta.label) + '<span class="count">' + items.length + ' 条</span></div>'
+            + '<div class="hub-title"><a href="' + href + '">' + esc(meta.label) + '</a><span class="count">' + items.length + ' 条</span></div>'
             + '<div class="hub-desc">' + esc(meta.desc) + '</div>'
             + (tops ? '<ul class="hub-tops">' + tops + '</ul>' : '')
             + '</div>'
             + illus
-            + '<div class="hub-arrow" aria-hidden="true">→</div>'
-            + '</a>';
+            + '<a class="hub-arrow" aria-hidden="true" href="' + href + '" tabindex="-1">→</a>'
+            + '</div>';
         }
+        // 点卡片空白处进板块；点到链接则走链接
+        hubEl.addEventListener('click', function (e) {
+          if (e.target.closest('a')) return;
+          var card = e.target.closest('.hub-card');
+          if (card && card.getAttribute('data-href')) location.href = card.getAttribute('data-href');
+        });
         function render(data) {
           var categories = (data && data.categories) || [];
           if (updatedEl && data && data.generated_at) {
