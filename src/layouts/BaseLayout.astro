@@ -34,6 +34,14 @@ const websiteSchema = {
   inLanguage: 'zh-CN',
   author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
 };
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'CityGenius',
+  url: 'https://citygenius-blog.pages.dev',
+  sameAs: ['https://github.com/37chengshan'],
+  knowsAbout: ['Vibe Coding', 'AI Agents', 'FastAPI', 'React', 'Android', 'Swift', '全栈开发'],
+};
 ---
 <!DOCTYPE html>
 <html lang='zh-CN'>
@@ -61,6 +69,7 @@ const websiteSchema = {
 <meta name='twitter:description' content={description} />
 <meta name='twitter:image' content={ogImage} />
 <script type='application/ld+json' set:html={JSON.stringify(websiteSchema)} />
+<script type='application/ld+json' set:html={JSON.stringify(personSchema)} />
 <link rel='preconnect' href='https://fonts.googleapis.com' />
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
 <link href={`https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500${extraFonts}&display=swap`} rel='stylesheet' />

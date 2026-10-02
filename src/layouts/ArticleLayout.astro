@@ -722,5 +722,59 @@ const articleSchema = {
     body .nav { padding-top: 10px !important; padding-bottom: 10px !important; }
     body .nav .brand-meta { display: none !important; }
     body .article-header { padding-top: 4px !important; }
+    /* TL;DR 总结框（GEO：15 秒答案） */
+    .article-body .prose .tldr {
+      background: var(--bone);
+      border-left: 4px solid var(--coral);
+      border-radius: 0 12px 12px 0;
+      padding: 18px 22px;
+      margin: 1.75em 0;
+      font-size: 15.5px;
+      line-height: 1.8;
+      color: var(--ink);
+    }
+    .article-body .prose .tldr b {
+      display: block;
+      color: var(--coral);
+      font-size: 12.5px;
+      letter-spacing: 0.14em;
+      margin-bottom: 8px;
+    }
+    /* FAQ 折叠块 */
+    .article-body .prose .faq {
+      margin: 1.75em 0;
+      display: grid;
+      gap: 10px;
+    }
+    .article-body .prose .faq details {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--bone);
+      overflow: hidden;
+    }
+    .article-body .prose .faq summary {
+      cursor: pointer;
+      font-weight: 700;
+      padding: 14px 18px;
+      list-style: none;
+      color: var(--ink);
+      font-size: 15.5px;
+    }
+    .article-body .prose .faq summary::-webkit-details-marker { display: none; }
+    .article-body .prose .faq summary::marker { content: ''; }
+    .article-body .prose .faq summary::before {
+      content: '+';
+      color: var(--coral);
+      font-weight: 800;
+      margin-right: 10px;
+    }
+    .article-body .prose .faq details[open] summary::before { content: '−'; }
+    .article-body .prose .faq details p {
+      margin: 0 !important;
+      padding: 2px 18px 16px 38px !important;
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--ink);
+    }
   </style>
 </BaseLayout>

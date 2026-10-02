@@ -6,9 +6,21 @@
 ## 站点信息
 - 首页: https://citygenius-blog.pages.dev/
 - 文章列表: https://citygenius-blog.pages.dev/article/
-- 新闻速览: https://citygenius-blog.pages.dev/news/ （AI 科技新闻，每 10 分钟更新）
+- 新闻速览: https://citygenius-blog.pages.dev/news/ （AI 科技、国际、财经、体育、娱乐、Valorant 六个板块，每 12 小时全量更新，突发新闻即时跟进；每条新闻有独立文章页）
 - RSS: https://citygenius-blog.pages.dev/rss.xml
 - Sitemap: https://citygenius-blog.pages.dev/sitemap-index.xml
+
+## 文章
+- 用 Vibe Coding 三天搞定一个全栈 AI 应用: https://citygenius-blog.pages.dev/article/vibe-coding-3-days/
+- 把 Agent Skill 当成可复用教案来写: https://citygenius-blog.pages.dev/article/agent-skill-as-lesson-plan/
+- 从开源设计到 Skill: https://citygenius-blog.pages.dev/article/open-design-to-skill/
+- d-token: https://citygenius-blog.pages.dev/article/project-d-token/
+- agent-mcp: https://citygenius-blog.pages.dev/article/project-agent-mcp/
+- ompweb: https://citygenius-blog.pages.dev/article/project-ompweb/
+- EduEvidence: https://citygenius-blog.pages.dev/article/project-eduevidence/
+- SwiftUI AppKit: https://citygenius-blog.pages.dev/article/swiftui-appkit/
+- Android 文件转换: https://citygenius-blog.pages.dev/article/android-file-conversion/
+- 本地 AI TFLite: https://citygenius-blog.pages.dev/article/local-ai-tflite/
 
 ## 内容领域
 - AI 应用与 Agent 开发（AI agents, multi-agent, MCP, Skill）

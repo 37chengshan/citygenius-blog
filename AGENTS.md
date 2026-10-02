@@ -10,7 +10,7 @@
 
 ## Article structure (MANDATORY)
 
-- Max **4 section titles** (`##`), short nouns only: 问题 / 做法 / 结果 / 现状. No colon subtitles (禁止「问题：xxx」).
+- Max **5 section titles** (`##`): 问题 / 做法 / 结果 / 现状 + 可选 常见问题（FAQ 问答区，内用 `###` 写具体问题）. TL;DR 总结框用 `div.tldr`（不占标题名额）. No colon subtitles (禁止「问题：xxx」).
 - Fold lessons/pitfalls into body prose; do not invent 踩坑/核心思想/还差什么 headers.
 - **figcaption** is reader-facing scientific description of the image (like OpenAI). Forbidden: 「真实编排图」「官方示意」「从终端长成工作区」这种编辑部/交接腔.
 - Opening: 2–3 concrete paragraphs, no section header before 问题.
