@@ -45,6 +45,11 @@ related:
 
 **AI 不缺搜索，缺的是证据纪律。**
 
+<div class="tldr">
+<b>一句话总结</b>
+EduEvidence 是一个 AI Agent Skill，专门治"AI 给教育决策出主意时满口顺话、没有证据"的毛病。它定死三条规矩：检索片段只是线索、不算证据；没有证据接地的知识缺口，就不许设计新研究；真正的事实层是版本化、不可变的 Evidence Graph，报告只是投影。最后不给你"行/不行"二选一，而是 ADOPT、试点、驳回、证据不足四种结论，外加怎么试点、怎么验证。
+</div>
+
 EduEvidence 要做的，是把「决策问题」变成「有证据支撑、可试点、可评估」的答案，而不是一段更长的摘要。
 
 README 的产品句是：**From Research Questions to Evidence-Based Decisions.**
@@ -132,3 +137,15 @@ open examples/ai-coding-assistant-evidence/EduEvidence_Report.html
 它不会替你做教育决策。它只保证：在你说「上」或「不上」之前，证据从哪来、Gap 是什么、试点怎么验——写清楚。
 
 主仓库：[37chengshan/eduevidence](https://github.com/37chengshan/eduevidence)。
+
+## 常见问题
+### EduEvidence 和直接问 AI 有什么区别？
+直接问 AI，你得到的是一段听起来很顺的话；EduEvidence 把决策问题压成有证据支撑、可试点、可评估的回答，最后给出 ADOPT、试点、驳回、证据不足四种结论，外加可执行的干预与评估计划。
+### 检索到的论文摘要算证据吗？
+不算。检索片段只是定位器，是线索；要成为证据，必须进入可追溯的引用链。这是第一条冻结原则。
+### 它会直接告诉我该不该给学生上 AI 编程助手吗？
+不会替你做决策。它只保证：在你说「上」或「不上」之前，证据从哪来、知识缺口是什么、试点怎么验——都写清楚。
+### 一定要装 Agent MCP 才能用吗？
+不用。Native Core 只依赖 Python 标准库，不绑死在某一个编排框架上；Claude Code、Cursor、Codex、OMP 等宿主都可以自动加载这个 Skill。
+### 「证据不足」算失败吗？
+不算。它是合法结论，不是失败。四态比二值难卖，但更有用。

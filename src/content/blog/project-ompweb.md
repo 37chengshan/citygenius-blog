@@ -45,6 +45,11 @@ related:
 
 想回看昨天的会话，只能 `ls` 一堆 JSONL。想同时开三个分支对比，只能开三个终端窗口。想看 MCP 有没有挂上，翻配置文件。想切 Git worktree，再开一个 pane。
 
+<div class="tldr">
+<b>一句话总结</b>
+ompweb 是给 oh-my-pi 配的一张本地工作台：不重写 Agent，只读它的会话文件，把会话树、终端、MCP 状态、Git worktree 摊在一张桌子上看。设计上只有一条硬规矩——OMP 写会话、ompweb 只做展示和编排，会话权威永远在 OMP 那边。技术栈是 Next.js 16 + Electron 44，一行 npx 就能跑起来。
+</div>
+
 我不是想换掉 omp。我是想要一张**桌子**：把已经存在的会话、终端、文件、MCP 状态摊开看。
 
 ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、本地优先的 Web 工作区与原生桌面应用**。
@@ -120,3 +125,25 @@ npx @37chengshan/ompweb@latest
 ```
 
 主仓库：[37chengshan/ompweb](https://github.com/37chengshan/ompweb)。
+
+## 常见问题
+
+### ompweb 是要替代 omp 吗？
+
+不是。作者明确说不是想换掉 omp，而是想要一张"桌子"。ompweb 不重写 Agent，只读它的会话文件；live 执行仍然走 omp，站在 omp 旁边而不是对面。
+
+### 它怎么读到我的会话的？
+
+`~/.omp/agent/sessions/` 是唯一会话权威：本地历史用 Node 直接扫 JSONL，live 工作走 `omp --mode rpc-ui`（stdio 上的 NDJSON）。一句话：OMP 写会话，ompweb 展示和编排。
+
+### 用它改会话内容安全吗？
+
+写路径被故意做得很窄，只保留 rename / archive / delete / branch-parent 这类低风险操作。什么都想写，就会和 live 进程打架——这是作者有意设的边界。
+
+### 怎么跑起来？要什么环境？
+
+Web 版一行命令：`npx @37chengshan/ompweb@latest`，默认监听 127.0.0.1:30177；也有桌面安装包（mac / Windows / Linux）。技术栈是 Next.js 16 + Electron 44，要求 Node ≥ 22.19，MIT 许可。
+
+### 能在服务器上远程用吗？
+
+可以，有 `--password`、`--hostname`、`--no-open` 参数，适合服务器后台。默认只走 loopback，作者提醒文档和默认安全必须跟上。
