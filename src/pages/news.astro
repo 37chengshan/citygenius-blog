@@ -136,7 +136,7 @@ const pageSchema = {
             var tops = '';
             for (var t = 0; t < Math.min(3, items.length); t++) {
               var it = items[t];
-              var inner = langSpans(it.title || '', it.zh_title || it.title || '');
+              var inner = langSpans(it.en_title || it.title || '', it.zh_title || it.title || '');
               if (NS) {
                 var ahref = base + NS.articlePath(meta.id, NS.slugFor(it.link || it.title));
                 tops += '<li><a href="' + esc(ahref) + '">' + inner + '</a></li>';

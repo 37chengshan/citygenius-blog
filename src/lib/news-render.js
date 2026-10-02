@@ -66,11 +66,11 @@ function staticDateLine(pub, src, lang) {
 /** 卡片正文双语：EN=英文标题+英文摘要；ZH=中文标题+中文摘要+中文解读。 */
 function cardBody(it, tag) {
   var zhTitle = it.zh_title || it.title || '';
-  var enTitle = it.title || '';
+  var enTitle = it.en_title || it.title || '';
   var zhSum = it.zh_summary || '';
-  var enSum = it.summary || '';
+  var enSum = it.en_summary || it.summary || '';
   var take = it.zh_take
-    ? '<div class="take"><b>解读</b>' + esc(it.zh_take) + '</div>'
+    ? '<div class="lang-zh"><div class="take"><b>解读</b>' + esc(it.zh_take) + '</div></div>'
     : '';
   return (
     '<div class="card-body">' +
@@ -177,7 +177,7 @@ export function staticHub(cats, data, linkArt) {
     for (var t = 0; t < Math.min(3, items.length); t++) {
       var it = items[t];
       tops += '<li><a href="' + esc(linkArt(meta.id, slugFor(it.link || it.title))) + '">' +
-        langSpans(it.title || '', it.zh_title || it.title || '') + '</a></li>';
+        langSpans(it.en_title || it.title || '', it.zh_title || it.title || '') + '</a></li>';
     }
     var n = ix + 1;
     var L = catLabel(meta.id) || { en: meta.label, zh: meta.label, descEn: meta.desc, descZh: meta.desc };
@@ -207,7 +207,7 @@ export function itemListSchema(label, items, labelEn) {
       return {
         '@type': 'ListItem',
         position: i + 1,
-        name: it.title || it.zh_title,
+        name: it.en_title || it.title || it.zh_title,
         url: it.link,
       };
     }),
@@ -216,11 +216,11 @@ export function itemListSchema(label, items, labelEn) {
 
 /* ---------- 文章页 chrome 双语 helper（供 news/[category]/[slug].astro 用） ---------- */
 
-/** 文章页解读块：EN 模式也保留，配英文小标签 Editor's take。 */
+/** 文章页解读块：中文解读，仅中文模式显示。 */
 export function takeHtml(take) {
   if (!take) return '';
-  return '<div class="take"><b><span class="lang-en">Editor\'s take</span><span class="lang-zh">解读</span></b>' +
-    esc(take) + '</div>';
+  return '<div class="lang-zh"><div class="take"><b>解读</b>' +
+    esc(take) + '</div></div>';
 }
 
 /** "阅读原文"按钮：英文默认 + data-i18n。 */

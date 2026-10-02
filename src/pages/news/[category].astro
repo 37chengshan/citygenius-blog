@@ -127,11 +127,11 @@ const pageSchema = {
 
         function cardBody(it, tag) {
           var zhTitle = it.zh_title || it.title || '';
-          var enTitle = it.title || '';
+          var enTitle = it.en_title || it.title || '';
           var zhSum = it.zh_summary || '';
-          var enSum = it.summary || '';
+          var enSum = it.en_summary || it.summary || '';
           var take = it.zh_take
-            ? '<div class="take"><b><span class="lang-en">Editor\'s take</span><span class="lang-zh">解读</span></b>' + esc(it.zh_take) + '</div>'
+            ? '<div class="lang-zh"><div class="take"><b>解读</b>' + esc(it.zh_take) + '</div></div>'
             : '';
           return '<div class="card-body">'
             + '<div class="lang-en">'

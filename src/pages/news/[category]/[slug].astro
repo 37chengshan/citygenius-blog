@@ -46,9 +46,9 @@ const catEn = catL.en || meta.label;
 
 const pEn = dateParts(item.published, 'en');
 const pZh = dateParts(item.published, 'zh') || dateParts(item.published);
-const enTitle = item.title || '';
+const enTitle = item.en_title || item.title || '';
 const zhTitle = item.zh_title || item.title;
-const enParas = (item.summary || '').split('\n').filter((s) => s.trim());
+const enParas = (item.en_summary || item.summary || '').split('\n').filter((s) => s.trim());
 const zhParas = (item.zh_summary || '').split('\n').filter((s) => s.trim());
 
 const newsSchema = {
@@ -63,7 +63,7 @@ const newsSchema = {
 };
 ---
 
-<BaseLayout title={enTitle + ' — ' + catEn + ' — CityGenius Blog'} description={(item.summary || '').slice(0, 150)}>
+<BaseLayout title={enTitle + ' — ' + catEn + ' — CityGenius Blog'} description={(item.en_summary || item.summary || '').slice(0, 150)}>
   <Fragment slot="head">
     <NewsStyles />
     <script type="application/ld+json" set:html={JSON.stringify(newsSchema)} />
