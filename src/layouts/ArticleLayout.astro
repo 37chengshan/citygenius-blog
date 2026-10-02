@@ -2,32 +2,50 @@
 import BaseLayout from './BaseLayout.astro';
 import { assetUrl, withBase } from '../lib/url';
 
+interface RelatedItem { date: string; title: string; desc: string; tag: string; slug: string; }
+
 interface Props {
-  title: string;
-  description: string;
+  zhTitle: string;
+  enTitle: string;
+  zhDesc: string;
+  enDesc: string;
   tag: string;
+  zhTag: string;
   date: string;
   readTime: string;
+  zhReadTime: string;
   authorMeta: string;
+  zhAuthorMeta: string;
   image: string;
+  imageWidth: number;
+  imageHeight: number;
   imageAlt: string;
   sideNote: string;
   caption: string;
   tags: string[];
+  zhTags: string[];
   tagFilters: Record<string, string>;
-  related: { date: string; title: string; desc: string; tag: string; slug: string; }[];
+  zhTagFilters: Record<string, string>;
+  related: RelatedItem[];
+  zhRelated: RelatedItem[];
 }
 
-const { title, description, tag, date, readTime, authorMeta, image, imageAlt, sideNote, caption, tags, tagFilters, related } = Astro.props;
-const plainTitle = title.replace(/<[^>]+>/g, '');
+const {
+  zhTitle, enTitle, zhDesc, enDesc,
+  tag, zhTag, date, readTime, zhReadTime,
+  authorMeta, zhAuthorMeta, image, imageWidth, imageHeight, imageAlt,
+  sideNote, caption, tags, zhTags, tagFilters, zhTagFilters,
+  related, zhRelated,
+} = Astro.props;
+const plainTitle = enTitle.replace(/<[^>]+>/g, '');
 const articleSite = (Astro.site ?? new URL('https://37chengshan.github.io')).toString().replace(/\/$/, '');
 const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: plainTitle,
-  description: description,
+  description: enDesc,
   datePublished: date.replace(/\./g, '-'),
-  inLanguage: 'zh-CN',
+  inLanguage: 'en',
   author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
   image: `${articleSite}/assets/${String(image).replace(/^\/+/, '')}`,
   mainEntityOfPage: `${articleSite}${Astro.url.pathname}`,
@@ -36,7 +54,7 @@ const articleSchema = {
 
 <BaseLayout
   title={`${plainTitle} — CityGenius Blog`}
-  description={description}
+  description={enDesc}
   extraFonts="&family=Noto+Serif+SC:wght@400;500;600;700"
   image={image}
   imageAlt={imageAlt}
@@ -564,21 +582,26 @@ const articleSchema = {
     <div class='container header-shell'>
       <div class='header-grid'>
         <div class='header-copy'>
-          <a class='back-link' href={withBase('/article/')} data-reveal>返回文章列表</a>
+          <a class='back-link' href={withBase('/article/')} data-reveal data-i18n='article.back'>Back to articles</a>
           <div class='article-meta-top' data-reveal>
-            <span class='tag'>{tag}</span>
+            <span class='tag lang-en'>{tag}</span>
+            <span class='tag lang-zh'>{zhTag}</span>
           </div>
-          <h1 data-reveal><Fragment set:html={title} /><span class='dot'>.</span></h1>
+          <h1 data-reveal><span class='lang-en'><Fragment set:html={enTitle} /></span><span class='lang-zh'><Fragment set:html={zhTitle} /></span><span class='dot'>.</span></h1>
+          <p class='lead lang-en' data-reveal>{enDesc}</p>
+          <p class='lead lang-zh' data-reveal>{zhDesc}</p>
           <div class='article-meta-top' data-reveal style='margin-bottom:22px;'>
             <span>{date}</span>
             <span>·</span>
-            <span>{readTime}</span>
+            <span class='lang-en'>{readTime}</span>
+            <span class='lang-zh'>{zhReadTime}</span>
           </div>
           <div class='article-author' data-reveal>
             <span class='avatar'>C</span>
             <div class='info'>
               CityGenius
-              <span>{authorMeta}</span>
+              <span class='lang-en'>{authorMeta}</span>
+              <span class='lang-zh'>{zhAuthorMeta}</span>
             </div>
           </div>
         </div>
@@ -595,13 +618,16 @@ const articleSchema = {
 
   {/* BODY + FLOATING TOC */}
   <div class='article-shell'>
-    <aside class='article-toc' aria-label='目录' data-reveal>
-      <div class='toc-label'>目录</div>
+    <aside class='article-toc' aria-label='Table of contents' data-reveal>
+      <div class='toc-label' data-i18n='article.toc'>Contents</div>
       <ul data-toc-list></ul>
     </aside>
     <article class='article-body' style='padding-top:24px;'>
-      <div class='prose' data-reveal>
-        <slot />
+      <div class='lang-en'>
+        <div class='prose' data-reveal><slot name="enBody" /></div>
+      </div>
+      <div class='lang-zh'>
+        <div class='prose' data-reveal><slot name="zhBody" /></div>
       </div>
     </article>
   </div>
@@ -609,15 +635,20 @@ const articleSchema = {
   {/* ARTICLE FOOTER */}
   <div class='article-footer'>
     <div class='container narrow'>
-      <div class='article-tags' data-reveal>
+      <div class='article-tags lang-en' data-reveal>
         {tags.map((t) => (
           <a class='tag-pill' href={withBase(`/article/?category=${tagFilters[t] || 'all'}`)}>{t}</a>
         ))}
       </div>
+      <div class='article-tags lang-zh' data-reveal>
+        {zhTags.map((t) => (
+          <a class='tag-pill' href={withBase(`/article/?category=${zhTagFilters[t] || 'all'}`)}>{t}</a>
+        ))}
+      </div>
       <div class='share-row' data-reveal>
-        <span>分享：</span>
+        <span data-i18n='article.share'>Share:</span>
         <a href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>GitHub</a>
-        <a href={withBase('/article/')}>返回文章列表</a>
+        <a href={withBase('/article/')} data-i18n='article.back'>Back to articles</a>
       </div>
     </div>
   </div>
@@ -625,9 +656,19 @@ const articleSchema = {
   {/* RELATED */}
   <section class='related'>
     <div class='container narrow'>
-      <h3 data-reveal>相关文章</h3>
-      <div class='related-grid'>
+      <h3 data-reveal data-i18n='article.related'>Related</h3>
+      <div class='related-grid lang-en'>
         {related.map((r) => (
+          <a class='related-card' href={withBase(`/article/${r.slug}/`)} data-reveal>
+            <span class='rc-date'>{r.date}</span>
+            <h4>{r.title}</h4>
+            <p>{r.desc}</p>
+            <span class='rc-tag'>{r.tag}</span>
+          </a>
+        ))}
+      </div>
+      <div class='related-grid lang-zh'>
+        {zhRelated.map((r) => (
           <a class='related-card' href={withBase(`/article/${r.slug}/`)} data-reveal>
             <span class='rc-date'>{r.date}</span>
             <h4>{r.title}</h4>
@@ -642,20 +683,21 @@ const articleSchema = {
   <script>
     (function () {
       var list = document.querySelector('[data-toc-list]');
-      var prose = document.querySelector('.article-body .prose');
-      if (!list || !prose) return;
-      var heads = Array.prototype.slice.call(prose.querySelectorAll('h2'));
-      if (!heads.length) return;
-      heads.forEach(function (h, i) {
-        if (!h.id) h.id = 'section-' + (i + 1);
-        var li = document.createElement('li');
-        var a = document.createElement('a');
-        a.href = '#' + h.id;
-        a.textContent = h.textContent.replace(/\.$/, '');
-        li.appendChild(a);
-        list.appendChild(li);
-      });
-      var links = Array.prototype.slice.call(list.querySelectorAll('a'));
+      var shell = document.querySelector('.article-shell');
+      if (!list || !shell) return;
+      var heads = [];
+      var links = [];
+      function visibleProse() {
+        var proses = shell.querySelectorAll('.article-body .prose');
+        for (var i = 0; i < proses.length; i++) {
+          if (getComputedStyle(proses[i]).display !== 'none') return proses[i];
+        }
+        return proses[0] || null;
+      }
+      function proseLang(prose) {
+        var wrap = prose.closest('.lang-en, .lang-zh');
+        return wrap && wrap.classList.contains('lang-zh') ? 'zh' : 'en';
+      }
       function onScroll() {
         var y = window.scrollY + 96;
         var active = 0;
@@ -666,8 +708,33 @@ const articleSchema = {
           links[j].classList.toggle('is-active', j === active);
         }
       }
+      function build() {
+        list.innerHTML = '';
+        heads = [];
+        links = [];
+        var prose = visibleProse();
+        if (!prose) return;
+        var lang = proseLang(prose);
+        heads = Array.prototype.slice.call(prose.querySelectorAll('h2'));
+        heads.forEach(function (h, i) {
+          if (!h.id) h.id = lang + '-section-' + (i + 1);
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.href = '#' + h.id;
+          a.textContent = h.textContent.replace(/\.$/, '');
+          li.appendChild(a);
+          list.appendChild(li);
+        });
+        links = Array.prototype.slice.call(list.querySelectorAll('a'));
+        onScroll();
+      }
       window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
+      build();
+      // Rebuild the TOC when the language layer switches
+      if (window.MutationObserver) {
+        new MutationObserver(function () { build(); })
+          .observe(document.documentElement, { attributes: true, attributeFilter: ['data-lang'] });
+      }
     })();
   </script>
 

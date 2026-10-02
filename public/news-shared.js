@@ -6,7 +6,7 @@
 //     （`npm run build` 的 prebuild 自动执行），挂为 `window.NewsShared`。
 // 改这里只需要改一处，生成脚本会同步到浏览器端。
 
-export function esc(s) {
+function esc(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -15,7 +15,7 @@ export function esc(s) {
 }
 
 /** 由原文链接算稳定 slug（FNV-1a 32bit → 8 位 hex）。 */
-export function slugFor(link) {
+function slugFor(link) {
   var h = 0x811c9dc5;
   var s = String(link || '');
   for (var i = 0; i < s.length; i++) {
@@ -26,7 +26,7 @@ export function slugFor(link) {
 }
 
 /** 站内文章路径（调用方再套 withBase）。 */
-export function articlePath(catId, slug) {
+function articlePath(catId, slug) {
   return '/news/' + catId + '/' + slug + '/';
 }
 
@@ -40,7 +40,7 @@ function dObj(iso) {
 }
 
 /** 日期三件套。lang='en' 时输出英文（Oct 2 / Fri）；默认中文。 */
-export function dateParts(iso, lang) {
+function dateParts(iso, lang) {
   var d = dObj(iso);
   if (!d) return null;
   var m = d.getMinutes();
@@ -57,7 +57,7 @@ export function dateParts(iso, lang) {
   };
 }
 
-export function fullTime(iso, lang) {
+function fullTime(iso, lang) {
   try {
     return new Date(iso).toLocaleString(lang === 'en' ? 'en-US' : 'zh-CN', { hour12: false });
   } catch (e) {
@@ -66,7 +66,7 @@ export function fullTime(iso, lang) {
 }
 
 /** 相对时间。lang='en' 时输出英文（just now / 5 mins ago …）；默认中文。 */
-export function relTime(iso, lang) {
+function relTime(iso, lang) {
   var d = dObj(iso);
   if (!d) return '';
   var diff = Date.now() - d.getTime();
@@ -101,7 +101,7 @@ export function relTime(iso, lang) {
  * 浏览器端经 gen-news-shared.js 生成后挂 window.NewsShared.CAT_LABELS。
  * news-cats.js 不在此改——如后续它加了 en 字段，以它为准合并（见 NEWS_WORKFLOW.md）。
  */
-export var CAT_LABELS = {
+var CAT_LABELS = {
   ai:       { en: 'AI Tech',       zh: 'AI 科技',   descEn: 'LLMs, agents, and big tech stories', descZh: '大模型、Agent 与科技圈大事' },
   world:    { en: 'World',         zh: '国际新闻', descEn: "What's happening around the world",  descZh: '全球正在发生的事' },
   finance:  { en: 'Finance',       zh: '财经',     descEn: 'Markets, companies, and money',       descZh: '市场、公司与钱' },
@@ -111,7 +111,7 @@ export var CAT_LABELS = {
 };
 
 /** 取板块双语名；未知 id 返回 null（调用方回退中文名）。 */
-export function catLabel(id) {
+function catLabel(id) {
   return Object.prototype.hasOwnProperty.call(CAT_LABELS, id) ? CAT_LABELS[id] : null;
 }
 
@@ -527,10 +527,10 @@ var DESIGNS = [
   d31, d32, d33, d34, d35, d36,
 ];
 
-export var ILLUS_COUNT = DESIGNS.length;
+var ILLUS_COUNT = DESIGNS.length;
 
 /** 按种子选一款插图并渲染为 SVG 字符串（同一种子永远同一款）。 */
-export function illusFor(seed, pal, wide) {
+function illusFor(seed, pal, wide) {
   var R = mulberry32(xmur3(String(seed || 'news'))());
   var W = wide ? 760 : 400,
     H = wide ? 300 : 250;
@@ -543,3 +543,5 @@ export function illusFor(seed, pal, wide) {
     '</svg>'
   );
 }
+
+window.NewsShared = { esc, slugFor, articlePath, dateParts, fullTime, relTime, CAT_LABELS, catLabel, ILLUS_COUNT, illusFor };
