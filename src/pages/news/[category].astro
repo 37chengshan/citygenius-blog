@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NewsStyles from '../../components/NewsStyles.astro';
+import { withBase } from '../../lib/url';
+import { NEWS_CATS } from '../../lib/news-cats.js';
+
+export function getStaticPaths() {
+  return NEWS_CATS.map((c) => ({ params: { category: c.id } }));
+}
+
+const { category } = Astro.params;
+const ix = NEWS_CATS.findIndex((c) => c.id === category);
+const meta = NEWS_CATS[ix];
+const prev = NEWS_CATS[(ix + NEWS_CATS.length - 1) % NEWS_CATS.length];
+const next = NEWS_CATS[(ix + 1) % NEWS_CATS.length];
+
+const newsUrl = withBase('/news.json');
+const hubHref = withBase('/news/');
+const prevHref = withBase('/news/' + prev.id + '/');
+const nextHref = withBase('/news/' + next.id + '/');
+
+const pad = (n: number) => (n < 10 ? '0' : '') + n;
+
+const pageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: meta.label + ' — 新闻速览 — CityGenius Blog',
+  description: meta.desc + '，每 10 分钟更新一次。',
+  inLanguage: 'zh-CN',
+};
+---
+
+<BaseLayout
+  title={meta.label + ' — 新闻速览 — CityGenius Blog'}
+  description={meta.desc + '，每 10 分钟更新一次。'}
+>
+  <Fragment slot="head">
+    <NewsStyles />
+    <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
+  </Fragment>
+
+  <main class="container" id="top">
+    <section class="tight news-page">
+      <div class="sec-rule">
+        <span class="crumb"><a href={hubHref}><span class="roman">News</span></a> · {meta.label}</span>
+        <span class="meta-grp"><span id="news-updated">正在加载…</span><span class="dot-mark">●</span><span id="news-count"></span></span>
+      </div>
+      <div class="cat-head">
+        <span class="module-ix">{pad(ix + 1)}</span>
+        <h1>{meta.label}</h1>
+      </div>
+      <p class="cat-desc">{meta.desc}</p>
+      <div class="news-grid" id="news-grid" style="margin-top: 28px;"></div>
+      <nav class="cat-nav" aria-label="板块导航">
+        <a href={prevHref}>← {prev.label}</a>
+        <a href={hubHref}>全部板块</a>
+        <a href={nextHref}>{next.label} →</a>
+      </nav>
+    </section>
+  </main>
+
+  <Fragment slot="scripts">
+    <script define:vars={{ newsUrl, catId: category }}>
+      import { newsCard } from '../../lib/news-card.js';
+      (function () {
+        var gridEl = document.getElementById('news-grid');
+        var updatedEl = document.getElementById('news-updated');
+        var countEl = document.getElementById('news-count');
+        function fmtTime(iso) {
+          try {
+            return new Date(iso).toLocaleString('zh-CN', { hour12: false });
+          } catch (e) {
+            return iso;
+          }
+        }
+        function render(data) {
+          var categories = (data && data.categories) || [];
+          var c = null;
+          for (var k = 0; k < categories.length; k++) {
+            if (categories[k].id === catId) {
+              c = categories[k];
+              break;
+            }
+          }
+          if (updatedEl && data && data.generated_at) {
+            updatedEl.textContent = '更新于 ' + fmtTime(data.generated_at);
+          }
+          var items = (c && c.items) || [];
+          if (countEl) countEl.textContent = items.length + ' 条';
+          if (!items.length) {
+            gridEl.innerHTML = '<div class="news-empty">这个板块的新闻正在抓取，稍后再来看看。</div>';
+            return;
+          }
+          var html = '';
+          for (var i = 0; i < items.length; i++) html += newsCard(items[i]);
+          gridEl.innerHTML = html;
+        }
+        function load() {
+          fetch(newsUrl + '?t=' + Date.now(), { cache: 'no-store' })
+            .then(function (r) { return r.json(); })
+            .then(render)
+            .catch(function () {
+              gridEl.innerHTML = '<div class="news-empty">新闻加载失败，稍后再试。</div>';
+            });
+        }
+        load();
+        setInterval(load, 10 * 60 * 1000);
+      })();
+    </script>
+  </Fragment>
+</BaseLayout>
