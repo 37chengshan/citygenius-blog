@@ -17,6 +17,7 @@
 - d-token: https://citygenius-blog.pages.dev/article/project-d-token/
 - agent-mcp: https://citygenius-blog.pages.dev/article/project-agent-mcp/
 - ompweb: https://citygenius-blog.pages.dev/article/project-ompweb/
+- 今日小票: https://citygenius-blog.pages.dev/article/project-xiaopiao/
 - EduEvidence: https://citygenius-blog.pages.dev/article/project-eduevidence/
 - SwiftUI AppKit: https://citygenius-blog.pages.dev/article/swiftui-appkit/
 - Android 文件转换: https://citygenius-blog.pages.dev/article/android-file-conversion/
