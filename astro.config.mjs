@@ -10,6 +10,12 @@ export default defineConfig({
   integrations: [
     sitemap(),
   ],
+  markdown: {
+    shikiConfig: {
+      themes: { light: 'github-light', dark: 'github-dark' },
+      defaultColor: false,
+    },
+  },
   image: {
     service: { entrypoint: 'astro/assets/services/sharp' },
   },

@@ -1,0 +1,38 @@
+{
+  "cell": [
+    26,
+    21
+  ],
+  "atlas": [
+    338,
+    63
+  ],
+  "faces": [
+    "idle",
+    "blink",
+    "content",
+    "happy",
+    "sleepy",
+    "surprised",
+    "think",
+    "wink",
+    "cheer",
+    "love",
+    "star",
+    "sad",
+    "shy"
+  ],
+  "props": [
+    "none",
+    "wave1",
+    "wave2",
+    "zzz1",
+    "zzz2",
+    "heart",
+    "sweat",
+    "bang",
+    "ques",
+    "note",
+    "sparkle"
+  ]
+}

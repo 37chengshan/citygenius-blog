@@ -1,0 +1,173 @@
+---
+import meta from '../data/mascot.json';
+import { withBase } from '../lib/url';
+
+interface Props {
+  scale?: number;
+  face?: string;
+  prop?: string;
+  greet?: boolean;
+  label: string;
+  class?: string;
+  id?: string;
+}
+const { scale = 3, face = 'idle', prop = 'none', greet = false, label, class: cls = '', id } = Astro.props;
+const [cw, ch] = meta.cell;
+const [aw, ah] = meta.atlas;
+const faceCss = meta.faces.map((f, i) => `.pxcat[data-face='${f}'] .pxcat-face{--col:${i}}`).join('');
+const propCss = meta.props.map((p, i) => `.pxcat[data-prop='${p}'] .pxcat-prop{--col:${i}}`).join('');
+---
+<button
+  type='button'
+  class={`pxcat ${cls}`}
+  id={id}
+  data-face={face}
+  data-prop={prop}
+  data-base-face={face}
+  data-greet={greet ? '' : undefined}
+  aria-label={label}
+  title={label}
+  style={`--s:${scale};--cw:${cw}px;--ch:${ch}px;--aw:${aw}px;--ah:${ah}px;--cat:url('${withBase('/mascot/cat.png')}')`}
+>
+  <i class='pxcat-body' aria-hidden='true'></i>
+  <i class='pxcat-face' aria-hidden='true'></i>
+  <i class='pxcat-prop' aria-hidden='true'></i>
+</button>
+
+<style is:global set:html={faceCss + propCss}></style>
+<style is:global>
+  .pxcat {
+    --u: calc(var(--s) * 1px);
+    position: relative;
+    display: inline-block;
+    width: calc(var(--cw) * var(--s));
+    height: calc(var(--ch) * var(--s));
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    animation: pxcat-breathe 2.4s steps(1, end) infinite;
+  }
+  .pxcat:focus-visible { outline: 2px dashed var(--coral, var(--coral)); outline-offset: 4px; }
+  .pxcat i {
+    position: absolute;
+    inset: 0;
+    --col: 0;
+    background-image: var(--cat);
+    background-repeat: no-repeat;
+    background-size: calc(var(--aw) * var(--s)) calc(var(--ah) * var(--s));
+    image-rendering: pixelated;
+    pointer-events: none;
+  }
+  .pxcat-body { background-position: 0 0; animation: pxcat-tail 5.2s step-end infinite; }
+  .pxcat-face { background-position: calc(var(--col) * var(--cw) * var(--s) * -1) calc(var(--ch) * var(--s) * -1); }
+  .pxcat-prop { background-position: calc(var(--col) * var(--cw) * var(--s) * -1) calc(var(--ch) * var(--s) * -2); }
+  .pxcat.is-hop { animation: pxcat-hop 420ms steps(1, end); }
+  @keyframes pxcat-breathe {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 var(--u); }
+  }
+  @keyframes pxcat-hop {
+    0% { translate: 0 0; }
+    20% { translate: 0 calc(var(--u) * -3); }
+    45% { translate: 0 calc(var(--u) * -5); }
+    70% { translate: 0 calc(var(--u) * -2); }
+    100% { translate: 0 0; }
+  }
+  @keyframes pxcat-tail {
+    0% { background-position: 0 0; }
+    62% { background-position: calc(var(--cw) * var(--s) * -1) 0; }
+    68% { background-position: 0 0; }
+    74% { background-position: calc(var(--cw) * var(--s) * -2) 0; }
+    80% { background-position: 0 0; }
+    86% { background-position: calc(var(--cw) * var(--s) * -1) 0; }
+    92% { background-position: 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pxcat, .pxcat-body, .pxcat.is-hop { animation: none; }
+  }
+</style>
+
+<script>
+  const REACTIONS: [string, string][] = [
+    ['love', 'heart'], ['star', 'sparkle'], ['wink', 'none'], ['cheer', 'sparkle'],
+    ['happy', 'note'], ['surprised', 'bang'], ['shy', 'sweat'], ['content', 'none'],
+  ];
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cats = Array.from(document.querySelectorAll<HTMLElement>('.pxcat'));
+  type Cat = HTMLElement & { _t?: number; _busy?: boolean; _sleep?: boolean; _z?: number };
+
+  const set = (el: HTMLElement, face: string, prop = 'none') => { el.dataset.face = face; el.dataset.prop = prop; };
+  const rest = (el: Cat) => { el._busy = false; set(el, el.dataset.baseFace || 'idle'); };
+  const play = (el: Cat, face: string, prop = 'none', ms = 1500, hop = false) => {
+    wake(el);
+    window.clearTimeout(el._t);
+    el._busy = true;
+    set(el, face, prop);
+    if (hop && !reduce) { el.classList.remove('is-hop'); void el.offsetWidth; el.classList.add('is-hop'); }
+    el._t = window.setTimeout(() => rest(el), ms);
+  };
+  const sleep = (el: Cat) => {
+    if (el._sleep || el._busy) return;
+    el._sleep = true;
+    let flip = false;
+    set(el, 'sleepy', 'zzz1');
+    el._z = window.setInterval(() => { flip = !flip; el.dataset.prop = flip ? 'zzz2' : 'zzz1'; }, 700);
+  };
+  const wake = (el: Cat) => {
+    if (!el._sleep) return;
+    el._sleep = false;
+    window.clearInterval(el._z);
+    rest(el);
+  };
+
+  let reaction = Math.floor(Math.random() * REACTIONS.length);
+  cats.forEach((el: Cat) => {
+    el.addEventListener('pointerenter', () => { if (!el._busy) set(el, 'content'); });
+    el.addEventListener('pointerleave', () => { if (!el._busy && !el._sleep) rest(el); });
+    el.addEventListener('click', () => {
+      const [f, p] = REACTIONS[reaction++ % REACTIONS.length];
+      play(el, f, p, 1600, true);
+    });
+    if (el.hasAttribute('data-greet') && !reduce) {
+      el._busy = true;
+      let n = 0;
+      set(el, 'happy', 'wave1');
+      const w = window.setInterval(() => {
+        n++;
+        el.dataset.prop = n % 2 ? 'wave2' : 'wave1';
+        if (n >= 7) { window.clearInterval(w); rest(el); }
+      }, 220);
+    }
+  });
+
+  // Blink now and then.
+  if (!reduce) {
+    const blink = () => {
+      cats.forEach((el: Cat) => {
+        if (el._busy || el._sleep || el.dataset.face !== (el.dataset.baseFace || 'idle')) return;
+        el.dataset.face = 'blink';
+        window.setTimeout(() => { if (el.dataset.face === 'blink') el.dataset.face = el.dataset.baseFace || 'idle'; }, 140);
+      });
+      window.setTimeout(blink, 2400 + Math.random() * 3200);
+    };
+    window.setTimeout(blink, 1800);
+  }
+
+  // Doze off when the reader goes quiet; wake up on any input.
+  let idleTimer = 0;
+  const poke = () => {
+    window.clearTimeout(idleTimer);
+    cats.forEach((el: Cat) => { if (el._sleep) play(el, 'surprised', 'bang', 700); });
+    if (!reduce) idleTimer = window.setTimeout(() => cats.forEach((el) => sleep(el)), 30000);
+  };
+  ['pointermove', 'keydown', 'scroll', 'touchstart'].forEach((t) => window.addEventListener(t, poke, { passive: true }));
+  poke();
+
+  // Pages can ask the cats to react: dispatchEvent(new CustomEvent('pxcat', { detail: { face, prop, ms } }))
+  window.addEventListener('pxcat', (e) => {
+    const d = (e as CustomEvent).detail || {};
+    cats.forEach((el) => play(el, d.face || 'happy', d.prop || 'none', d.ms || 1600, !!d.hop));
+  });
+</script>

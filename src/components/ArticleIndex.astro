@@ -148,7 +148,7 @@ const cards = posts.map((post) => ({
     align-items: center;
     gap: 8px;
   }
-  .pill:hover { background: rgba(21, 20, 15, 0.04); }
+  .pill:hover { background: rgba(var(--ink-rgb), 0.04); }
   .pill.active {
     background: var(--coral);
     border-color: var(--coral);
@@ -245,7 +245,7 @@ const cards = posts.map((post) => ({
     position: absolute;
     top: 12px;
     left: 12px;
-    background: rgba(239, 231, 210, 0.9);
+    background: rgba(var(--paper-rgb), 0.9);
     color: var(--ink);
     padding: 4px 9px;
     border-radius: 4px;

@@ -15,6 +15,8 @@ const { Content } = await render(article);
 ---
 
 <ArticleLayout
+  lang='zh'
+  slug={article.id}
   title={article.data.title}
   description={article.data.description}
   tag={article.data.tag}

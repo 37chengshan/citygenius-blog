@@ -35,7 +35,9 @@ related:
     slug: "local-ai-tflite"
 ---
 
-## 什么是 <em>Vibe Coding</em>
+## 问题
+
+### 什么是 <em>Vibe Coding</em>
 
 Vibe Coding 这个概念来自 Andrej Karpathy，核心理念是：你不需要逐行手写每一行代码，而是通过描述你的意图，让 AI 帮你生成大部分实现。你的角色从"写代码的人"变成了"指挥代码的人"。
 
@@ -44,7 +46,7 @@ Vibe Coding 这个概念来自 Andrej Karpathy，核心理念是：你不需要�
 > "There's a new kind of coding I call 'vibe coding', where you fully give in to the vibes, embrace exponentials, and forget that the code even exists."
 > — Andrej Karpathy
 
-## 项目背景：<em>Scholar AI</em>
+### 项目背景：<em>Scholar AI</em>
 
 Scholar AI 是一个学术研究辅助工具。作为一个经常需要阅读论文、整理文献的大学生，我深知这个过程有多痛苦。我想要一个工具，能帮我快速检索相关论文、自动生成摘要、甚至支持多语言翻译。
 
@@ -61,7 +63,9 @@ Scholar AI 是一个学术研究辅助工具。作为一个经常需要阅读论
 </ul>
 </div>
 
-## Day 1：后端 <em>从零搭建</em>
+## 做法
+
+### Day 1：后端 <em>从零搭建</em>
 
 第一天的目标很明确：搭建一个能跑起来的后端。我用 Claude 作为主要的编码助手，通过描述需求来生成代码。
 
@@ -89,7 +93,7 @@ Scholar AI 是一个学术研究辅助工具。作为一个经常需要阅读论
 </div>
 </div>
 
-## Day 2：前端 <em>快速成型</em>
+### Day 2：前端 <em>快速成型</em>
 
 第二天转向前端。我选择 React + TypeScript，配合 shadcn/ui 组件库。Vibe Coding 在前端开发中的效率提升更加明显 — 描述一个页面的布局和交互，AI 几乎能一次性生成可用的组件代码。
 
@@ -100,7 +104,7 @@ Scholar AI 是一个学术研究辅助工具。作为一个经常需要阅读论
 <cite>个人体会</cite>
 </div>
 
-## Day 3：集成 <em>与打磨</em>
+### Day 3：集成 <em>与打磨</em>
 
 第三天做集成和细节打磨。前后端联调、错误处理、加载状态、响应式布局 — 这些"脏活"反而是 Vibe Coding 效率最高的地方。描述一个问题，AI 给出修复方案，你验证，继续。
 
@@ -110,7 +114,7 @@ Scholar AI 是一个学术研究辅助工具。作为一个经常需要阅读论
 - **流式响应**：SSE (Server-Sent Events) 的实现细节比较多，AI 第一次生成的代码有 bug，但描述清楚错误后修复很快
 - **向量数据库性能**：ChromaDB 的默认配置在数据量大时会变慢，需要手动调优索引参数
 
-## 总结与<em>反思</em>
+## 结果
 
 三天完成一个全栈 AI 应用的 MVP，这在以前是不可想象的。Vibe Coding 真正改变了我的开发节奏 — 从"写代码"变成了"描述需求、验证输出、迭代优化"的循环。
 

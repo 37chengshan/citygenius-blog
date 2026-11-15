@@ -1,0 +1,865 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { assetUrl, withBase } from '../lib/url';
+import PixelCat from '../components/PixelCat.astro';
+import PixelIcon from '../components/PixelIcon.astro';
+import { getPosts } from '../lib/posts';
+import { ui, localePath, type Lang } from '../i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const L = (p: string) => localePath(lang, p);
+const copy = {
+  zh: {
+    "title": "文章索引 — CityGenius Blog",
+    "desc": "查看 CityGenius 的最新文章、推荐阅读与完整归档，支持分类筛选和关键词搜索。",
+    "rule": "<span>文章 / Articles</span><span class='dot-mark'>•</span><span>最新与推荐</span>",
+    "indexWord": "文章索引",
+    "recommended": "最近文章",
+    "inWord": "·",
+    "searchLabel": "搜索文章",
+    "searchPh": "搜索标题、摘要或标签",
+    "toolCopy": "<b>文章检索</b>搜索标题、摘要、标签<br />按 <kbd>/</kbd> 直接开始搜",
+    "pillsAria": "文章分类",
+    "all": "全部",
+    "fullstack": "全栈",
+    "archLabel": "全部文章 <span class='ix'>· 完整归档</span>",
+    "archH2": "继续往下读完整的<em>文章归档</em><span class='dot'>.</span>",
+    "allPosts": "全部文章",
+    "searchResults": "搜索结果",
+    "filtered": "筛选结果",
+    "emptyH": "没有找到合适的<em>文章</em>",
+    "emptyP": "换个关键词试试，或者切回「全部」。搜索会同时匹配标题、摘要和标签。",
+    "latest": "最新",
+    "newChip": "New"
+  },
+  en: {
+    "title": "Articles — CityGenius Blog",
+    "desc": "Latest posts, picks and the full archive from CityGenius, with category filters and search.",
+    "rule": "<span>Articles</span><span class='dot-mark'>•</span><span>Latest and picks</span>",
+    "indexWord": "articles",
+    "recommended": "Recent essays",
+    "inWord": "in",
+    "searchLabel": "Search articles",
+    "searchPh": "Search titles, summaries or tags",
+    "toolCopy": "<b>Find a post</b>Searches titles, summaries and tags<br />Press <kbd>/</kbd> to start typing",
+    "pillsAria": "Article categories",
+    "all": "All",
+    "fullstack": "Full-stack",
+    "archLabel": "All articles <span class='ix'>· Archive</span>",
+    "archH2": "Keep reading the full <em>archive</em><span class='dot'>.</span>",
+    "allPosts": "All articles",
+    "searchResults": "Search results",
+    "filtered": "Filtered",
+    "emptyH": "No <em>articles</em> match",
+    "emptyP": "Try another word, or switch back to All. Search looks at titles, summaries and tags.",
+    "latest": "Latest",
+    "newChip": "New"
+  },
+};
+const c = copy[lang];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function displayDate(input: string) {
+  const m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec(input);
+  if (!m || lang === 'zh') return input;
+  return `${MONTHS[Number(m[2]) - 1]} ${m[3]}, ${m[1]}`;
+}
+
+type CategoryKey = 'all' | 'ai' | 'macos' | 'android' | 'full-stack';
+
+function normalizeDateValue(input: string) {
+  var match = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec(input);
+  if (!match) return 0;
+  return Number(match[1] + match[2] + match[3]);
+}
+
+function uniqueFilters(post: (typeof posts)[number]) {
+  return [...new Set(Object.values(post.data.tagFilters).filter((value) => value === 'ai' || value === 'macos' || value === 'android' || value === 'full-stack'))];
+}
+
+const posts = (await getPosts(lang))
+  .filter((post) => post.id !== 'dev-log')
+  .sort((a, b) => normalizeDateValue(b.data.date) - normalizeDateValue(a.data.date) || a.id.localeCompare(b.id));
+
+const heroPost = posts[0];
+const leadRailPosts = posts.slice(1, 3);
+const recommendedPosts = posts.slice(3, 7);
+const allPosts = posts;
+
+const categoryCounts: Record<CategoryKey, number> = {
+  all: posts.length,
+  ai: posts.filter((post) => uniqueFilters(post).includes('ai')).length,
+  macos: posts.filter((post) => uniqueFilters(post).includes('macos')).length,
+  android: posts.filter((post) => uniqueFilters(post).includes('android')).length,
+  'full-stack': posts.filter((post) => uniqueFilters(post).includes('full-stack')).length,
+};
+
+---
+
+<BaseLayout
+  title={c.title}
+  description={c.desc}
+  lang={lang}
+  extraFonts="&family=Noto+Serif+SC:wght@400;500;700;900"
+>
+  <Fragment slot="head">
+    <style>
+      .article-index-page {
+        padding: 12px 0 64px;
+      }
+      .article-top {
+        display: grid;
+        gap: 24px;
+        padding: 28px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .article-top-intro { display: none; }
+      .article-top-note { display: none; }
+
+      .editorial-stage {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+        align-items: start;
+      }
+      .ev-col { min-width: 0; display: grid; align-content: start; }
+      .ev-center,
+      .ev-right {
+        padding-left: 24px;
+        margin-left: 24px;
+        border-left: 1px dashed var(--line);
+        align-self: stretch;
+      }
+      .ev-card {
+        display: grid;
+        gap: 12px;
+        color: inherit;
+        text-decoration: none;
+      }
+      .ev-media {
+        overflow: hidden;
+        border-radius: 4px;
+        background: var(--bone);
+      }
+      .ev-media img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .ev-card:hover .ev-media img { transform: scale(1.035); }
+      .ev-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 8px;
+        font-family: var(--sans);
+        font-size: 11.5px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-top: 4px;
+      }
+      .ev-meta .ev-in { color: var(--coral); }
+      .ev-title {
+        font-family: var(--serif);
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+        color: var(--ink);
+        text-wrap: balance;
+      }
+      .ev-title :global(em) { font-style: normal; color: var(--coral); }
+      :global(html[lang='en']) .ev-title :global(em) { font-style: italic; }
+      .ev-u {
+        background-image: linear-gradient(var(--coral), var(--coral));
+        background-position: 0 92%;
+        background-size: 0 2px;
+        background-repeat: no-repeat;
+        transition: background-size 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .ev-u { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+      .ev-card:hover .ev-u,
+      .ev-card:focus-visible .ev-u { background-size: 100% 2px; }
+      .ev-by {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--sans);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .ev-av {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background:
+          var(--cat) -12px -44px / 676px 126px no-repeat,
+          var(--cat) -12px -2px / 676px 126px no-repeat,
+          #fbe6ec;
+        image-rendering: pixelated;
+        box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), 0.08);
+      }
+
+      .ev-rail { padding-bottom: 22px; }
+      .ev-rail + .ev-rail { padding-top: 22px; border-top: 1px solid var(--line); }
+      .ev-rail .ev-media { aspect-ratio: 16 / 9; }
+      .ev-rail .ev-title { font-size: clamp(21px, 1.7vw, 27px); }
+
+      .ev-hero { justify-items: center; text-align: center; gap: 14px; }
+      .ev-hero .ev-media { width: 100%; aspect-ratio: 4 / 3; }
+      .ev-hero .ev-meta { justify-content: center; margin-top: 10px; }
+      .ev-hero .ev-title {
+        justify-self: center;
+        font-size: clamp(34px, 3.4vw, 54px);
+        line-height: 1.12;
+        max-width: 16ch;
+      }
+      .ev-hero .ev-dek {
+        max-width: 34ch;
+        font-family: var(--serif);
+        font-size: clamp(17px, 1.35vw, 21px);
+        line-height: 1.55;
+        color: var(--ink-mute);
+      }
+
+      .ev-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 14px;
+        font-family: var(--sans);
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .ev-arrow { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+      .ev-label:hover .ev-arrow { transform: translateX(4px); color: var(--coral); }
+      .ev-item {
+        grid-template-columns: 84px minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+        padding: 18px 0;
+        border-top: 1px solid var(--line);
+      }
+      .ev-item .ev-media { aspect-ratio: 1; }
+      .ev-item-copy { display: grid; gap: 10px; }
+      .ev-item .ev-title { font-size: clamp(18px, 1.35vw, 21px); line-height: 1.3; }
+      .ev-item .ev-av { display: none; }
+
+      .article-tools {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 28px;
+        align-items: end;
+        padding: 54px 0 26px;
+      }
+      .search-shell {
+        display: grid;
+        gap: 12px;
+      }
+      .search-shell label {
+        font-family: var(--sans);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+      .search-input-wrap {
+        position: relative;
+      }
+      .search-input-wrap::before {
+        content: '⌕';
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-family: var(--sans);
+        font-size: 14px;
+        color: var(--ink-faint);
+      }
+      .search-input {
+        width: 100%;
+        height: 56px;
+        padding: 0 18px 0 46px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(var(--paper-rgb), 0.78);
+        font-family: var(--body);
+        font-size: 15px;
+        color: var(--ink);
+        outline: none;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+      .search-input:focus {
+        border-color: var(--coral);
+        box-shadow: 0 0 0 3px rgba(var(--coral-rgb), 0.12);
+      }
+      .tool-copy {
+        font-family: var(--sans);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        line-height: 1.6;
+        text-align: right;
+      }
+      .tool-copy :global(b) {
+        display: block;
+        color: var(--ink);
+        font-size: 12px;
+      }
+
+      .article-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 28px;
+      }
+      .article-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        text-decoration: none;
+        background: transparent;
+        font-family: var(--sans);
+        font-size: 13px;
+        color: var(--ink-soft);
+        transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+      }
+      .article-pill:hover {
+        background: rgba(var(--ink-rgb), 0.04);
+      }
+      .article-pill.active {
+        background: var(--coral);
+        border-color: var(--coral);
+        color: #fff;
+      }
+      .article-pill .count {
+        padding-left: 8px;
+        border-left: 1px solid var(--line);
+        font-size: 10px;
+        color: var(--ink-faint);
+      }
+      .article-pill.active .count {
+        border-color: rgba(255, 255, 255, 0.28);
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .archive-section {
+        padding-top: 6px;
+      }
+      .results-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: end;
+        margin-bottom: 24px;
+      }
+      .results-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        font-family: var(--sans);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+      .results-count .ring {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px dashed var(--ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      @media (hover: hover) {
+        .archive-list:hover .archive-row:not(:hover) { opacity: 0.35; }
+        .ev-right:has(.ev-item:hover) .ev-item:not(:hover) { opacity: 0.35; }
+      }
+      .ev-item { transition: opacity 0.25s; }
+      .archive-list {
+        border-top: 1px solid var(--ink);
+      }
+      .archive-row {
+        position: relative;
+        display: grid;
+        grid-template-columns: 34px 132px minmax(0, 1fr) auto 112px;
+        align-items: center;
+        gap: 22px;
+        padding: 22px 10px;
+        border-bottom: 1px solid var(--line);
+        color: var(--ink);
+        text-decoration: none;
+        transition: background-color 0.15s, opacity 0.25s;
+      }
+      .archive-row::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: -1px;
+        bottom: -1px;
+        width: 3px;
+        background: var(--coral);
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .archive-row:hover,
+      .archive-row:focus-visible { background: rgba(var(--paper-rgb), 0.72); outline: none; }
+      .archive-row:hover::before,
+      .archive-row:focus-visible::before { transform: scaleY(1); }
+      .row-icon {
+        display: flex;
+        color: var(--ink-mute);
+        transition: color 0.2s ease, transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .archive-row:hover .row-icon { color: var(--coral); transform: translateY(-2px); }
+      .row-date,
+      .row-time {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink-faint);
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+      }
+      .row-time { text-align: right; }
+      .row-main { min-width: 0; }
+      .row-title {
+        display: block;
+        font-family: var(--sans);
+        font-size: 19px;
+        font-weight: 600;
+        line-height: 1.35;
+        letter-spacing: -0.01em;
+        transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .row-title em { font-family: var(--serif); font-style: italic; font-weight: 500; }
+      .row-desc {
+        display: block;
+        margin-top: 5px;
+        max-width: 64ch;
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--ink-mute);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1) 30ms;
+      }
+      .archive-row:hover .row-title,
+      .archive-row:hover .row-desc { transform: translateX(6px); }
+      .row-cat {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        border: 1px solid var(--line);
+        padding: 4px 8px;
+        white-space: nowrap;
+      }
+      .archive-list.is-in .archive-row {
+        animation: row-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        animation-delay: calc(min(var(--i), 12) * 45ms);
+      }
+      .archive-list:not(.is-in) .archive-row { opacity: 0; }
+      @keyframes row-pop {
+        from { opacity: 0; transform: translateX(-10px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .archive-list .archive-row { animation: none !important; opacity: 1 !important; }
+      }
+      .search-shell { position: relative; }
+      .search-cat {
+        position: absolute;
+        right: 28px;
+        bottom: calc(56px - 2px);
+        line-height: 0;
+        z-index: 2;
+      }
+      .tool-copy :global(kbd) {
+        font-family: var(--mono);
+        font-size: 11px;
+        padding: 1px 6px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: var(--bone);
+      }
+      .article-empty {
+        display: none;
+        padding: 34px 28px;
+        border-radius: 24px;
+        background: rgba(var(--paper-rgb), 0.82);
+        box-shadow: var(--shadow), inset 0 0 0 1px rgba(var(--ink-rgb), 0.06);
+      }
+      .article-empty.show {
+        display: block;
+      }
+      .article-empty h3 {
+        font-family: var(--sans);
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .article-empty h3 em {
+        font-family: var(--serif);
+        font-style: italic;
+        font-weight: 500;
+      }
+      .article-empty p {
+        margin-top: 10px;
+        max-width: 40ch;
+        font-size: 14px;
+        line-height: 1.66;
+        color: var(--ink-mute);
+      }
+
+      .editorial-stage.is-filtered {
+        display: none;
+      }
+
+      @media (max-width: 1100px) {
+        .editorial-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); }
+        .ev-right {
+          grid-column: 1 / -1;
+          margin: 28px 0 0;
+          padding: 24px 0 0;
+          border-left: 0;
+          border-top: 1px dashed var(--line);
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          column-gap: 28px;
+        }
+        .ev-label { grid-column: 1 / -1; }
+      }
+      @media (max-width: 760px) {
+        .editorial-stage { grid-template-columns: minmax(0, 1fr); }
+        .ev-center { order: -1; margin: 0 0 28px; padding: 0 0 28px; border-left: 0; border-bottom: 1px dashed var(--line); }
+        .ev-right { grid-template-columns: minmax(0, 1fr); }
+        .ev-hero .ev-title { font-size: clamp(28px, 8vw, 36px); }
+      }
+      @media (max-width: 980px) {
+        .article-index-page {
+          padding-top: 66px;
+        }
+        .article-top-intro,
+        .article-tools {
+          grid-template-columns: 1fr;
+        }
+        .article-top-note {
+          justify-self: start;
+        }
+        .tool-copy {
+          text-align: left;
+        }
+        .archive-row { grid-template-columns: 30px 110px minmax(0, 1fr) 96px; }
+        .row-cat { display: none; }
+      }
+      @media (max-width: 720px) {
+        .archive-row {
+          grid-template-columns: 26px minmax(0, 1fr) auto;
+          gap: 6px 14px;
+          padding: 18px 4px;
+        }
+        .row-icon { grid-row: 1 / 3; align-self: start; padding-top: 2px; }
+        .row-date { grid-column: 2; grid-row: 1; font-size: 11px; }
+        .row-time { grid-column: 3; grid-row: 1; font-size: 11px; }
+        .row-main { grid-column: 2 / 4; grid-row: 2; }
+        .row-title { font-size: 17px; }
+        .row-desc { white-space: normal; }
+        .tool-copy { display: none; }
+      }
+      @media (max-width: 640px) {
+        .article-index-page {
+          padding-bottom: 88px;
+        }
+        .results-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+    <style is:global>
+      body .topbar { display: none !important; }
+      body .nav { padding-top: 10px !important; padding-bottom: 10px !important; }
+      body .nav .brand-meta { display: none !important; }
+    </style>
+  </Fragment>
+
+  <main class='article-index-page'>
+    <div class='container'>
+      <div class='sec-rule'>
+        <span class='roman'>IV.</span>
+        <span class='meta-grp'><Fragment set:html={c.rule} /></span>
+        <span>{String(posts.length).padStart(2, '0')} / {c.indexWord}</span>
+      </div>
+
+      <section class='article-top'>
+        <div class='editorial-stage' data-editorial-stage style={`--cat:url(${withBase('/mascot/cat.png')})`}>
+          <div class='ev-col ev-left'>
+            {leadRailPosts.map((post) => (
+              <a
+                class='ev-card ev-rail'
+                href={L(`/article/${post.id}/`)}
+                data-article-card
+                data-search-text={`${post.data.title.replace(/<[^>]+>/g, '')} ${post.data.description} ${post.data.tags.join(' ')}`}
+                data-categories={uniqueFilters(post).join(' ')}
+                data-zone='feature'
+                data-reveal
+              >
+                <div class='ev-media'>
+                  <img src={assetUrl(post.data.image)} alt={post.data.imageAlt} width={post.data.imageWidth} height={post.data.imageHeight} loading='lazy' decoding='async' />
+                </div>
+                <div class='ev-meta'><time>{displayDate(post.data.date)}</time><span class='ev-in'>{c.inWord}</span><span>{post.data.category}</span></div>
+                <h2 class='ev-title'><span class='ev-u'><Fragment set:html={post.data.title} /></span></h2>
+                <span class='ev-by'><span class='ev-av' aria-hidden='true'></span>CityGenius</span>
+              </a>
+            ))}
+          </div>
+
+          {heroPost && (
+            <div class='ev-col ev-center'>
+              <a
+                class='ev-card ev-hero'
+                href={L(`/article/${heroPost.id}/`)}
+                data-article-card
+                data-search-text={`${heroPost.data.title.replace(/<[^>]+>/g, '')} ${heroPost.data.description} ${heroPost.data.tags.join(' ')}`}
+                data-categories={uniqueFilters(heroPost).join(' ')}
+                data-zone='feature'
+                data-reveal='scale'
+              >
+                <div class='ev-media'>
+                  <img src={assetUrl(heroPost.data.image)} alt={heroPost.data.imageAlt} width={heroPost.data.imageWidth} height={heroPost.data.imageHeight} loading='eager' decoding='async' />
+                </div>
+                <div class='ev-meta'><time>{displayDate(heroPost.data.date)}</time><span class='ev-in'>{c.inWord}</span><span>{heroPost.data.category}</span></div>
+                <h2 class='ev-title'><span class='ev-u'><Fragment set:html={heroPost.data.title} /></span></h2>
+                <p class='ev-dek'>{heroPost.data.description}</p>
+                <span class='ev-by'><span class='ev-av' aria-hidden='true'></span>CityGenius</span>
+              </a>
+            </div>
+          )}
+
+          <aside class='ev-col ev-right' data-reveal='left'>
+            <a class='ev-label' href='#archive'>
+              <span>{c.recommended}</span>
+              <span class='ev-arrow' aria-hidden='true'>→</span>
+            </a>
+            {recommendedPosts.map((post) => (
+              <a
+                class='ev-card ev-item'
+                href={L(`/article/${post.id}/`)}
+                data-article-card
+                data-search-text={`${post.data.title.replace(/<[^>]+>/g, '')} ${post.data.description} ${post.data.tags.join(' ')}`}
+                data-categories={uniqueFilters(post).join(' ')}
+                data-zone='feature'
+              >
+                <div class='ev-media'>
+                  <img src={assetUrl(post.data.image)} alt={post.data.imageAlt} width={post.data.imageWidth} height={post.data.imageHeight} loading='lazy' decoding='async' />
+                </div>
+                <div class='ev-item-copy'>
+                  <h3 class='ev-title'><span class='ev-u'><Fragment set:html={post.data.title} /></span></h3>
+                  <span class='ev-by'><span class='ev-av' aria-hidden='true'></span>CityGenius</span>
+                </div>
+              </a>
+            ))}
+          </aside>
+        </div>
+      </section>
+
+      <section class='article-tools'>
+        <div class='search-shell' data-reveal>
+          <label for='article-search'>{c.searchLabel}</label>
+          <div class='search-cat'><PixelCat scale={2} label={ui[lang].catLabel} /></div>
+          <div class='search-input-wrap'>
+            <input
+              id='article-search'
+              class='search-input'
+              type='search'
+              placeholder={c.searchPh}
+              data-search
+              autocomplete='off'
+            />
+          </div>
+        </div>
+        <div class='tool-copy' data-reveal='right'>
+          <Fragment set:html={c.toolCopy} />
+        </div>
+      </section>
+
+      <div class='article-pills' role='tablist' aria-label={c.pillsAria} data-reveal>
+        <a class='article-pill active' href={L('/article/')} data-filter='all' aria-pressed='true'>{c.all}<span class='count'>{String(categoryCounts.all).padStart(2, '0')}</span></a>
+        <a class='article-pill' href={L('/article/?category=ai')} data-filter='ai' aria-pressed='false'>AI<span class='count'>{String(categoryCounts.ai).padStart(2, '0')}</span></a>
+        <a class='article-pill' href={L('/article/?category=macos')} data-filter='macos' aria-pressed='false'>macOS<span class='count'>{String(categoryCounts.macos).padStart(2, '0')}</span></a>
+        <a class='article-pill' href={L('/article/?category=android')} data-filter='android' aria-pressed='false'>Android<span class='count'>{String(categoryCounts.android).padStart(2, '0')}</span></a>
+        <a class='article-pill' href={L('/article/?category=full-stack')} data-filter='full-stack' aria-pressed='false'>{c.fullstack}<span class='count'>{String(categoryCounts['full-stack']).padStart(2, '0')}</span></a>
+      </div>
+
+      <section class='archive-section' id='archive'>
+        <div class='results-head' data-reveal>
+          <div>
+            <span class='label'><Fragment set:html={c.archLabel} /></span>
+            <h2 class='display' style='margin-top:18px;font-size:clamp(34px,3.5vw,54px);line-height:0.98;'><Fragment set:html={c.archH2} /></h2>
+          </div>
+          <div class='results-count'>
+            <span class='ring' data-results-count>{String(allPosts.length).padStart(2, '0')}</span>
+            <span data-results-copy data-copy-all={c.allPosts} data-copy-search={c.searchResults} data-copy-filter={c.filtered}>{c.allPosts}</span>
+          </div>
+        </div>
+
+        <div class='archive-list' data-archive-grid>
+          {allPosts.map((post, index) => (
+            <a
+              class='archive-row'
+              href={L(`/article/${post.id}/`)}
+              data-article-card
+              data-search-text={`${post.data.title.replace(/<[^>]+>/g, '')} ${post.data.description} ${post.data.tags.join(' ')}`}
+              data-categories={uniqueFilters(post).join(' ')}
+              data-zone='archive'
+              style={`--i:${index}`}
+            >
+              <span class='row-icon'><PixelIcon name={uniqueFilters(post)[0] ?? 'doc'} /></span>
+              <span class='row-date'>{displayDate(post.data.date)}</span>
+              <span class='row-main'>
+                <span class='row-title'><Fragment set:html={post.data.title} /></span>
+                <span class='row-desc'>{post.data.description}</span>
+              </span>
+              <span class='row-cat'>{index === 0 ? c.latest : post.data.badge}</span>
+              <span class='row-time'>{post.data.readTime}</span>
+            </a>
+          ))}
+        </div>
+
+        <div class='article-empty' data-empty-state>
+          <h3><Fragment set:html={c.emptyH} /></h3>
+          <p>{c.emptyP}</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <Fragment slot="scripts">
+    <script>
+      (function () {
+        var categories = ['all', 'ai', 'macos', 'android', 'full-stack'];
+        var cards = Array.prototype.slice.call(document.querySelectorAll('[data-article-card]'));
+        var pills = Array.prototype.slice.call(document.querySelectorAll('.article-pill[data-filter]'));
+        var searchInput = document.getElementById('article-search');
+        var resultsCount = document.querySelector('[data-results-count]');
+        var resultsCopy = document.querySelector('[data-results-copy]');
+        var emptyState = document.querySelector('[data-empty-state]');
+        var archiveGrid = document.querySelector('[data-archive-grid]');
+        var editorialStage = document.querySelector('[data-editorial-stage]');
+        if (!cards.length || !pills.length || !searchInput || !resultsCount || !resultsCopy || !emptyState || !archiveGrid || !editorialStage) return;
+
+        function normalizeFilter(value) {
+          var filter = String(value || '').toLowerCase().trim();
+          if (!filter || filter === 'all') return 'all';
+          return categories.indexOf(filter) !== -1 ? filter : 'all';
+        }
+
+        function normalizeQuery(value) {
+          return String(value || '').toLowerCase().trim();
+        }
+
+        function matchesCard(card, category, query) {
+          var cardCategories = String(card.dataset.categories || '').split(/\s+/).filter(Boolean);
+          var searchText = normalizeQuery(card.dataset.searchText || '');
+          var categoryMatch = category === 'all' || cardCategories.indexOf(category) !== -1;
+          var queryMatch = !query || searchText.indexOf(query) !== -1;
+          return categoryMatch && queryMatch;
+        }
+
+        function applyPillState(category) {
+          for (var i = 0; i < pills.length; i++) {
+            var active = pills[i].dataset.filter === category;
+            pills[i].classList.toggle('active', active);
+            pills[i].setAttribute('aria-pressed', active ? 'true' : 'false');
+          }
+        }
+
+        function updateUi(category, query, syncUrl) {
+          var visible = 0;
+          var filtering = category !== 'all' || Boolean(query);
+
+          applyPillState(category);
+
+          for (var j = 0; j < cards.length; j++) {
+            var matches = matchesCard(cards[j], category, query);
+            if (cards[j].dataset.zone === 'archive') {
+              cards[j].hidden = !matches;
+              cards[j].setAttribute('aria-hidden', matches ? 'false' : 'true');
+              if (matches) visible += 1;
+            }
+          }
+
+          editorialStage.classList.toggle('is-filtered', filtering);
+          archiveGrid.hidden = visible === 0;
+          emptyState.classList.toggle('show', visible === 0);
+          resultsCount.textContent = String(visible).padStart(2, '0');
+          resultsCopy.textContent = query ? resultsCopy.dataset.copySearch : category === 'all' ? resultsCopy.dataset.copyAll : resultsCopy.dataset.copyFilter;
+          if (syncUrl && query) {
+            window.clearTimeout(window.__catT);
+            window.dispatchEvent(new CustomEvent('pxcat', { detail: { face: 'think', prop: 'ques', ms: 900 } }));
+            window.__catT = window.setTimeout(function () {
+              window.dispatchEvent(new CustomEvent('pxcat', { detail: visible ? { face: 'happy', prop: 'note', ms: 1400, hop: true } : { face: 'sad', prop: 'sweat', ms: 2200 } }));
+            }, 700);
+          }
+
+          if (syncUrl) {
+            var url = new URL(window.location.href);
+            if (category === 'all') url.searchParams.delete('category');
+            else url.searchParams.set('category', category);
+            if (query) url.searchParams.set('q', query);
+            else url.searchParams.delete('q');
+            history.replaceState(null, '', url.pathname + url.search);
+          }
+        }
+
+        for (var k = 0; k < pills.length; k++) {
+          pills[k].addEventListener('click', function (event) {
+            event.preventDefault();
+            updateUi(normalizeFilter(this.dataset.filter), normalizeQuery(searchInput.value), true);
+          });
+        }
+
+        searchInput.addEventListener('input', function () {
+          var current = document.querySelector('.article-pill.active');
+          var category = normalizeFilter(current ? current.dataset.filter : 'all');
+          updateUi(category, normalizeQuery(searchInput.value), true);
+        });
+
+        if ('IntersectionObserver' in window) {
+          var listObserver = new IntersectionObserver(function (entries) {
+            if (!entries[0].isIntersecting) return;
+            archiveGrid.classList.add('is-in');
+            listObserver.disconnect();
+          }, { threshold: 0.05 });
+          listObserver.observe(archiveGrid);
+        } else {
+          archiveGrid.classList.add('is-in');
+        }
+
+        var initialUrl = new URL(window.location.href);
+        var initialCategory = normalizeFilter(initialUrl.searchParams.get('category'));
+        var initialQuery = normalizeQuery(initialUrl.searchParams.get('q'));
+        searchInput.value = initialQuery;
+        updateUi(initialCategory, initialQuery, false);
+      })();
+    </script>
+  </Fragment>
+</BaseLayout>
