@@ -1,6 +1,6 @@
 ---
-title: "Daily Receipt: Two Entry-Level Subscriptions, Five Models, One Working App"
-description: "One developer, two entry-level AI subscriptions and five models built an Android bookkeeping app in three weeks. How to route work by budget, keep context lean, and turn complaints into rules. The setup is open source."
+title: "Claude + GPT + DeepSeek Teamed Up and Made Me 10x Faster"
+description: "One developer, two entry-level AI subscriptions and five models built an Android bookkeeping app in three weeks. How to split work by each model's strengths, make trade-offs inside a tight budget, keep context lean, and turn complaints into rules. The setup is open source."
 date: "2026.11.14"
 readTime: "15 min read"
 tag: "Daily Receipt"
@@ -12,8 +12,8 @@ tagFilters:
   "Multi-agent": "ai"
   "Agent Skill": "ai"
   "Android": "android"
-image: "project-xiaopiao-cover.webp"
-imageAlt: "A thermal printer feeding out a receipt on a desk at night"
+image: "project-xiaopiao-cover-girls.webp"
+imageAlt: "Anime-style personifications of Claude, GPT and DeepSeek peeking over the bottom edge, under the words \"the three of us together are unbeatable\""
 imageWidth: 1672
 imageHeight: 940
 badge: "Daily Receipt"
@@ -36,24 +36,24 @@ related:
 
 <div class="tldr">
 <b>TL;DR</b>
-Daily Receipt is an Android bookkeeping app I built. It reads Alipay and WeChat Pay notifications to log each payment, and at night it prints your day as a receipt. This post is mostly about how it got built. I had one entry-level Claude subscription and one entry-level GPT subscription, so I routed work by budget: Opus 5.5 only writes the frontend and dispatches work; unmetered DeepSeek v4.1 Flash handles the backend, chores and knowledge bases; Haiku does search and keeps context lean; GPT-6.1-sol in Codex cross-reviews and generates images; Fable 5.2 is called in when I'm stuck. Three weeks: 497 commits and 911 unit tests in the dev repo. The whole setup is open source.
+Daily Receipt is an Android bookkeeping app I built. It reads Alipay and WeChat Pay notifications to log each payment, and at night it prints your day as a receipt. This post is mostly about how it got built. I split the work by what each model does best: Opus 5.5 plans, writes the frontend and dispatches work; DeepSeek v4.1 Flash handles the backend, chores and knowledge bases; Haiku does search and keeps context lean; GPT-6.1-sol in Codex cross-reviews and generates images; Fable 5.2 is called in when I'm stuck. I had only one entry-level Claude subscription and one entry-level GPT subscription; the budget is a constraint the system trades off against, not the reason for the split. Three weeks: 497 commits and 911 unit tests in the dev repo. The whole setup is open source.
 </div>
 
 The trigger was an AI agent contest run by Alipay. It had a wish pool: 812 requests after deduplication, and the largest group, 149 of them, was about spending and bookkeeping. The most-supported single wish was "catch the auto-renewals that quietly take my money," with 298 votes. Those numbers told me plenty of people want this.
 
 The idea is simple. Log a payment automatically the moment money leaves your account, then at night print the day as a receipt: line items, a total, and one comment that doesn't lecture. It's called Daily Receipt: a native Android app, plus a web version and a Node service I run myself.
 
-I'm one person building three clients, with an entry-level subscription each for Claude and GPT. This post covers the product, but most of it is about development: how an idea gets questioned into a spec, how a small budget gets split across five models, how to keep context clean, and how complaints become rules. I call all of this the harness, the engineering layer around the models: roles, context, tools and gates. I've published the configuration as a repo; the link is at the end.
+I'm one person building three clients, with an entry-level subscription each for Claude and GPT. This post covers the product, but most of it is about development: how an idea gets questioned into a spec, how five models split the work, how a small budget gets traded off, how to keep context clean, and how complaints become rules. I call all of this the harness, the engineering layer around the models: roles, context, tools and gates. I've published the configuration as a repo; the link is at the end.
 
 ## Problem
 
 The product problem is clear. There are plenty of bookkeeping apps already, and the hard part is sticking with one. Every purchase means opening the app, picking a category, typing an amount, and after a few days most people quit. And when AI meets money, the biggest fear is that it casually makes up a number.
 
-Development had four problems. The first three all showed up within two days. One: features the AI wrote were correct, but the UI was ugly. Looking at it on my phone, my reaction was "the buttons and stuff look really bad." Two: in a new session, settled decisions got reverted, and a sample receipt I had deleted came back. Three: with too many agents running at once, they kept changing each other's code and nothing got finished.
+Development had three problems, and all of them showed up within two days. One: features the AI wrote were correct, but the UI was ugly. Looking at it on my phone, my reaction was "the buttons and stuff look really bad." Two: in a new session, settled decisions got reverted, and a sample receipt I had deleted came back. Three: with too many agents running at once, they kept changing each other's code and nothing got finished.
 
-The fourth problem was there from day one: budget. Entry-level subscriptions meter usage in time windows, a strong model like Opus can use up a window quickly, and then you wait. One person, three clients, a lot of code: every Opus token had to count.
+One constraint was there from day one: budget. Entry-level subscriptions meter usage in time windows, a strong model like Opus can use up a window quickly, and then you wait. One person, three clients, a lot of code: every Opus token had to count.
 
-Everything below is about those four problems.
+Everything below addresses those three problems while making trade-offs inside that budget.
 
 ## Approach
 
@@ -65,20 +65,22 @@ I reversed a big one the day the spec was final. The first plan was screenshot r
 
 This is also the cheapest step in budget terms. Settling requirements in conversation costs a few rounds of Q&A. Starting before they're settled costs rewrites of whole chunks of code.
 
-### Route Work by Budget
+### Give Each Model Its Own Job
 
 <figure class="illu method">
-  <img src="/citygenius-blog/assets/project-xiaopiao-harness.webp" alt="Agent harness architecture of Daily Receipt" width="1800" height="1458" loading="lazy" />
+  <img src="/citygenius-blog/assets/project-xiaopiao-harness.webp" alt="Agent harness architecture of Daily Receipt" width="1800" height="1439" loading="lazy" />
   <figcaption>The agent harness behind Daily Receipt. On the left, me and the Opus 5.5 main session, which only plans, writes the frontend and dispatches: search goes to Haiku subagents; backend and chores go through Orca to DeepSeek in omp, omp work is committed on separate branches and merged into main only after review. Codex gives a second opinion and makes images; Fable 5.2 appears only when I am stuck. Bottom left is the context every model shares: AGENTS.md, the spec, skills, and Figma variables named after Tokens.kt.</figcaption>
 </figure>
 
-The rule is one line: the more expensive the model, the fewer and more critical its jobs.
+The split rests on two questions: what is this model best at, and does this job need to be kept apart from others? Planning and UI need someone watching the whole picture, the model that writes code shouldn't be the one reviewing it, and search that reads a lot but concludes little shouldn't crowd the main session.
 
-- **Opus 5.5** only writes the frontend and dispatches. It breaks down tasks, writes specs, writes the app's UI mainline, and sends out everything that can be split off. It is credited on 180 commits in the dev repo, from the first day to the last.
-- **DeepSeek v4.1 Flash** (running in omp) is the foundation of the split because it is unmetered. Backend endpoints, bulk code, chores, and collecting and organizing knowledge-base material all go to it. Opus writes the spec in detail, DeepSeek implements it, Opus polishes. It is credited on 70-plus commits.
+- **Opus 5.5** plans, writes the frontend and dispatches. It breaks down tasks, writes specs, writes the app's UI mainline, and sends out everything that can be split off. It is credited on 180 commits in the dev repo, from the first day to the last.
+- **DeepSeek v4.1 Flash** (running in omp) handles the backend, chores and knowledge bases. This work has clear boundaries and a lot of volume, and it goes well from a written spec: backend endpoints, bulk code, and collecting and organizing knowledge-base material all go to it. Opus writes the spec in detail, DeepSeek implements it, Opus polishes. It is credited on 70-plus commits.
 - **Haiku** does search and research, and its real job is protecting the main session's context window. Walking the repo, tracing call chains, finding open-source implementations: these read many files and leave few conclusions, and letting Opus do them means reading logs with the most expensive tokens. Haiku reads, then returns a short JSON: findings, file locations, gaps.
 - **GPT-6.1-sol in Codex** cross-reviews and generates images. A model from another company spots Claude's blind spots, and it made the photos on the landing page.
 - **Fable 5.2** is the advisor, used at three moments only: before an architecture locks in, when the same error shows up a second time, and before a risky task is declared done.
+
+The budget is a trade-off on top of this split. Entry-level windows are tight, so a few rules follow: Opus's budget goes only to planning, frontend and merging; high-volume work goes to DeepSeek first, since it is unmetered; file reading goes to Haiku and stays out of the main session.
 
 The subagents' limits live in their frontmatter, which is more reliable than a verbal agreement. `search` and `grep` get read-only tools; `audit` adds Bash but runs in plan mode and only reviews committed code in an isolated worktree. All of them declare `disallowedTools: advisor`, so a cheap model can't quietly call the expensive advisor in the background, and `omitClaudeMd: true` keeps them from loading the main session's long rulebook, saving a little more on every call.
 
@@ -165,13 +167,13 @@ It's a 0.5.1 preview, still iterating daily. The receipt comment is still templa
 
 The whole setup is on GitHub at [37chengshan/agent-harness](https://github.com/37chengshan/agent-harness): the shared `AGENTS.md`, four Haiku subagents, the `app-ui-design` skill, the Orca dispatch workflow, templates for the spec and the verbatim log, and the sources for both diagrams in this post. Following Anthropic's advice, the repo also includes two extra templates: a `features.json` feature list in which workers may only flip pass or fail, and a Stop hook that won't let a session finish until the tests pass.
 
-If you take three things from this post, take these. Give expensive models only the critical work and send search and chores to cheap ones. Put whatever must be remembered into files instead of hoping the model remembers. Every time you complain, write it into a skill or the verbatim log, once.
+If you take three things from this post, take these. Split work by strengths, keep writing and reviewing apart, keep search out of the main session, and treat the budget as a trade-off on top. Put whatever must be remembered into files instead of hoping the model remembers. Every time you complain, write it into a skill or the verbatim log, once.
 
 Daily Receipt's APK and notes are on [GitHub](https://github.com/37chengshan/xiaopiao). Try it, and feel free to file suggestions in Issues.
 
 ## FAQ
 ### Why not let the strongest model do everything?
-The budget won't stretch, and it doesn't need to. Planning and UI need a strong model watching the whole picture. Jobs with clear boundaries, like building a backend from a spec or organizing a knowledge base, are cheaper to run in parallel on an unmetered model, and a small model is enough for search and research. A model from another company doing cross-review also catches blind spots the first model has about its own work.
+It doesn't need to. Different jobs need different strengths. Planning and UI need a strong model watching the whole picture. Jobs with clear boundaries, like building a backend from a spec or organizing a knowledge base, suit a model that is good at high-volume code, running in parallel, and a small model is enough for search and research. Writing and reviewing should be separate too: a model from another company catches the first model's blind spots. A tight budget only makes this split pay off more.
 ### Is an entry-level subscription really enough?
 Only if the main session stays out of chores. Opus's budget goes to planning, frontend and merging; reading files goes to Haiku, bulk code to DeepSeek. Rework costs the most, so question requirements and write the spec first.
 ### Don't parallel agents break each other's code?
