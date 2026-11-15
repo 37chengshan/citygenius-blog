@@ -1,6 +1,6 @@
 ---
 title: "Claude + GPT + DeepSeek Teamed Up and Made Me 10x Faster"
-description: "One developer, two entry-level AI subscriptions and five models built an Android bookkeeping app in three weeks. How to split work by each model's strengths, make trade-offs inside a tight budget, keep context lean, and turn complaints into rules. The setup is open source."
+description: "Since starting university I wanted to keep a budget and never stuck with it. An Alipay contest finally got me to build an app that logs spending on its own, with five models. How 37chengshan-harness splits work by strengths and keeps context lean, and how the app reads notifications, stores data, gets tested and protects privacy."
 date: "2026.11.14"
 readTime: "15 min read"
 tag: "Daily Receipt"
@@ -36,24 +36,22 @@ related:
 
 <div class="tldr">
 <b>TL;DR</b>
-Daily Receipt is an Android bookkeeping app I built. It reads Alipay and WeChat Pay notifications to log each payment, and at night it prints your day as a receipt. This post is mostly about how it got built. I split the work by what each model does best: Opus 5.5 plans, writes the frontend and dispatches work; DeepSeek v4.1 Flash handles the backend, chores and knowledge bases; Haiku does search and keeps context lean; GPT-6.1-sol in Codex cross-reviews and generates images; Fable 5.2 is called in when I'm stuck. I had only one entry-level Claude subscription and one entry-level GPT subscription; the budget is a constraint the system trades off against, not the reason for the split. Three weeks: 497 commits and 911 unit tests in the dev repo. The whole setup is open source.
+Daily Receipt is an Android bookkeeping app I built. It reads Alipay and WeChat Pay notifications to log each payment, and at night it prints your day as a receipt. Half of this post is the product, half is how it got built. I call the whole setup 37chengshan-harness. Opus 5.5 plans, writes the frontend and dispatches work; DeepSeek v4.1 Flash handles the backend, chores and knowledge bases; Haiku does search and keeps context lean; GPT-6.1-sol in Codex cross-reviews and generates images; Fable 5.2 is called in when I'm stuck. Claude and GPT are both on entry-level plans, so budget is a constraint to trade off against, but the split follows strengths. Three weeks: 497 commits and 911 unit tests in the dev repo. The whole setup is open source.
 </div>
 
-The trigger was an AI agent contest run by Alipay. It had a wish pool: 812 requests after deduplication, and the largest group, 149 of them, was about spending and bookkeeping. The most-supported single wish was "catch the auto-renewals that quietly take my money," with 298 votes. Those numbers told me plenty of people want this.
+Ever since I started university, I've wanted to keep track of my spending. I never stuck with it for more than a few days: every purchase meant opening an app, picking a category and typing an amount, and once things got busy I forgot. I kept thinking how nice it would be if an app just recorded everything for me. I never had the time, or the push, to actually build it.
 
-The idea is simple. Log a payment automatically the moment money leaves your account, then at night print the day as a receipt: line items, a total, and one comment that doesn't lecture. It's called Daily Receipt: a native Android app, plus a web version and a Node service I run myself.
+At the end of last month the push arrived. I saw Alipay's "Emergent Agent Award (智能体涌现奖) Season 1," which has a track called "Life Helper" and a wish pool. I organized and cleaned the wish-pool data: 812 requests after deduplication, and the largest group, 149 of them, was about spending and bookkeeping. The most-supported single wish was "catch the auto-renewals that quietly take my money," with 298 votes. Plenty of people wanted the same thing I did. So I started building the app from zero.
 
-I'm one person building three clients, with an entry-level subscription each for Claude and GPT. This post covers the product, but most of it is about development: how an idea gets questioned into a spec, how five models split the work, how a small budget gets traded off, how to keep context clean, and how complaints become rules. I call all of this the harness, the engineering layer around the models: roles, context, tools and gates. I've published the configuration as a repo; the link is at the end.
+It's called Daily Receipt: a native Android app, plus a web version and a Node service I run myself. Money goes out, a line gets logged; at night your day prints as a receipt with line items, a total, and one comment that doesn't lecture. I built all three by myself, with one entry-level plan each for Claude and GPT. I call the whole way of working 37chengshan-harness, the engineering layer around the models that handles roles, context, tools and gates. The configuration is published as a repo; the link is at the end.
 
 ## Problem
 
-The product problem is clear. There are plenty of bookkeeping apps already, and the hard part is sticking with one. Every purchase means opening the app, picking a category, typing an amount, and after a few days most people quit. And when AI meets money, the biggest fear is that it casually makes up a number.
+On the product side, there are plenty of bookkeeping apps already, and the hard part is sticking with one. I'm proof of that. And when AI meets money, the biggest fear is that it casually makes up a number.
 
-Development had three problems, and all of them showed up within two days. One: features the AI wrote were correct, but the UI was ugly. Looking at it on my phone, my reaction was "the buttons and stuff look really bad." Two: in a new session, settled decisions got reverted, and a sample receipt I had deleted came back. Three: with too many agents running at once, they kept changing each other's code and nothing got finished.
+On the development side, I hit three things within two days. Features the AI wrote were correct, but the UI was ugly; looking at it on my phone, my words were "the buttons and stuff look really bad." In a new session, settled decisions got reverted, and a sample receipt I had deleted came back. With too many agents running at once, they kept changing each other's code and nothing got finished.
 
-One constraint was there from day one: budget. Entry-level subscriptions meter usage in time windows, a strong model like Opus can use up a window quickly, and then you wait. One person, three clients, a lot of code: every Opus token had to count.
-
-Everything below addresses those three problems while making trade-offs inside that budget.
+Budget pressed the whole time. Entry-level plans meter usage in time windows, a strong model like Opus can burn through a window fast, and then you wait. Three clients' worth of code meant every Opus token had to count.
 
 ## Approach
 
@@ -61,15 +59,15 @@ Everything below addresses those three problems while making trade-offs inside t
 
 Before writing code, I used a skill called grilling to have the AI interrogate me: who the user is, app or web, how entries get in, whether data may leave the phone. Two rounds produced 11 decisions, D1 to D11, written into `docs/SPEC.md`. Anything I didn't answer and left at the suggested default was marked "assumption," open to reversal.
 
-I reversed a big one the day the spec was final. The first plan was screenshot recognition on iOS. Then I found that Android, with permission, can read Alipay and WeChat Pay notifications, which makes truly hands-free logging possible, so the app became Android-only. From then on, every requirement change records a date and a reason in the spec. The spec is the project's single source of truth: any fresh session reads it and knows what to do now, and why.
+The spec is the project's single source of truth. Every later requirement change records its reason there, and any fresh session reads it and knows what to do now, and why.
 
 This is also the cheapest step in budget terms. Settling requirements in conversation costs a few rounds of Q&A. Starting before they're settled costs rewrites of whole chunks of code.
 
 ### Give Each Model Its Own Job
 
 <figure class="illu method">
-  <img src="/citygenius-blog/assets/project-xiaopiao-harness.webp" alt="Agent harness architecture of Daily Receipt" width="1800" height="1439" loading="lazy" />
-  <figcaption>The agent harness behind Daily Receipt. On the left, me and the Opus 5.5 main session, which only plans, writes the frontend and dispatches: search goes to Haiku subagents; backend and chores go through Orca to DeepSeek in omp, omp work is committed on separate branches and merged into main only after review. Codex gives a second opinion and makes images; Fable 5.2 appears only when I am stuck. Bottom left is the context every model shares: AGENTS.md, the spec, skills, and Figma variables named after Tokens.kt.</figcaption>
+  <img src="/citygenius-blog/assets/project-xiaopiao-harness.webp" alt="Architecture of 37chengshan-harness" width="1800" height="1439" loading="lazy" />
+  <figcaption>The structure of 37chengshan-harness. On the left, me and the Opus 5.5 main session, which only plans, writes the frontend and dispatches: search goes to Haiku subagents; backend and chores go through Orca to DeepSeek in omp, omp work is committed on separate branches and merged into main only after review. Codex gives a second opinion and makes images; Fable 5.2 appears only when I am stuck. Bottom left is the context every model shares: AGENTS.md, the spec, skills, and Figma variables named after Tokens.kt.</figcaption>
 </figure>
 
 The split rests on two questions: what is this model best at, and does this job need to be kept apart from others? Planning and UI need someone watching the whole picture, the model that writes code shouldn't be the one reviewing it, and search that reads a lot but concludes little shouldn't crowd the main session.
@@ -125,7 +123,52 @@ The skill also requires stress-testing screens with worst-case data (very long n
 
 Put together, one feature moves through the repo like this. I raise a request or complaint on the phone; it goes into the verbatim log first, and once settled, into the spec. Opus reads the spec, writes the parts that can be split off as a spec slice, and dispatches it through Orca to an omp worker, which implements it on a separate branch. Opus writes the UI mainline itself, reading the UI skill first and taking colors and spacing from same-named Figma variables. Finished work goes through tests and review: unit tests run after queuing for the Gradle lock, then Codex or the audit subagent looks for problems. Then device QA: screenshots at both 360dp and 411dp widths and at 1.3x font, with every main screen walked through; passing the build and unit tests alone doesn't count as done. Finally, I merge. Problems found in QA go back into the skill, and every model follows them from then on.
 
-While writing this post, I read Anthropic's engineering posts on harnesses side by side with my setup, and a lot of it lines up. The multi-agent research post says each subagent needs "an objective, an output format, guidance on the tools and sources to use, and clear task boundaries," and that without them agents duplicate work and leave gaps. The context engineering post says a subagent may spend tens of thousands of tokens exploring but returns "only a condensed, distilled summary of its work," often 1,000 to 2,000 tokens. The post on long-running apps notes that agents "reliably skew positive when grading their own work," so review and acceptance belong to a different role; giving cross-review to another company's model and making device QA its own step points the same way. The same post has a line I agree with: every component in a harness encodes an assumption about what the model can't do on its own. Retest them as models improve, and delete what no longer pays.
+While writing this post, I read Anthropic's engineering posts on harnesses side by side with my setup, and a lot of it lines up. The context engineering post says a subagent may spend tens of thousands of tokens exploring but returns "only a condensed, distilled summary of its work," often 1,000 to 2,000 tokens. The post on long-running apps notes that agents "reliably skew positive when grading their own work," so review and acceptance belong to a different role; giving cross-review to another company's model and making device QA its own step points the same way. The same post has a line I agree with: every component in a harness encodes an assumption about what the model can't do on its own. Retest them as models improve, and delete what no longer pays.
+
+### How Notifications Get Read
+
+<figure class="illu method">
+  <img src="/citygenius-blog/assets/project-xiaopiao-arch-en.webp" alt="System architecture of Daily Receipt" width="1600" height="847" loading="lazy" />
+  <figcaption>System architecture of Daily Receipt. The Android app parses payment notifications on the phone; raw data inside the security group never leaves the device, and only structured fields reach the cloud. The web version uses the same API. In the cloud, the agent runtime opens the knowledge books a question needs, calls the model, and every number in the answer must pass a "has a source" check.</figcaption>
+</figure>
+
+Automatic logging relies on Android's `NotificationListenerService`. Once you grant access in system settings, `PaymentListenerService` listens only to the Alipay and WeChat packages and ignores every other app. When a notification arrives, it first records that the channel is still alive, skips group summaries, takes the title and the longest body text, and hands them to the parser on the phone. It recognizes payments, password-free charges, buy-now-pay-later, auto-renewals, incoming payments and refunds. Red packets and transfers that show no amount are logged as "amount pending"; a Huabei bill reminder becomes a "bill due" entry and doesn't count as spending. Amounts are always stored as integer cents to avoid floating-point error.
+
+Chinese Android ROMs have a trap here. After a reinstall or a battery-saver freeze, the listener often disconnects silently, and the app has no idea. So a disconnect schedules an automatic repair, and the setup screen shows when the last notification arrived and from which app. Payment apps also tend to post the same payment twice, first a bare "spent" and then a "payment successful" with the merchant, so notifications with the same amount and direction within 2 minutes are logged once.
+
+### Where the Data Lives
+
+The ledger, the notification log and the nightly letters live in a Room database on the phone (SQLite underneath); toggles and preferences live in DataStore. Every payment notification read is saved verbatim to a `capture_log` table along with what happened to it: recorded, duplicate skipped, ignored, amount pending, or not recognized. The table keeps only the latest 200 rows, prunes the rest, and is never uploaded. In the app, "Data & Privacy → Notification log" shows how each notification was handled.
+
+The app turns off system backup (`allowBackup="false"`), so the local database doesn't get copied elsewhere by a system backup. After sign-in, sync pushes only structured ledger fields; edited rows are flagged for push, and deleted rows leave a tombstone so the cloud deletes them too. Nightly letters written by the server are stored locally once pulled, so you can read them offline.
+
+### Testing, and How Feedback Comes Back
+
+The parser is the easiest thing to get wrong, so it's the most tested. `PaymentNotificationParserTest` holds a corpus of notifications, each stating the amount and type it should produce, or that it should be ignored; deduplication, merchant categories and amount rules have their own test sets. The repo has 911 `@Test` cases in total, run after queuing for the Gradle lock.
+
+Unit tests aren't enough; real notifications have to go through the whole pipeline. So I wrote a tiny test app called notifake that is installed only on the emulator. It posts fake notifications under spoofed Alipay and WeChat package names, and its 11 samples are the same ones the parser tests use, so whatever the tests say gets recognized really shows up on screen. It can also be triggered with a single adb command, so an agent can run it without waiting for me to tap the phone. Only after all that comes device QA.
+
+The real world always has more notifications than the corpus. Any "not recognized" entry in the notification log can be sent with "Report to the developer": the exact payload is shown, you can edit it, and nothing is sent until you tap send. It lands in the server's `feedback` table with kind `capture_miss`. I pull these with a read-only script, copy the text word for word into the parser tests as regression cases, then fix the rules, and track status in a ledger. Of the reports so far, an Alipay "11.90 yuan password-free/auto charge" wasn't recognized at first and got a new rule; WeChat's "yesterday's bookkeeping report" and an Alipay "red packet about to expire" turned out to be marketing and are now ignored; a Huabei bill reminder also went unrecognized before and is now a bill-due entry.
+
+### How Privacy Is Kept
+
+Payment notifications are private, so the data rules sit at the top of `AGENTS.md`, and all three model vendors follow them.
+
+- Notification text, statements and images are parsed on the phone; the cloud gets structured fields only.
+- Notification text never leaves the phone on its own. The only exit is the report above, where you see and can edit what is sent.
+- Logs record only the rule id and amount, never the notification body.
+- Life data such as meals, workouts and weight stays on the phone by default; syncing it to your account is a separate opt-in you can turn off anytime.
+- Data contribution is off by default, separately authorized and revocable; merchants see only aggregates, and cells with fewer than 20 samples are hidden.
+- Receipts shared to a circle carry only category totals, with no merchant names or line items.
+- Model keys live only on the server; the server's security logs record no IP or account, requests are rate-limited per IP, and passwords are stored with scrypt.
+
+You can keep a ledger without signing in.
+
+### Voice and Asking the Ledger
+
+Voice input had a pitfall. The system `SpeechRecognizer` never called back on my vivo phone, so the UI stayed on "listening" forever. I switched to on-device sherpa-onnx, a 25 MB Chinese model that transcribes as you speak, plus a bookkeeping hotword list. "Thirty-five fifty" becomes 35.5 before it reaches the ledger, and both the recording and the model stay on the phone.
+
+When you ask about your ledger, the AI isn't allowed to do the math itself. The server-side agent fetches data through read-only tools, such as querying entries, filtering by category or comparing with the same period last week, then writes the answer from the results, streamed to the UI over SSE. Before an answer goes out, a grounding check makes sure no number appears without a source. The model started as commandcode's free tier; production now runs on DeepSeek v4.1 Flash with the free model as fallback.
 
 ### Other Skills and Tools
 
@@ -136,19 +179,6 @@ While writing this post, I read Anthropic's engineering posts on harnesses side 
 - **animate**: for motion, its order decides whether to animate, which curve, and how to interrupt.
 - **archify**: architecture diagrams; every diagram in this post came from it.
 - **hooks**: rules that must hold every time, like context handoff, are hooks, not prompts.
-
-### Key Product Decisions
-
-<figure class="illu method">
-  <img src="/citygenius-blog/assets/project-xiaopiao-arch-en.webp" alt="System architecture of Daily Receipt" width="1600" height="847" loading="lazy" />
-  <figcaption>System architecture of Daily Receipt. The Android app parses payment notifications on the phone; raw data inside the security group never leaves the device, and only structured fields reach the cloud. The web version uses the same API. In the cloud, the agent runtime opens the knowledge books a question needs, calls the model, and every number in the answer must pass a "has a source" check.</figcaption>
-</figure>
-
-Logging relies on Android's `NotificationListenerService` reading payment notifications. It recognizes payments, password-free charges, buy-now-pay-later, auto-renewals, incoming payments and refunds. Red packets and transfers that show no amount are logged as "amount pending." Amounts are always stored as integer cents to avoid floating-point error.
-
-Voice input had a pitfall. The system `SpeechRecognizer` never called back on my vivo phone, so the UI stayed on "listening" forever. I switched to on-device sherpa-onnx, a 25 MB Chinese model that transcribes as you speak, plus a bookkeeping hotword list. "Thirty-five fifty" becomes 35.5 before it reaches the ledger, and both the recording and the model stay on the phone.
-
-When you ask about your ledger, the AI isn't allowed to do the math itself. The server-side agent fetches data through read-only tools, such as querying entries, filtering by category or comparing with the same period last week, then writes the answer from the results, streamed to the UI over SSE. Before an answer goes out, a grounding check makes sure no number appears without a source. The model started as commandcode's free tier; production now runs on DeepSeek v4.1 Flash with the free model as fallback, and keys live only on the server.
 
 ## Results
 
@@ -165,7 +195,7 @@ The v0.5.0 APK is on GitHub and installs on Android 8.0 and up. Working features
 
 It's a 0.5.1 preview, still iterating daily. The receipt comment is still template-generated; the hook for a language model is ready. The "shop edition" is still exploratory. The AI's boundaries are also being tuned. I recently removed an old principle, "every choice is made by the person." I hadn't set it, and it was blocking suggestions like meal combinations and workout plans. Investment conclusions and medical judgments remain off-limits, and it will never place an order for you.
 
-The whole setup is on GitHub at [37chengshan/agent-harness](https://github.com/37chengshan/agent-harness): the shared `AGENTS.md`, four Haiku subagents, the `app-ui-design` skill, the Orca dispatch workflow, templates for the spec and the verbatim log, and the sources for both diagrams in this post. Following Anthropic's advice, the repo also includes two extra templates: a `features.json` feature list in which workers may only flip pass or fail, and a Stop hook that won't let a session finish until the tests pass.
+The full 37chengshan-harness setup is on GitHub at [37chengshan/agent-harness](https://github.com/37chengshan/agent-harness): the shared `AGENTS.md`, four Haiku subagents, the `app-ui-design` skill, the Orca dispatch workflow, templates for the spec and the verbatim log, and the sources for both diagrams in this post. Following Anthropic's advice, the repo also includes two extra templates: a `features.json` feature list in which workers may only flip pass or fail, and a Stop hook that won't let a session finish until the tests pass.
 
 If you take three things from this post, take these. Split work by strengths, keep writing and reviewing apart, keep search out of the main session, and treat the budget as a trade-off on top. Put whatever must be remembered into files instead of hoping the model remembers. Every time you complain, write it into a skill or the verbatim log, once.
 
@@ -179,6 +209,6 @@ Only if the main session stays out of chores. Opus's budget goes to planning, fr
 ### Don't parallel agents break each other's code?
 The key is splitting lanes first. Each agent edits only files in its own lane, nobody touches shared files, each commits on its own worktree branch, and everything is merged after review. Cap the number running in parallel too; I run 5 at most now.
 ### Does Daily Receipt upload my payment history?
-Notification text, statements and images are parsed on the phone. Cloud sync uses only structured fields. Receipts shared to a circle carry only category totals, with no merchant names or line items. You can also keep a ledger without signing in.
+Not the raw text. Notification text, statements and images are parsed on the phone, raw notifications are kept only as the latest 200 on the device, and cloud sync uses only structured fields. Receipts shared to a circle carry only category totals, with no merchant names or line items. You can also keep a ledger without signing in.
 ### Do I need to buy a receipt printer?
 No. The receipt is an on-screen animation; printing, stamping and tearing all happen in the app.
