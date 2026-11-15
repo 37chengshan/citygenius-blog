@@ -19,6 +19,7 @@ const schema = z.object({
     caption: z.string(),
     authorMeta: z.string(),
     featured: z.boolean().default(false),
+    repo: z.string().url().optional(),
     related: z.array(z.object({
       date: z.string(),
       title: z.string(),

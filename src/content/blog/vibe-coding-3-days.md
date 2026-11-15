@@ -22,6 +22,7 @@ sideNote: "Scholar AI · Vibe Coding ·<br/>FastAPI · React · RAG"
 caption: "<b>Three days, one MVP.</b>(CityGenius, MMXXVI)"
 authorMeta: "大学生 · 全栈开发者 · Vibe Coding 爱好者"
 featured: true
+repo: "https://github.com/37chengshan/scholar-ai"
 related:
   - date: "2026.05.08"
     title: "macOS 原生开发心得：SwiftUI 与 AppKit 的取舍"

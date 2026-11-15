@@ -21,6 +21,7 @@ sideNote: "ompweb · Local-first ·<br/>sessions · PTY · MCP"
 caption: "<b>Workbench for omp.</b>(CityGenius, MMXXVI)"
 authorMeta: "大学生 · 全栈开发者 · AI 工具链探索者"
 featured: false
+repo: "https://github.com/37chengshan/ompweb"
 related:
   - date: "2026.09.17"
     title: "agent-mcp：把各种 Agent CLI 收进一个工作池"

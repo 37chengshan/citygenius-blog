@@ -97,6 +97,12 @@ const newsSchema = {
                 <span class="lang-en">{pEn ? `${pEn.date} ${pEn.week} ${pEn.hm}` : ''}</span><span class="lang-zh">{pZh ? `${pZh.date} ${pZh.week} ${pZh.hm}` : ''}</span>
               </span>
             )}
+            {item.aihot && (
+              <span>
+                <a href={item.aihot} target="_blank" rel="noreferrer noopener">AIHOT</a>
+                <span class="lang-en"> pick</span><span class="lang-zh"> 精选</span>
+              </span>
+            )}
           </div>
           <Fragment set:html={readOriginHtml(item.link)} />
         </div>

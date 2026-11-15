@@ -44,7 +44,7 @@ export const ui = {
     },
     article: {
       back: '返回文章列表', tree: '目录', progress: '阅读进度', share: '分享', copyLink: '复制链接', copied: '已复制',
-      related: '相关文章', top: '回到顶部', readTime: '阅读时长', minRead: '分钟阅读', author: '作者', published: '发布', category: '分类',
+      related: '相关文章', top: '回到顶部', readTime: '阅读时长', minRead: '分钟阅读', author: '作者', published: '发布', category: '分类', repo: 'GitHub 仓库',
     },
   },
   en: {
@@ -73,7 +73,7 @@ export const ui = {
     },
     article: {
       back: 'All articles', tree: 'Contents', progress: 'Progress', share: 'Share', copyLink: 'Copy link', copied: 'Copied',
-      related: 'Related', top: 'Back to top', readTime: 'Reading time', minRead: 'min read', author: 'Author', published: 'Published', category: 'Category',
+      related: 'Related', top: 'Back to top', readTime: 'Reading time', minRead: 'min read', author: 'Author', published: 'Published', category: 'Category', repo: 'View on GitHub',
     },
   },
 } as const;

@@ -21,6 +21,7 @@ sideNote: "Opus · Fable · DeepSeek ·<br/>Haiku · GPT-6.1 · Orca"
 caption: "<b>From an idea to an app.</b>(CityGenius, MMXXVI)"
 authorMeta: "大学生 · 全栈开发者 · AI 工具链探索者"
 featured: false
+repo: "https://github.com/37chengshan/xiaopiao"
 related:
   - date: "2026.09.17"
     title: "ompweb：给 omp 一张本地工作台"

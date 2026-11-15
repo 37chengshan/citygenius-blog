@@ -21,6 +21,7 @@ sideNote: "agent-mcp · Control Plane ·<br/>spawn · wait · steer"
 caption: "<b>Agent work pool.</b>(CityGenius, MMXXVI)"
 authorMeta: "大学生 · 全栈开发者 · AI 工具链探索者"
 featured: false
+repo: "https://github.com/37chengshan/agent-mcp"
 related:
   - date: "2026.09.17"
     title: "d-token：上下文离开本机之前"

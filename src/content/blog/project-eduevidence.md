@@ -21,6 +21,7 @@ sideNote: "EduEvidence · Research Engine ·<br/>nine-stage · graph · ADOPT"
 caption: "<b>From question to decision.</b>(CityGenius, MMXXVI)"
 authorMeta: "大学生 · 全栈开发者 · AI 工具链探索者"
 featured: false
+repo: "https://github.com/37chengshan/eduevidence"
 related:
   - date: "2026.09.17"
     title: "agent-mcp：把各种 Agent CLI 收进一个工作池"

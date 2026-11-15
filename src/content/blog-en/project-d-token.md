@@ -21,6 +21,7 @@ sideNote: "d-token · Local Control Plane ·<br/>compress · route · receipt"
 caption: "<b>Context before it leaves.</b>(CityGenius, MMXXVI)"
 authorMeta: "Student · Full-stack developer · AI toolchain tinkerer"
 featured: false
+repo: "https://github.com/37chengshan/d-token"
 related:
   - date: "2026.09.17"
     title: "agent-mcp: turning Agent CLIs into one work pool"

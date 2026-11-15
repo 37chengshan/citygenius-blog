@@ -21,6 +21,7 @@ sideNote: "agent-mcp · Control Plane ·<br/>spawn · wait · steer"
 caption: "<b>Agent work pool.</b>(CityGenius, MMXXVI)"
 authorMeta: "Student · Full-stack developer · AI toolchain tinkerer"
 featured: false
+repo: "https://github.com/37chengshan/agent-mcp"
 related:
   - date: "2026.09.17"
     title: "d-token: before context leaves your machine"

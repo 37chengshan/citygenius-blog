@@ -21,6 +21,7 @@ sideNote: "ompweb · Local-first ·<br/>sessions · PTY · MCP"
 caption: "<b>Workbench for omp.</b>(CityGenius, MMXXVI)"
 authorMeta: "University student · Full-stack developer · AI toolchain explorer"
 featured: false
+repo: "https://github.com/37chengshan/ompweb"
 related:
   - date: "2026.09.17"
     title: "agent-mcp: one worker pool for every Agent CLI"

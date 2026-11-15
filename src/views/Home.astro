@@ -45,6 +45,8 @@ const copy = {
     "card3h": "Android 应用集",
     "card3": "几个 Android 小应用：文件格式转换、AI 图片处理、多语言翻译。想做得好用，也好看。",
     "card4h": "技术栈",
+    "repoLabel": "GitHub 上的项目",
+    "repoPost": "读文章",
     "artRule": "<span>文章</span><span class='dot-mark'>•</span><span>开发笔记</span>",
     "artLabel": "文章",
     "artH2": "边做边 <em>写</em>，把坑 <em>记下来</em><span class='dot'>.</span>",
@@ -114,6 +116,8 @@ const copy = {
     "card3h": "Android apps",
     "card3": "A handful of Android apps covering file conversion, AI image processing and translation, aiming to be both useful and nice to look at.",
     "card4h": "Stack",
+    "repoLabel": "On GitHub",
+    "repoPost": "Read post",
     "artRule": "<span>Articles</span><span class='dot-mark'>•</span><span>Dev notes</span>",
     "artLabel": "Writing",
     "artH2": "Build it, then <em>write it down</em><span class='dot'>.</span>",
@@ -156,6 +160,8 @@ const sortedPosts = posts.sort((a, b) => {
   if (!a.data.featured && b.data.featured) return 1;
   return new Date(b.data.date).getTime() - new Date(a.data.date).getTime() || a.id.localeCompare(b.id);
 });
+
+const repoPosts = sortedPosts.filter((p) => p.data.repo);
 
 const categoryCounts = {
   all: posts.length,
@@ -601,6 +607,34 @@ const categoryCounts = {
       }
       .card:hover .arrow-mark { background: var(--coral); border-color: var(--coral); color: #fff; }
       .card .arrow-mark svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+      .repos { margin-top: 28px; }
+      .repos-label {
+        font-family: var(--sans);
+        font-size: 10.5px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-bottom: 8px;
+      }
+      .repos ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+      .repos li {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: baseline;
+        gap: 16px;
+        padding: 11px 0;
+        border-bottom: 1px solid var(--line);
+        font-family: var(--sans);
+        font-size: 13.5px;
+      }
+      .repos .repo-name { font-family: var(--mono); font-size: 13px; color: var(--ink-mute); text-decoration: none; }
+      .repos .repo-name b { color: var(--ink); font-weight: 600; }
+      .repos .repo-name:hover, .repos .repo-name:hover b { color: var(--coral); }
+      .repos .repo-tag { color: var(--ink-faint); font-size: 12px; }
+      .repos .repo-post { color: var(--ink); text-decoration: none; font-size: 12.5px; white-space: nowrap; }
+      .repos .repo-post:hover { color: var(--coral); }
+      @media (max-width: 560px) { .repos .repo-tag { display: none; } .repos li { grid-template-columns: minmax(0, 1fr) auto; } }
 
       /* ===== LABS ===== */
       .labs-head {
@@ -1318,6 +1352,20 @@ const categoryCounts = {
             <div class='card' data-reveal><div class='num'>03<span class='tag'>Android · Apps</span></div><h3>{c.card3h}</h3><p>{c.card3}</p></div>
             <div class='card' data-reveal><div class='num'>Stack<span class='tag'>Core</span></div><h3>{c.card4h}</h3><p>Python / FastAPI / React / Swift / AppKit / Kotlin / Jetpack Compose / TFLite / RAG.</p></div>
           </div>
+          {repoPosts.length > 0 && (
+            <div class='repos' data-reveal>
+              <div class='repos-label'>{c.repoLabel}</div>
+              <ul>
+                {repoPosts.map((post) => (
+                  <li>
+                    <a class='repo-name' href={post.data.repo} target='_blank' rel='noreferrer noopener'>37chengshan/<b>{post.data.repo!.split('/').pop()}</b><span aria-hidden='true'> ↗</span></a>
+                    <span class='repo-tag'>{post.data.tag.toLowerCase().replace(/\s+/g, '-') === post.data.repo!.split('/').pop() ? '' : post.data.tag}</span>
+                    <a class='repo-post' href={L(`/article/${post.id}/`)}>{c.repoPost} →</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>

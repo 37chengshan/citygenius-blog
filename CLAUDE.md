@@ -22,7 +22,7 @@
 
 ## Frontmatter
 
-Must match `src/content.config.ts` (title, description, date, readTime, tag, category, tags, tagFilters, image, imageAlt, imageWidth, imageHeight, badge, sideNote, caption, authorMeta, featured, related).
+Must match `src/content.config.ts` (title, description, date, readTime, tag, category, tags, tagFilters, image, imageAlt, imageWidth, imageHeight, badge, sideNote, caption, authorMeta, featured, related; optional repo = public GitHub URL, shown as a button in the article header and in the home Projects list).
 
 ## Build / deploy
 
