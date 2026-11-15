@@ -149,7 +149,7 @@ const pageSchema = {
                 tops += '<li>' + inner + '</li>';
               }
             }
-            var illus = NS ? '<div class="hub-illus" aria-hidden="true">' + NS.illusFor('hub-' + meta.id, meta.pal, false) + '</div>' : '';
+            var illus = NS ? NS.hubPhotoHtml(items) : '';
             return '<div class="hub-card" data-href="' + esc(href) + '">'
               + '<div class="hub-ix">' + pad(ix + 1) + '</div>'
               + '<div class="hub-main">'

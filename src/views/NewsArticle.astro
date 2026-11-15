@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsStyles from '../components/NewsStyles.astro';
 import { localePath, type Lang } from '../i18n';
-import { dateParts, fullTime, illusFor, catLabel } from '../lib/news-shared.js';
+import { dateParts, fullTime, catLabel, srcName } from '../lib/news-shared.js';
 import { takeHtml, readOriginHtml, artNavHtml } from '../lib/news-render.js';
 
 const { lang = 'zh' } = Astro.props as { lang?: Lang };
@@ -71,7 +71,12 @@ const newsSchema = {
           </div>
         </div>
 
-        <div class="illus art-illus" set:html={illusFor(item.link || item.title, meta.pal, true)} />
+        {item.image && (
+          <figure class="art-photo">
+            <img src={item.image} alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('figure').remove()" />
+            <figcaption><span class="lang-en">Image: </span><span class="lang-zh">图片：</span>{srcName(item.source)}</figcaption>
+          </figure>
+        )}
 
         <div class="art-body">
           <div class="lang-en">

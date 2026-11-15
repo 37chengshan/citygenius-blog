@@ -6,7 +6,7 @@ import { localePath, type Lang } from '../i18n';
 import { NEWS_CATS } from '../lib/news-cats.js';
 import { readFileSync } from 'node:fs';
 import { staticCategory, itemListSchema, slugFor, snapUpdated, catNavHtml, totalHtml } from '../lib/news-render.js';
-import { illusFor, articlePath, catLabel } from '../lib/news-shared.js';
+import { articlePath, catLabel } from '../lib/news-shared.js';
 
 const { lang = 'zh' } = Astro.props as { lang?: Lang };
 const L = (p: string) => localePath(lang, p);
@@ -39,8 +39,7 @@ try {
 } catch (e) {
   snapItems = [];
 }
-const snap = staticCategory(category, snapItems, meta.pal, linkArt);
-const heroIllus = illusFor('hero-' + category, meta.pal, true);
+const snap = staticCategory(category, snapItems, linkArt);
 const catL = catLabel(category) || {};
 const catEn = catL.en || meta.label;
 const catDescEn = catL.descEn || meta.desc;
@@ -77,11 +76,10 @@ const pageSchema = {
           <h1><span class="lang-en">{catEn}</span><span class="lang-zh">{meta.label}</span></h1>
           <p class="cat-desc"><span class="lang-en">{catDescEn}</span><span class="lang-zh">{meta.desc}</span></p>
         </div>
-        <div class="cat-hero-illus" id="cat-hero-illus" aria-hidden="true" set:html={heroIllus} />
       </div>
 
       <div id="news-feat" set:html={snap.feat} />
-      <div class="bento" id="news-grid" style="margin-top: 18px;" set:html={snap.grid} />
+      <div class="news-grid3" id="news-grid" set:html={snap.grid} />
 
       <Fragment set:html={catNavHtml(prevHref, prev.id, hubHref, nextHref, next.id)} />
     </section>
@@ -89,12 +87,11 @@ const pageSchema = {
 
   <Fragment slot="scripts">
     <script src={newsSharedUrl}></script>
-    <script define:vars={{ newsUrl, catId: category, pal: meta.pal, artBase }}>
+    <script define:vars={{ newsUrl, catId: category, artBase }}>
       (function () {
         var NS = window.NewsShared || null;
         var gridEl = document.getElementById('news-grid');
         var featEl = document.getElementById('news-feat');
-        var heroIllusEl = document.getElementById('cat-hero-illus');
         var updatedEl = document.getElementById('news-updated');
         var countEl = document.getElementById('news-count');
 
@@ -102,79 +99,8 @@ const pageSchema = {
           return NS ? NS.esc(s) : String(s == null ? '' : s);
         }
         function artHref(it) {
-          var slug = NS ? NS.slugFor(it.link || it.title) : '';
-          return artBase + slug + '/';
+          return artBase + NS.slugFor(it.link || it.title) + '/';
         }
-        function illus(seed, wide) {
-          return NS ? NS.illusFor(seed, pal, wide) : '';
-        }
-        function dateLineOne(pub, src, lang) {
-          var dp = NS ? NS.dateParts(pub, lang) : null;
-          if (!pub || !dp) {
-            return '<div class="date-line"><span class="src">' + esc(src || '') + '</span></div>';
-          }
-          var rel = NS ? NS.relTime(pub, lang) : '';
-          return '<div class="date-line" title="' + esc(NS ? NS.fullTime(pub, lang) : '') + '">'
-            + '<span class="date-badge">' + esc(dp.date) + '</span>'
-            + '<span class="week">' + esc(dp.week) + ' · ' + esc(dp.hm) + '</span>'
-            + (rel ? '<span class="rel">' + esc(rel) + '</span>' : '')
-            + '<span class="src">' + esc(src || '') + '</span>'
-            + '</div>';
-        }
-        function dateLine(pub, src) {
-          return '<div class="lang-en">' + dateLineOne(pub, src, 'en') + '</div>'
-            + '<div class="lang-zh">' + dateLineOne(pub, src, 'zh') + '</div>';
-        }
-
-        function cardBody(it, tag) {
-          var zhTitle = it.zh_title || it.title || '';
-          var enTitle = it.en_title || it.title || '';
-          var zhSum = it.zh_summary || '';
-          var enSum = it.en_summary || it.summary || '';
-          var take = it.zh_take
-            ? '<div class="lang-zh"><div class="take"><b>解读</b>' + esc(it.zh_take) + '</div></div>'
-            : '';
-          return '<div class="card-body">'
-            + '<div class="lang-en">'
-            + '<' + tag + '>' + esc(enTitle) + '</' + tag + '>'
-            + dateLineOne(it.published, it.source, 'en')
-            + (enSum ? '<p>' + esc(enSum) + '</p>' : '')
-            + '</div>'
-            + '<div class="lang-zh">'
-            + '<' + tag + '>' + esc(zhTitle) + '</' + tag + '>'
-            + dateLineOne(it.published, it.source, 'zh')
-            + (zhSum ? '<p>' + esc(zhSum) + '</p>' : '')
-            + take
-            + '</div>'
-            + '</div>';
-        }
-        function featCard(it) {
-          var art = it.image
-            ? '<div class="illus"><img loading="lazy" src="' + esc(it.image) + '" alt=""/></div>'
-            : '<div class="illus">' + illus(it.link || it.title, false) + '</div>';
-          return '<a class="feat" href="' + esc(artHref(it)) + '">'
-            + art + cardBody(it, 'h2') + '</a>';
-        }
-        var SPANS = ['sp7', 'sp5', 'sp5', 'sp7', 'wide', 'sp4', 'sp8', 'sp8', 'sp4', 'sp6', 'sp6'];
-        function bentoCard(it, cls) {
-          if (cls === 'wide') {
-            return '<a class="news-card wide" href="' + esc(artHref(it)) + '">'
-              + '<div class="illus">' + illus(it.link || it.title, false) + '</div>'
-              + cardBody(it, 'h3') + '</a>';
-          }
-          return '<a class="news-card ' + cls + '" href="' + esc(artHref(it)) + '">'
-            + '<div class="illus">' + illus(it.link || it.title, false) + '</div>'
-            + cardBody(it, 'h3') + '</a>';
-        }
-        function dayDiv(iso) {
-          var zen = NS ? NS.dateParts(iso, 'en') : null;
-          var zzh = NS ? NS.dateParts(iso, 'zh') : (NS ? NS.dateParts(iso) : null);
-          var en = zen ? zen.date + ' ' + zen.week : '';
-          var zh = zzh ? zzh.date + ' ' + zzh.week : '';
-          return '<div class="day-div"><span><span class="lang-en">' + esc(en) + '</span>'
-            + '<span class="lang-zh">' + esc(zh) + '</span></span></div>';
-        }
-
         function applyLang() {
           if (window.__cg && window.__cg.applyI18n) {
             window.__cg.applyI18n(document.documentElement.dataset.lang || 'en');
@@ -203,29 +129,16 @@ const pageSchema = {
                 + '<span class="lang-zh">数据更新于 ' + esc(dpz.date) + ' ' + esc(dpz.week) + ' ' + esc(dpz.hm) + (relZ ? ' · ' + esc(relZ) : '') + '</span>'
               : 'Updated ' + esc(g);
           }
-          if (heroIllusEl && NS) heroIllusEl.innerHTML = NS.illusFor('hero-' + catId, pal, true);
-          if (!items.length) {
+          if (!items.length || !NS) {
             if (!featEl.innerHTML.trim() && !gridEl.innerHTML.trim()) {
               gridEl.innerHTML = '<div class="news-empty"><span data-i18n="news.load_fail">Couldn\'t load the news — try again later.</span></div>';
               applyLang();
             }
             return;
           }
-          featEl.innerHTML = featCard(items[0]);
-          var html = '';
-          var first = NS ? NS.dateParts(items[0].published) : null;
-          var lastDay = first ? first.key : '';
-          for (var i = 1; i < items.length; i++) {
-            var dp2 = NS ? NS.dateParts(items[i].published) : null;
-            var dk = dp2 ? dp2.key : '';
-            if (dk && dk !== lastDay) {
-              html += dayDiv(items[i].published);
-              lastDay = dk;
-            }
-            var sp = SPANS[(i - 1) % SPANS.length];
-            html += bentoCard(items[i], sp + (sp === 'wide' ? '' : i % 2 === 0 ? ' off' : ''));
-          }
-          gridEl.innerHTML = html;
+          var out = NS.categoryHtml(items, artHref, true);
+          featEl.innerHTML = out.feat;
+          gridEl.innerHTML = out.grid;
           applyLang();
         }
         function load() {

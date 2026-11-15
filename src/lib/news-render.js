@@ -5,7 +5,7 @@
 // 由全局 CSS 按 html[data-lang] 显隐；chrome 文案英文默认 + data-i18n。
 // 注意 snapUpdated() 返回的是 HTML 片段，调用方必须用 set:html（不能 {var} 直接插值）。
 
-import { esc, slugFor, articlePath, dateParts, illusFor, catLabel } from './news-shared.js';
+import { esc, slugFor, articlePath, catLabel, categoryHtml, hubPhotoHtml } from './news-shared.js';
 
 /** 文章站内链接：linkArt(catId, slug) 由调用方传入（已套 withBase）。 */
 export { slugFor, articlePath };
@@ -48,105 +48,9 @@ export function snapUpdated(iso) {
   }
 }
 
-/* ---------- 卡片（静态版：绝对时间，无"几小时前"，JS 刷新后会补上） ---------- */
-function staticDateLine(pub, src, lang) {
-  var p = pub ? dateParts(pub, lang) : null;
-  if (!p) {
-    return '<div class="date-line"><span class="src">' + esc(src || '') + '</span></div>';
-  }
-  return (
-    '<div class="date-line">' +
-    '<span class="date-badge">' + esc(p.date) + '</span>' +
-    '<span class="week">' + esc(p.week) + ' · ' + esc(p.hm) + '</span>' +
-    '<span class="src">' + esc(src || '') + '</span>' +
-    '</div>'
-  );
-}
-
-/** 卡片正文双语：EN=英文标题+英文摘要；ZH=中文标题+中文摘要+中文解读。 */
-function cardBody(it, tag) {
-  var zhTitle = it.zh_title || it.title || '';
-  var enTitle = it.en_title || it.title || '';
-  var zhSum = it.zh_summary || '';
-  var enSum = it.en_summary || it.summary || '';
-  var take = it.zh_take
-    ? '<div class="lang-zh"><div class="take"><b>解读</b>' + esc(it.zh_take) + '</div></div>'
-    : '';
-  return (
-    '<div class="card-body">' +
-    '<div class="lang-en">' +
-    '<' + tag + '>' + esc(enTitle) + '</' + tag + '>' +
-    staticDateLine(it.published, it.source, 'en') +
-    (enSum ? '<p>' + esc(enSum) + '</p>' : '') +
-    '</div>' +
-    '<div class="lang-zh">' +
-    '<' + tag + '>' + esc(zhTitle) + '</' + tag + '>' +
-    staticDateLine(it.published, it.source, 'zh') +
-    (zhSum ? '<p>' + esc(zhSum) + '</p>' : '') +
-    take +
-    '</div>' +
-    '</div>'
-  );
-}
-
-function artHref(linkArt, catId, it) {
-  return linkArt(catId, slugFor(it.link || it.title));
-}
-
-export function featCard(catId, it, pal, linkArt) {
-  var art = it.image
-    ? '<div class="illus"><img loading="lazy" src="' + esc(it.image) + '" alt=""/></div>'
-    : '<div class="illus">' + illusFor(it.link || it.title, pal, false) + '</div>';
-  return (
-    '<a class="feat" href="' + esc(artHref(linkArt, catId, it)) + '">' +
-    art + cardBody(it, 'h2') + '</a>'
-  );
-}
-
-var SPANS = ['sp7', 'sp5', 'sp5', 'sp7', 'wide', 'sp4', 'sp8', 'sp8', 'sp4', 'sp6', 'sp6'];
-
-function bentoCard(catId, it, cls, pal, linkArt) {
-  if (cls === 'wide') {
-    return (
-      '<a class="news-card wide" href="' + esc(artHref(linkArt, catId, it)) + '">' +
-      '<div class="illus">' + illusFor(it.link || it.title, pal, false) + '</div>' +
-      cardBody(it, 'h3') + '</a>'
-    );
-  }
-  return (
-    '<a class="news-card ' + cls + '" href="' + esc(artHref(linkArt, catId, it)) + '">' +
-    '<div class="illus">' + illusFor(it.link || it.title, pal, false) + '</div>' +
-    cardBody(it, 'h3') + '</a>'
-  );
-}
-
-function dayDiv(iso) {
-  var zen = dateParts(iso, 'en'), zzh = dateParts(iso, 'zh') || dateParts(iso);
-  var en = zen ? zen.date + ' ' + zen.week : '';
-  var zh = zzh ? zzh.date + ' ' + zzh.week : '';
-  return '<div class="day-div"><span><span class="lang-en">' + esc(en) + '</span>' +
-    '<span class="lang-zh">' + esc(zh) + '</span></span></div>';
-}
-
 /** 板块页静态 HTML：{ feat, grid }，无数据时返回空字符串。 */
-export function staticCategory(catId, items, pal, linkArt) {
-  if (!items || !items.length) return { feat: '', grid: '' };
-  var feat = featCard(catId, items[0], pal, linkArt);
-  var html = '';
-  var first = dateParts(items[0].published);
-  var lastDay = first ? first.key : '';
-  for (var i = 1; i < items.length; i++) {
-    var p = dateParts(items[i].published);
-    var dk = p ? p.key : '';
-    if (dk && dk !== lastDay) {
-      html += dayDiv(items[i].published);
-      lastDay = dk;
-    }
-    var sp = SPANS[(i - 1) % SPANS.length];
-    var cls = sp + (sp === 'wide' ? '' : i % 2 === 0 ? ' off' : '');
-    html += bentoCard(catId, items[i], cls, pal, linkArt);
-  }
-  return { feat: feat, grid: html };
+export function staticCategory(catId, items, linkArt) {
+  return categoryHtml(items, function (it) { return linkArt(catId, slugFor(it.link || it.title)); }, false);
 }
 
 /** 条数双语：12 stories / 12 条（hub 卡片用）。 */
@@ -190,7 +94,7 @@ export function staticHub(cats, data, linkArt) {
       '<div class="hub-desc">' + langSpans(L.descEn, L.descZh) + '</div>' +
       (tops ? '<ul class="hub-tops">' + tops + '</ul>' : '') +
       '</div>' +
-      '<div class="hub-illus" aria-hidden="true">' + illusFor('hub-' + meta.id, meta.pal, false) + '</div>' +
+      hubPhotoHtml(items) +
       '<a class="hub-arrow" aria-hidden="true" href="' + esc(meta.href) + '" tabindex="-1">→</a>' +
       '</div>';
   }

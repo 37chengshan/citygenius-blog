@@ -544,4 +544,59 @@ function illusFor(seed, pal, wide) {
   );
 }
 
-window.NewsShared = { esc, slugFor, articlePath, dateParts, fullTime, relTime, CAT_LABELS, catLabel, ILLUS_COUNT, illusFor };
+/* ---------- 板块页卡片：构建期（news-render.js）和浏览器端（NewsCategory）共用 ---------- */
+
+/** 来源名去掉聚合前后缀：「AI HOT · TechCrunch：AI（RSS）」→「TechCrunch」，「AI HOT · X：Rohan Paul (@x)」→「Rohan Paul」。 */
+function srcName(s) {
+  var n = String(s || '').replace(/^AI HOT · /, '').replace(/（RSS）$/, '');
+  var m = n.match(/^X：(.+?)(\s*\(@[^)]*\))?$/);
+  return m ? m[1] : n.split('：')[0];
+}
+
+/** 新闻原图；加载失败就把图位删掉，卡片退回纯文字样式。 */
+function photoHtml(src, cls) {
+  if (!src) return '';
+  return '<div class="' + cls + '"><img src="' + esc(src) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"' +
+    ' onerror="this.parentNode.parentNode.classList.add(\'nc-text\');this.parentNode.remove()"></div>';
+}
+
+function cardLang(it, lang, tag, rel) {
+  var zh = lang === 'zh';
+  var title = (zh ? it.zh_title : it.en_title) || it.title || '';
+  var sum = zh ? it.zh_summary || '' : it.en_summary || it.summary || '';
+  var p = dateParts(it.published, lang);
+  var when = (rel && it.published && relTime(it.published, lang)) || (p ? p.date + ' ' + p.hm : '');
+  return '<div class="lang-' + lang + '">' +
+    '<div class="nc-meta"><span class="nc-src">' + esc(srcName(it.source)) + '</span>' +
+    (when ? '<span title="' + esc(fullTime(it.published, lang)) + '">' + esc(when) + '</span>' : '') + '</div>' +
+    '<' + tag + ' class="nc-title">' + esc(title) + '</' + tag + '>' +
+    (sum ? '<p class="nc-sum">' + esc(sum) + '</p>' : '') +
+    (zh && it.zh_take ? '<p class="nc-take"><b>解读</b>' + esc(it.zh_take) + '</p>' : '') +
+    '</div>';
+}
+
+/** 单张新闻卡。feat=头条横卡；rel=显示相对时间（只在浏览器端用，构建期显示绝对时间）。 */
+function newsCardHtml(it, href, feat, rel) {
+  var tag = feat ? 'h2' : 'h3';
+  return '<a class="nc' + (feat ? ' nc-feat' : '') + (it.image ? '' : ' nc-text') + '" href="' + esc(href) + '">' +
+    photoHtml(it.image, 'nc-photo') +
+    '<div class="nc-body">' + cardLang(it, 'en', tag, rel) + cardLang(it, 'zh', tag, rel) + '</div></a>';
+}
+
+/** 板块页：{ feat: 头条, grid: 其余卡片 }。hrefFor(it) 返回站内文章链接。 */
+function categoryHtml(items, hrefFor, rel) {
+  if (!items || !items.length) return { feat: '', grid: '' };
+  var html = '';
+  for (var i = 1; i < items.length; i++) html += newsCardHtml(items[i], hrefFor(items[i]), false, rel);
+  return { feat: newsCardHtml(items[0], hrefFor(items[0]), true, rel), grid: html };
+}
+
+/** 入口页板块卡的小图：取该板块前几条里第一张原图。 */
+function hubPhotoHtml(items) {
+  for (var i = 0; i < Math.min(4, (items || []).length); i++) {
+    if (items[i].image) return photoHtml(items[i].image, 'hub-photo');
+  }
+  return '';
+}
+
+window.NewsShared = { esc, slugFor, articlePath, dateParts, fullTime, relTime, CAT_LABELS, catLabel, ILLUS_COUNT, illusFor, srcName, photoHtml, newsCardHtml, categoryHtml, hubPhotoHtml };

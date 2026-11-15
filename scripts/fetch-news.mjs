@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 const OUT = 'public/news.json';
 const LIVE = 'https://37chengshan.github.io/citygenius-blog/news.json';
-const PER_CAT = 12;
+const PER_CAT = 13; // 头条 + 12 张卡，三栏 / 两栏都能排满
 const PER_SOURCE = 8;
 const UA = 'Mozilla/5.0 (compatible; news-digest/1.0)';
 const USE_AIHOT = process.env.NEWS_AIHOT !== '0';
@@ -152,6 +152,26 @@ function pick(items) {
     .slice(0, PER_CAT);
 }
 
+/* ---------- 配图：RSS 没给图的，取原文页的 og:image ---------- */
+async function ogImage(url) {
+  try {
+    const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'text/html' }, signal: AbortSignal.timeout(12000) });
+    if (!r.ok) return '';
+    const html = (await r.text()).slice(0, 300000);
+    const tagHtml = html.match(/<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)["'][^>]*>/i);
+    const src = tagHtml ? attr(tagHtml[0], /content=["']([^"']+)/i) : '';
+    return src.startsWith('https:') ? src : '';
+  } catch {
+    return '';
+  }
+}
+async function fillImages(items) {
+  const todo = items.filter((it) => !it.image && !it.link.includes('news.google.com'));
+  for (let i = 0; i < todo.length; i += 6) {
+    await Promise.all(todo.slice(i, i + 6).map(async (it) => { it.image = await ogImage(it.link); }));
+  }
+}
+
 /* ---------- 翻译缓存 ---------- */
 // 只有真正翻过的字段才算缓存（兜底时 zh_summary 等于英文原文，不算）。
 // AIHOT 条目的中文每次以 AIHOT 最新返回为准（它会更正、撤回），不用缓存覆盖。
@@ -163,6 +183,7 @@ function cachedFields(c, fromAihot) {
     if (c.zh_summary && c.zh_summary !== c.summary) out.zh_summary = c.zh_summary;
   }
   if (c.zh_take) out.zh_take = c.zh_take;
+  if (c.image) out.image = c.image;
   if (c.en_summary && c.en_summary !== c.summary && !CJK.test(c.en_summary)) {
     out.en_title = c.en_title; out.en_summary = c.en_summary;
   }
@@ -278,7 +299,11 @@ async function main() {
       continue;
     }
     fresh++;
-    items = items.map((it) => ({ ...it, ...cachedFields(cache.get(it.link), !!it.aihot) }));
+    items = items.map((it) => {
+      const c = cachedFields(cache.get(it.link), !!it.aihot);
+      return { ...it, ...c, image: it.image || c.image || '' };
+    });
+    await fillImages(items);
     if (llmOn) await enrich(items);
     categories.push({
       id: cat.id,
