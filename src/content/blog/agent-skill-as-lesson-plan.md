@@ -29,7 +29,7 @@ related:
     slug: "open-design-to-skill"
   - date: "2026.05.15"
     title: "用 Vibe Coding 三天搞定一个全栈 AI 应用"
-    desc: "从想法到上线，记录 scholar-ai 的开发过程。"
+    desc: "scholar-ai 从想法到上线的过程。"
     tag: "Vibe Coding · AI"
     slug: "vibe-coding-3-days"
 ---
@@ -88,7 +88,7 @@ Skill 里最容易被忽略的，是“完成”的定义。没有验收线，Ag
 - 文章 frontmatter 字段齐全。
 - 不引入未要求的新依赖。
 
-这听起来很朴素，但它把“感觉差不多了”换成了可执行检查。对学生项目尤其有用——你可能没有 code review 同伴，但你可以有 checklist。
+这听起来很朴素，但它把“感觉差不多了”换成了可执行检查。对学生项目尤其有用。你可能没有 code review 同伴，但你可以有 checklist。
 
 ## 现状
 
@@ -102,7 +102,7 @@ Vibe Coding 真正省时间的地方，不是让 AI 替你写完，而是把你�
 
 ### Skill 和 Prompt 到底有什么区别？
 
-学生做 AI 项目最常见的浪费不是算力，而是重复解释——每次开新会话都要重新交代项目背景、目录约定、禁止事项。Prompt 解决的是"这一次怎么答"，Skill 解决的是"这类任务以后怎么做"。
+学生做 AI 项目最常见的浪费不是算力，而是重复解释：每次开新会话都要重新交代项目背景、目录约定、禁止事项。Prompt 解决的是"这一次怎么答"，Skill 解决的是"这类任务以后怎么做"。
 
 ### 一份 Skill 至少要写清楚什么？
 

@@ -69,7 +69,7 @@ Three hard rules:
 
 <div class="tldr">
 <b>TL;DR</b>
-d-token is a context control plane that runs on your own machine: requests from your AI coding agent pass through it first — duplicates get compressed, routing stays explicit — then go out to the model provider, with a receipt for every request. In one measured real request, it cut the physical payload by 33,705 tokens — not an estimate, but the difference between Local Tokens and Provider Tokens on the receipt. Three rules: secrets never leave your machine, routing never switches silently, and a broken config can be rolled back.
+d-token is a context control plane that runs on your own machine: requests from your AI coding agent pass through it first (duplicates get compressed, routing stays explicit), then go out to the model provider, with a receipt for every request. In one measured real request, it cut the physical payload by 33,705 tokens: not an estimate, but the difference between Local Tokens and Provider Tokens on the receipt. Three rules: secrets never leave your machine, routing never switches silently, and a broken config can be rolled back.
 </div>
 
 ## Problem
@@ -147,7 +147,7 @@ The README records one measurement: a single real routed request on 2026-08-04 s
 
 ### Will it upload my code or secrets?
 
-No. Local-first is a hard rule: settings, diagnostics, request metadata, and rollback records stay on your machine, and plain logs never store full prompts, full responses, source text, or API keys. Your chosen provider still receives the requests you send — but now there's a door you control in between.
+No. Local-first is a hard rule: settings, diagnostics, request metadata, and rollback records stay on your machine, and plain logs never store full prompts, full responses, source text, or API keys. Your chosen provider still receives the requests you send, but now there's a door you control in between.
 
 ### What if I break a config?
 
@@ -155,4 +155,4 @@ Changes aren't "save and it applies" — they go through five steps: preview →
 
 ### Can I use it now?
 
-It's at 0.2.0-beta.1, a public unsigned pre-release (macOS ARM64 / Windows x64). Unsigned builds may trigger OS security warnings — after downloading, verify the repo and hashes; don't bypass system protections.
+It's at 0.2.0-beta.1, a public unsigned pre-release (macOS ARM64 / Windows x64). Unsigned builds may trigger OS security warnings. After downloading, verify the repo and hashes; don't bypass system protections.

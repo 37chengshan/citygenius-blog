@@ -41,7 +41,7 @@ related:
 
 有人问：要不要给学生上 AI 编程助手？
 
-让模型直接答，它会给你一段听起来很顺的话：提效、个性化、未来已来。翻文献又是另一回事——CHI 2023 有 1.15× / 1.8× 的对照，也有「一周后无显著差距」；PNAS 2025 在无监督考试里测到 −17%。
+让模型直接答，它会给你一段听起来很顺的话：提效、个性化、未来已来。翻文献又是另一回事。CHI 2023 有 1.15× / 1.8× 的对照，也有「一周后无显著差距」；PNAS 2025 在无监督考试里测到 −17%。
 
 **AI 不缺搜索，缺的是证据纪律。**
 
@@ -54,7 +54,7 @@ EduEvidence 要做的，是把「决策问题」变成「有证据支撑、可�
 
 README 的产品句是：**From Research Questions to Evidence-Based Decisions.**
 
-交付形态是 **AI Agent Skill**；Skill 里面跑的是 **EduEvidence Research Engine**——持久、可审计，把决策问题压成证据接地的回答。
+交付形态是 **AI Agent Skill**；Skill 里面跑的是 **EduEvidence Research Engine**：持久、可审计，把决策问题压成证据接地的回答。
 
 三条冻结原则：
 
@@ -134,7 +134,7 @@ Native Core **只依赖 Python 标准库**，不需要 Agent MCP，也不需要 
 open examples/ai-coding-assistant-evidence/EduEvidence_Report.html
 ```
 
-它不会替你做教育决策。它只保证：在你说「上」或「不上」之前，证据从哪来、Gap 是什么、试点怎么验——写清楚。
+它不会替你做教育决策。它只保证：在你说「上」或「不上」之前，证据从哪来、Gap 是什么、试点怎么验，写清楚。
 
 主仓库：[37chengshan/eduevidence](https://github.com/37chengshan/eduevidence)。
 
@@ -144,7 +144,7 @@ open examples/ai-coding-assistant-evidence/EduEvidence_Report.html
 ### 检索到的论文摘要算证据吗？
 不算。检索片段只是定位器，是线索；要成为证据，必须进入可追溯的引用链。这是第一条冻结原则。
 ### 它会直接告诉我该不该给学生上 AI 编程助手吗？
-不会替你做决策。它只保证：在你说「上」或「不上」之前，证据从哪来、知识缺口是什么、试点怎么验——都写清楚。
+不会替你做决策。它只保证：在你说「上」或「不上」之前，证据从哪来、知识缺口是什么、试点怎么验，都写清楚。
 ### 一定要装 Agent MCP 才能用吗？
 不用。Native Core 只依赖 Python 标准库，不绑死在某一个编排框架上；Claude Code、Cursor、Codex、OMP 等宿主都可以自动加载这个 Skill。
 ### 「证据不足」算失败吗？

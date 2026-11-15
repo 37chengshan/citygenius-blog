@@ -67,7 +67,7 @@ In one line: **OMP writes the sessions, ompweb displays and orchestrates them. T
 
 <div class="tldr">
 <b>TL;DR</b>
-ompweb is a local workbench for oh-my-pi: it doesn't rewrite the agent, it just reads its session files — the session tree, terminal, MCP status, and Git worktrees all laid out on one desk. One hard rule in the design: OMP writes sessions, ompweb only displays and orchestrates; session authority always stays with OMP. The stack is Next.js 16 + Electron 44, and one npx line gets it running.
+ompweb is a local workbench for oh-my-pi: it doesn't rewrite the agent, it just reads its session files: the session tree, terminal, MCP status, and Git worktrees all laid out on one desk. One hard rule in the design: OMP writes sessions, ompweb only displays and orchestrates; session authority always stays with OMP. The stack is Next.js 16 + Electron 44, and one npx line gets it running.
 </div>
 
 ## Problem
@@ -130,7 +130,7 @@ Main repo: [37chengshan/ompweb](https://github.com/37chengshan/ompweb).
 
 ### Is ompweb meant to replace omp?
 
-No. The author is explicit: it's not about replacing omp, it's about wanting a "desk". ompweb doesn't rewrite the agent, it just reads its session files; live execution still goes through omp — standing next to omp, not across from it.
+No. The author is explicit: it's not about replacing omp, it's about wanting a "desk". ompweb doesn't rewrite the agent, it just reads its session files; live execution still goes through omp: standing next to omp, not across from it.
 
 ### How does it read my sessions?
 
@@ -138,7 +138,7 @@ No. The author is explicit: it's not about replacing omp, it's about wanting a "
 
 ### Is it safe to change sessions with it?
 
-The write path is deliberately narrow — only low-risk operations like rename / archive / delete / branch-parent. Try to write everything and you'll fight the live process — that's a boundary the author set on purpose.
+The write path is deliberately narrow: only low-risk operations like rename / archive / delete / branch-parent. Try to write everything and you'll fight the live process. That's a boundary the author set on purpose.
 
 ### How do I run it? What do I need?
 
@@ -146,4 +146,4 @@ Web version, one line: `npx @37chengshan/ompweb@latest`, listening on 127.0.0.1:
 
 ### Can I use it remotely on a server?
 
-Yes — with `--password`, `--hostname`, `--no-open` flags, built for servers. Loopback only by default; the author notes that docs and secure defaults have to keep up.
+Yes, with `--password`, `--hostname`, `--no-open` flags, built for servers. Loopback only by default; the author notes that docs and secure defaults have to keep up.

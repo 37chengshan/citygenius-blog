@@ -1,6 +1,6 @@
 ---
 title: "SwiftUI 与 AppKit 的取舍"
-description: "在开发 macOS 工具时遇到的坑和经验。SwiftUI 的便利与局限，什么时候该回归 AppKit，以及如何利用 Core ML 做本地推理。"
+description: "做 macOS 工具时踩过的坑。SwiftUI 哪里好用、哪里不够用，什么时候该退回 AppKit，还有怎么用 Core ML 做本地推理。"
 date: "2026.05.08"
 readTime: "7 分钟阅读"
 tag: "macOS"
@@ -18,13 +18,13 @@ imageWidth: 768
 imageHeight: 1024
 badge: "macOS"
 sideNote: "SwiftUI · AppKit ·<br/>Toolbar · Layout · Core ML"
-caption: "<b>Native workflow visual.</b>(CityGenius, MMXXVI)"
+caption: "<b>SwiftUI first, AppKit when needed.</b>(CityGenius, MMXXVI)"
 authorMeta: "大学生 · macOS 开发者 · 原生工具实践者"
 featured: false
 related:
   - date: "2026.05.15"
     title: "用 Vibe Coding 三天搞定一个全栈 AI 应用"
-    desc: "从想法到上线，记录 scholar-ai 的开发过程。"
+    desc: "scholar-ai 从想法到上线的过程。"
     tag: "Vibe Coding · 全栈"
     slug: "vibe-coding-3-days"
   - date: "2026.04.15"
@@ -36,7 +36,7 @@ related:
 
 <div class="tldr">
 <b>一句话总结</b>
-做 macOS 工具，我的判断标准很简单：需求只是内容展示和基础交互，SwiftUI 又快又好；一旦接近"桌面级生产力工具"的细节密度（窗口管理、菜单栏、快捷键、拖拽、精细滚动），就尽早请回 AppKit——它不是历史包袱，是能力边界。实践上我分三层：SwiftUI 负责页面骨架和状态展示，AppKit 负责窗口、菜单、焦点这些用户真正感知得到的桌面细节，数据模型和 Core ML 推理放在共享层。记住一点：原生体验不是看起来像 macOS，而是用户在边角操作时察觉不到"这是个壳"。
+做 macOS 工具，我的判断标准很简单：需求只是内容展示和基础交互，SwiftUI 又快又好；一旦接近"桌面级生产力工具"的细节密度（窗口管理、菜单栏、快捷键、拖拽、精细滚动），就尽早请回 AppKit。它不是历史包袱，是能力边界。实践上我分三层：SwiftUI 负责页面骨架和状态展示，AppKit 负责窗口、菜单、焦点这些用户真正感知得到的桌面细节，数据模型和 Core ML 推理放在共享层。记住一点：原生体验不是看起来像 macOS，而是用户在边角操作时察觉不到"这是个壳"。
 </div>
 
 ## 为什么这个问题总会出现

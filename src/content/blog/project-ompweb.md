@@ -47,14 +47,14 @@ related:
 
 <div class="tldr">
 <b>一句话总结</b>
-ompweb 是给 oh-my-pi 配的一张本地工作台：不重写 Agent，只读它的会话文件，把会话树、终端、MCP 状态、Git worktree 摊在一张桌子上看。设计上只有一条硬规矩——OMP 写会话、ompweb 只做展示和编排，会话权威永远在 OMP 那边。技术栈是 Next.js 16 + Electron 44，一行 npx 就能跑起来。
+ompweb 是给 oh-my-pi 配的一张本地工作台：不重写 Agent，只读它的会话文件，把会话树、终端、MCP 状态、Git worktree 摊在一张桌子上看。设计上只有一条硬规矩：OMP 写会话、ompweb 只做展示和编排，会话权威永远在 OMP 那边。技术栈是 Next.js 16 + Electron 44，一行 npx 就能跑起来。
 </div>
 
 我不是想换掉 omp。我是想要一张**桌子**：把已经存在的会话、终端、文件、MCP 状态摊开看。
 
 ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、本地优先的 Web 工作区与原生桌面应用**。
 
-关键设计只有一条——
+关键设计只有一条：
 
 **不重写 Agent，只读它的会话文件。**
 
@@ -68,7 +68,7 @@ ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、
 
 本地会话用 Node 直接扫 JSONL；**live 工作走 `omp --mode rpc-ui`**（stdio 上的 NDJSON）。OMP SDK 在 Bun 侧，Node 服务刻意不 import，避免把运行时搞混。
 
-一句话：**OMP 写会话，ompweb 展示和编排；权威不在 UI。**
+**OMP 写会话，ompweb 展示和编排；权威不在 UI。**
 
 ## 问题
 
@@ -114,7 +114,7 @@ ompweb 的定位写在 README 第一页：**oh-my-pi 的现代化、高性能、
 
 **SDK 边界要守住。** OMP SDK 是 Bun-only，Node/Next 服务不能图省事直接 import。活儿必须走 `omp --mode rpc-ui`。
 
-**架构会变厚。** 加 host daemon 之后调试面变大——UI、Next、host、omp 四层。这是 local-first 的代价，文档和默认安全（loopback / 密码）必须跟上。
+**架构会变厚。** 加 host daemon 之后调试面变大：UI、Next、host、omp 四层。这是 local-first 的代价，文档和默认安全（loopback / 密码）必须跟上。
 
 可 `npx` 一键体验，也有 Releases 安装包（mac / Windows / Linux）。MIT 许可，上游脉络来自 pi-web / oh-my-pi 生态。
 
@@ -134,11 +134,11 @@ npx @37chengshan/ompweb@latest
 
 ### 它怎么读到我的会话的？
 
-`~/.omp/agent/sessions/` 是唯一会话权威：本地历史用 Node 直接扫 JSONL，live 工作走 `omp --mode rpc-ui`（stdio 上的 NDJSON）。一句话：OMP 写会话，ompweb 展示和编排。
+`~/.omp/agent/sessions/` 是唯一会话权威：本地历史用 Node 直接扫 JSONL，live 工作走 `omp --mode rpc-ui`（stdio 上的 NDJSON）。OMP 写会话，ompweb 展示和编排。
 
 ### 用它改会话内容安全吗？
 
-写路径被故意做得很窄，只保留 rename / archive / delete / branch-parent 这类低风险操作。什么都想写，就会和 live 进程打架——这是作者有意设的边界。
+写路径被故意做得很窄，只保留 rename / archive / delete / branch-parent 这类低风险操作。什么都想写，就会和 live 进程打架，这是作者有意设的边界。
 
 ### 怎么跑起来？要什么环境？
 

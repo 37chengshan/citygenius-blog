@@ -18,7 +18,7 @@ imageWidth: 768
 imageHeight: 1024
 badge: "macOS"
 sideNote: "SwiftUI · AppKit ·<br/>Toolbar · Layout · Core ML"
-caption: "<b>Native workflow visual.</b>(CityGenius, MMXXVI)"
+caption: "<b>SwiftUI first, AppKit when needed.</b>(CityGenius, MMXXVI)"
 authorMeta: "Student · macOS developer · Native tools in practice"
 featured: false
 related:
@@ -36,7 +36,7 @@ related:
 
 <div class="tldr">
 <b>TL;DR</b>
-My rule of thumb for macOS tools is simple: if it's mostly content display and basic interaction, SwiftUI is fast and good. The moment it approaches the detail density of a desktop-grade productivity tool (window management, menu bar, shortcuts, drag and drop, fine scrolling), bring AppKit back early — it's not legacy baggage, it's a capability boundary. In practice I work in three layers: SwiftUI handles page structure and state display, AppKit handles windows, menus, and focus — the desktop details users actually feel — and the shared layer holds the data models and Core ML inference. One thing to remember: native feel isn't looking like macOS; it's the user never noticing "this is a wrapper" when working the edges.
+My rule of thumb for macOS tools is simple: if it's mostly content display and basic interaction, SwiftUI is fast and good. The moment it approaches the detail density of a desktop-grade productivity tool (window management, menu bar, shortcuts, drag and drop, fine scrolling), bring AppKit back early. It's not legacy baggage, it's a capability boundary. In practice I work in three layers: SwiftUI handles page structure and state display, AppKit handles windows, menus, and focus (the desktop details users actually feel), and the shared layer holds the data models and Core ML inference. One thing to remember: native feel isn't looking like macOS; it's the user never noticing "this is a wrapper" when working the edges.
 </div>
 
 ## Why This Keeps Coming Up

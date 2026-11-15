@@ -47,10 +47,10 @@ related:
 
 <div class="tldr">
 <b>一句话总结</b>
-agent-mcp 把 Claude、Codex、omp 这些 Agent CLI 收成一个工作池：主 Agent 只负责拆解任务和汇合结果，派发、等待、超时、续接这些事全交给控制面。它不重写 agent loop，也不绑死某个模型，而是按任务匹配底座——读密集的探索丢给快模型，深推理的规划丢给强模型。当前 v4.0.0a1，有 34 个 MCP 工具、589 个测试通过。
+agent-mcp 把 Claude、Codex、omp 这些 Agent CLI 收成一个工作池：主 Agent 只负责拆解任务和汇合结果，派发、等待、超时、续接这些事全交给控制面。它不重写 agent loop，也不绑死某个模型，而是按任务匹配底座：读密集的探索丢给快模型，深推理的规划丢给强模型。当前 v4.0.0a1，有 34 个 MCP 工具、589 个测试通过。
 </div>
 
-agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」，而是把任意 CLI 收成一个**可派发、可监控、可续接、可终止的工作池**。
+agent-mcp 的 README 写得很清楚：核心不是「多开几个 Agent」，而是把任意 CLI 收成一个**可派发、可监控、可续接、可终止的工作池**。
 
 主 Agent 只做两件事：**拆解**和**汇合**。
 
@@ -110,7 +110,7 @@ DeepSeek Harness 也做了原生接入：一行 `insert` patch，34 个工具以
 
 写完之后，我的工作流变了：以前是「我自己盯」，现在是「拆完、派出去、循环 wait、汇合」。
 
-一次跨文件重构：先 `estimate_complexity` 判成 L，再 `orchestrate_task` 声明依赖——先改公共类型，再改调用方，最后 review。无依赖的扫描并行跑。每个子任务可以指定不同 CLI。
+一次跨文件重构：先 `estimate_complexity` 判成 L，再 `orchestrate_task` 声明依赖：先改公共类型，再改调用方，最后 review。无依赖的扫描并行跑。每个子任务可以指定不同 CLI。
 
 中途范围写大了，`steer_agent` 收窄。跑挂了，超时兜住，session 还能 resume。
 

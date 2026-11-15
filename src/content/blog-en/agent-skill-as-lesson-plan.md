@@ -36,7 +36,7 @@ related:
 
 <div class="tldr">
 <b>TL;DR</b>
-A Prompt answers "how do I answer this time." A Skill answers "how do I handle this kind of task from now on." Write Agent Skills like reusable lesson plans: a Skill should answer four things — when to use it, where the steps start and stop, what quality bar counts as done, and how to bail out when it fails. Put constraints up front, lock quality with a minimal acceptance bar (local build passes, links work, frontmatter complete), and version it in the repo alongside your code.
+A Prompt answers "how do I answer this time." A Skill answers "how do I handle this kind of task from now on." Write Agent Skills like reusable lesson plans: a Skill should answer four things: when to use it, where the steps start and stop, what quality bar counts as done, and how to bail out when it fails. Put constraints up front, lock quality with a minimal acceptance bar (local build passes, links work, frontmatter complete), and version it in the repo alongside your code.
 </div>
 
 ## Problem
@@ -118,4 +118,4 @@ Hard-code a minimal acceptance bar at the end of the Skill: local `npm run build
 
 ### Where should a Skill live?
 
-Not in your chat history. Put it in the repo's skills/ directory or docs folder, versioned alongside your code — that's when reuse becomes real. State the applicable models, directory conventions, and hard no-nos at the top, so future-you doesn't have to do archaeology.
+Not in your chat history. Put it in the repo's skills/ directory or docs folder, versioned alongside your code: that's when reuse becomes real. State the applicable models, directory conventions, and hard no-nos at the top, so future-you doesn't have to do archaeology.

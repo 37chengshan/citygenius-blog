@@ -1,6 +1,6 @@
 ---
 title: "本地 AI 模型实战"
-description: "探索在移动端运行本地 AI 模型的可能性。TFLite 图片处理、离线翻译模型的集成，以及性能优化技巧。"
+description: "试着在手机上跑本地 AI 模型：用 TFLite 处理图片，接入离线翻译模型，再加几招性能优化。"
 date: "2026.04.15"
 readTime: "6 分钟阅读"
 tag: "Local AI"
@@ -18,7 +18,7 @@ imageWidth: 916
 imageHeight: 1717
 badge: "Local AI"
 sideNote: "TFLite · On-device ·<br/>Image · Translate · Perf"
-caption: "<b>On-device AI visual.</b>(CityGenius, MMXXVI)"
+caption: "<b>Models that stay on the phone.</b>(CityGenius, MMXXVI)"
 authorMeta: "大学生 · AI 应用实践者 · 移动端本地模型探索者"
 featured: false
 related:
@@ -36,7 +36,7 @@ related:
 
 <div class="tldr">
 <b>一句话总结</b>
-很多移动端 AI 场景（图片去水印、OCR 辅助、离线翻译、文本分类）根本不需要永远联网，本地跑通之后体验更稳定、隐私边界也更清晰。TFLite 的优点不是"最先进"，而是足够工程化——模型体积、推理速度、设备兼容性和双端集成路径都清楚，真正的坑在前后处理：尺寸归一化、颜色通道、量化精度、输出解释，一错结果就全失真。优化记住三条：模型只加载一次、前后处理少做 bitmap 拷贝、推理扔后台线程。但也别为了本地而本地：模型太大、设备覆盖差、精度要求极高、要持续热更新，就老实上云——方案应该场景驱动，而不是理念驱动。
+很多移动端 AI 场景（图片去水印、OCR 辅助、离线翻译、文本分类）根本不需要永远联网，本地跑通之后体验更稳定、隐私边界也更清晰。TFLite 的优点不是"最先进"，而是足够工程化。模型体积、推理速度、设备兼容性和双端集成路径都清楚，真正的坑在前后处理：尺寸归一化、颜色通道、量化精度、输出解释，一错结果就全失真。优化记住三条：模型只加载一次、前后处理少做 bitmap 拷贝、推理扔后台线程。但也别为了本地而本地：模型太大、设备覆盖差、精度要求极高、要持续热更新，就老实上云。方案应该场景驱动，而不是理念驱动。
 </div>
 
 ## 为什么我对本地模型感兴趣

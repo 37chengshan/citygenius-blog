@@ -131,7 +131,7 @@ Main repo: [37chengshan/agent-mcp](https://github.com/37chengshan/agent-mcp). Is
 
 ### How is this different from just opening more terminals?
 
-Terminals have no scheduler: runaway subtasks, slot queueing, mid-course correction, token reconciliation — all on a human. In agent-mcp, a Run is the only unit of execution: full slots queue automatically, timed-out tasks kill the whole process tree, blown token budgets rerun at a lower tier, and session_id draws the ownership boundary.
+Terminals have no scheduler: runaway subtasks, slot queueing, mid-course correction, token reconciliation, all on a human. In agent-mcp, a Run is the only unit of execution: full slots queue automatically, timed-out tasks kill the whole process tree, blown token budgets rerun at a lower tier, and session_id draws the ownership boundary.
 
 ### Does it lock me into one model?
 
@@ -147,4 +147,4 @@ One JSON config plugs it in, no code changes. The adapter layer normalizes each 
 
 ### Is it stable now?
 
-v4.0.0a1, still alpha. Adapter test coverage is uneven; the sandbox is currently just "one policy translated into each CLI's own flags" — not real isolation; cross-vendor review in complex merges needs more mileage. The author says adapter coverage comes first.
+v4.0.0a1, still alpha. Adapter test coverage is uneven; the sandbox is currently just "one policy translated into each CLI's own flags", not real isolation; cross-vendor review in complex merges needs more mileage. The author says adapter coverage comes first.

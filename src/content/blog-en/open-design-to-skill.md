@@ -43,7 +43,7 @@ Open Design is a macOS desktop app that generates brand-consistent HTML pages th
 
 Open Design is a macOS desktop app that does something simple: you tell it what kind of page you want, and it assembles a brand-consistent HTML artifact. Inside it sit three repositories: 149 brand design systems, 110 page templates and 11 general craft guides. Every generation picks one from each axis and puts them together into the final output.
 
-The question: can this logic move into Claude Code as a Skill?
+Can this logic move into Claude Code as a Skill?
 
 Yes, and it works surprisingly well. But it isn't a matter of "porting the features". You have to understand the design pattern first, then re-express it with Claude's native abilities.
 
@@ -128,7 +128,7 @@ The frontmatter defines the Skill's metadata and the tools it may use. `allowed-
 
 The body has several core parts:
 
-**1. Identity** — defines the agent as a "design consultant", not a menu picker.
+**1. Identity**: defines the agent as a "design consultant", not a menu picker.
 
 **2. Resource Map** — points to the resource paths inside the app:
 
@@ -148,11 +148,11 @@ $OD/craft/<name>.md
 | `--browse term` | Browse | Search resources |
 | `--compare b1 b2` | Compare | Compare two design systems |
 
-**4. Workflow** — the detailed flow of five stages, each one interactive through `AskUserQuestion`.
+**4. Workflow**: the detailed flow of five stages, each one interactive through `AskUserQuestion`.
 
-**5. Matching Algorithm** — the scoring formulas for templates and design systems, weighted over keywords, scenario, style and scale.
+**5. Matching Algorithm**: the scoring formulas for templates and design systems, weighted over keywords, scenario, style and scale.
 
-**6. Output Contract** — the HTML must be self-contained and wrapped in an `<artifact>` tag.
+**6. Output Contract**: the HTML must be self-contained and wrapped in an `<artifact>` tag.
 
 ### <em>Translating</em> the matching algorithm
 
@@ -243,7 +243,7 @@ Things at the "app experience" layer can't make it over: pixel-level device-fram
 
 ### How is the matching algorithm implemented in a Skill?
 
-No code needed — it's expressed as a "matching index table." For example, template score = 3×keyword match + 2×scenario match + 2×style match + 2×scale match + 1×featured. The agent reads the user's answers, scores them against the table, and recommends the Top 3 combinations.
+No code needed: it's expressed as a "matching index table." For example, template score = 3×keyword match + 2×scenario match + 2×style match + 2×scale match + 1×featured. The agent reads the user's answers, scores them against the table, and recommends the Top 3 combinations.
 
 ### What's the general method for distilling design patterns?
 

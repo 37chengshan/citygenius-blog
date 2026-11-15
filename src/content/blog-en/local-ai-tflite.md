@@ -18,7 +18,7 @@ imageWidth: 916
 imageHeight: 1717
 badge: "Local AI"
 sideNote: "TFLite · On-device ·<br/>Image · Translate · Perf"
-caption: "<b>On-device AI visual.</b>(CityGenius, MMXXVI)"
+caption: "<b>Models that stay on the phone.</b>(CityGenius, MMXXVI)"
 authorMeta: "Student · AI app builder · On-device model explorer"
 featured: false
 related:
@@ -36,7 +36,7 @@ related:
 
 <div class="tldr">
 <b>TL;DR</b>
-Many mobile AI tasks (image watermark removal, OCR assist, offline translation, text classification) don't need a constant connection at all — once they run locally, the experience is steadier and the privacy boundary is clearer. TFLite's strength isn't being "state of the art" — it's being engineered enough: model size, inference speed, device compatibility, and dual-platform integration paths are all clear. The real pitfalls are pre- and post-processing: size normalization, color channels, quantization precision, output interpretation — get one wrong and the results are completely distorted. Three optimization rules: load the model only once, minimize bitmap copies in pre/post-processing, run inference on a background thread. But don't go local for local's sake: if the model is too big, device coverage is poor, accuracy demands are extreme, or you need constant hot updates — just use the cloud. The approach should be driven by the scenario, not by ideology.
+Many mobile AI tasks (image watermark removal, OCR assist, offline translation, text classification) don't need a constant connection at all. Once they run locally, the experience is steadier and the privacy boundary is clearer. TFLite's strength isn't being "state of the art" — it's being engineered enough: model size, inference speed, device compatibility, and dual-platform integration paths are all clear. The real pitfalls are pre- and post-processing: size normalization, color channels, quantization precision, output interpretation. Get one wrong and the results are completely distorted. Three optimization rules: load the model only once, minimize bitmap copies in pre/post-processing, run inference on a background thread. But don't go local for local's sake: if the model is too big, device coverage is poor, accuracy demands are extreme, or you need constant hot updates. Just use the cloud. The approach should be driven by the scenario, not by ideology.
 </div>
 
 ## Why local

@@ -1,6 +1,6 @@
 ---
 title: "Building a Full-Stack AI App in Three Days with <em>Vibe Coding</em>"
-description: "From idea to launch, the story of scholar-ai. How I used AI-assisted coding to stand up a FastAPI backend and a React frontend fast, and what retrieval-augmented generation (RAG) looked like in practice."
+description: "How scholar-ai went from idea to launch: using AI-assisted coding to stand up a FastAPI backend and a React frontend fast, and what retrieval-augmented generation (RAG) looked like once it was real."
 date: "2026.05.15"
 readTime: "8 min read"
 tag: "Vibe Coding"
@@ -19,7 +19,7 @@ imageWidth: 1003
 imageHeight: 1568
 badge: "Featured"
 sideNote: "Scholar AI · Vibe Coding ·<br/>FastAPI · React · RAG"
-caption: "<b>Feature story visual.</b>(CityGenius, MMXXVI)"
+caption: "<b>Three days, one MVP.</b>(CityGenius, MMXXVI)"
 authorMeta: "Student · Full-stack developer · Vibe Coding enthusiast"
 featured: true
 related:
@@ -102,7 +102,7 @@ The goal for day one was clear: get a backend running. I used Claude as my main 
 
 Day two was the frontend. I picked React + TypeScript with the shadcn/ui component library. The speed-up from Vibe Coding is even bigger here. Describe a page's layout and interactions, and the AI can produce usable component code almost in one shot.
 
-The main lesson: **don't try to describe a whole page at once**. Break it into small components and describe them one by one, and the results are much better. "A search box with autocomplete that shows paper titles and authors in a dropdown" gets a far more precise result than "build a search page".
+**Don't try to describe a whole page at once**. Break it into small components and describe them one by one, and the results are much better. "A search box with autocomplete that shows paper titles and authors in a dropdown" gets a far more precise result than "build a search page".
 
 <div class="pull-quote">
 <p>Vibe Coding doesn't mean you stop thinking. It lets you spend your effort where it matters more: product thinking and user experience.</p>
@@ -125,7 +125,7 @@ Finishing a full-stack AI app MVP in three days would have been unthinkable befo
 
 It has limits, though. For complex business logic, performance-critical paths, and anything that needs a deep understanding of the underlying principles, hand-written code is still irreplaceable. Vibe Coding fits best for **quick prototypes** and **standard features**.
 
-My advice: treat Vibe Coding as your coding copilot, not an autopilot. Stay in touch with your code and keep control of it, and that's when it really pays off.
+Treat Vibe Coding as your coding copilot, not an autopilot. Stay in touch with your code and keep control of it, and that's when it really pays off.
 
 ## FAQ
 
