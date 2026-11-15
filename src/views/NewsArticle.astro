@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsStyles from '../components/NewsStyles.astro';
+import { localePath, type Lang } from '../i18n';
+import { dateParts, fullTime, illusFor, catLabel } from '../lib/news-shared.js';
+import { takeHtml, readOriginHtml, artNavHtml } from '../lib/news-render.js';
+
+const { lang = 'zh' } = Astro.props as { lang?: Lang };
+const L = (p: string) => localePath(lang, p);
+
+const { category, slug } = Astro.params;
+const { item, meta, prev, next } = Astro.props;
+
+const hubHref = L('/news/');
+const catHref = L('/news/' + category + '/');
+const prevHref = prev ? L('/news/' + category + '/' + prev.slug + '/') : null;
+const nextHref = next ? L('/news/' + category + '/' + next.slug + '/') : null;
+
+const catL = catLabel(category) || {};
+const catEn = catL.en || meta.label;
+
+const pEn = dateParts(item.published, 'en');
+const pZh = dateParts(item.published, 'zh') || dateParts(item.published);
+const enTitle = item.en_title || item.title || '';
+const zhTitle = item.zh_title || item.title;
+const enParas = (item.en_summary || item.summary || '').split('\n').filter((s) => s.trim());
+const zhParas = (item.zh_summary || '').split('\n').filter((s) => s.trim());
+
+const newsSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: lang === 'zh' ? zhTitle : enTitle,
+  inLanguage: lang === 'zh' ? 'zh-CN' : 'en',
+  datePublished: item.published || undefined,
+  author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
+  isBasedOn: item.link,
+  about: catEn,
+};
+---
+
+<BaseLayout lang={lang} title={lang === 'zh' ? zhTitle + ' — ' + meta.label + ' — CityGenius Blog' : enTitle + ' — ' + catEn + ' — CityGenius Blog'} description={(lang === 'zh' ? (item.zh_summary || item.summary || '') : (item.en_summary || item.summary || '')).slice(0, 150)}>
+  <Fragment slot="head">
+    <NewsStyles />
+    <script type="application/ld+json" set:html={JSON.stringify(newsSchema)} />
+  </Fragment>
+
+  <main class="container" id="top">
+    <section class="tight news-page">
+      <div class="sec-rule">
+        <span class="crumb">
+          <a href={hubHref}><span class="roman">News</span></a> ·
+          <a href={catHref}><span class="lang-en">{catEn}</span><span class="lang-zh">{meta.label}</span></a> ·
+          <span class="lang-en">Article</span><span class="lang-zh">正文</span>
+        </span>
+        <span class="meta-grp"><span>{item.source}</span></span>
+      </div>
+
+      <article class="art">
+        <div class="art-kicker"><span class="lang-en">{catEn}</span><span class="lang-zh">{meta.label}</span></div>
+        <h1 class="art-title"><span class="lang-en">{enTitle}</span><span class="lang-zh">{zhTitle}</span></h1>
+        <div class="date-line">
+          <div class="lang-en">
+            {pEn && <span class="date-badge">{pEn.date}</span>}
+            {pEn && <span class="week">{pEn.week} · {pEn.hm}</span>}
+            <span class="src">{item.source}</span>
+          </div>
+          <div class="lang-zh">
+            {pZh && <span class="date-badge">{pZh.date}</span>}
+            {pZh && <span class="week">{pZh.week} · {pZh.hm}</span>}
+            <span class="src">{item.source}</span>
+          </div>
+        </div>
+
+        <div class="illus art-illus" set:html={illusFor(item.link || item.title, meta.pal, true)} />
+
+        <div class="art-body">
+          <div class="lang-en">
+            {enParas.map((para) => (
+              <p>{para}</p>
+            ))}
+          </div>
+          <div class="lang-zh">
+            {zhParas.map((para) => (
+              <p>{para}</p>
+            ))}
+          </div>
+        </div>
+
+        <Fragment set:html={takeHtml(item.zh_take)} />
+
+        <div class="art-origin">
+          <div class="art-origin-meta">
+            <span><span class="lang-en">Source: </span><span class="lang-zh">来源：</span>{item.source}</span>
+            {item.published && (
+              <span title={fullTime(item.published, 'en')}>
+                <span class="lang-en">Published: </span><span class="lang-zh">发布时间：</span>
+                <span class="lang-en">{pEn ? `${pEn.date} ${pEn.week} ${pEn.hm}` : ''}</span><span class="lang-zh">{pZh ? `${pZh.date} ${pZh.week} ${pZh.hm}` : ''}</span>
+              </span>
+            )}
+          </div>
+          <Fragment set:html={readOriginHtml(item.link)} />
+        </div>
+
+        <Fragment
+          set:html={artNavHtml({
+            prevHref,
+            prevEn: prev?.en,
+            prevZh: prev?.zh,
+            catHref,
+            catEn,
+            catZh: meta.label,
+            nextHref,
+            nextEn: next?.en,
+            nextZh: next?.zh,
+          })}
+        />
+      </article>
+    </section>
+  </main>
+  <script>
+    import { applyI18n } from '../lib/i18n.js';
+    applyI18n(document.documentElement.dataset.lang === 'zh' ? 'zh' : 'en');
+  </script>
+</BaseLayout>

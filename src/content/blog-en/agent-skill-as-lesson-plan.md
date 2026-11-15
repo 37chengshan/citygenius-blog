@@ -34,6 +34,11 @@ related:
     slug: "vibe-coding-3-days"
 ---
 
+<div class="tldr">
+<b>TL;DR</b>
+A Prompt answers "how do I answer this time." A Skill answers "how do I handle this kind of task from now on." Write Agent Skills like reusable lesson plans: a Skill should answer four things — when to use it, where the steps start and stop, what quality bar counts as done, and how to bail out when it fails. Put constraints up front, lock quality with a minimal acceptance bar (local build passes, links work, frontmatter complete), and version it in the repo alongside your code.
+</div>
+
 ## Problem
 
 The most common waste in student AI projects isn't compute. It's explaining things twice. Every new session, you have to say it all again: the project background, the directory conventions, what's off limits, the acceptance criteria, how to roll back after a failure. A prompt answers "how to respond this time." A Skill answers "how to do this kind of task from now on."
@@ -92,3 +97,25 @@ It sounds plain, but it swaps "feels about right" for checks that can actually r
 A Skill shouldn't live in a chat history. Put it in the repo's skills/ or docs folder and version it with the code, and only then can you really reuse it. You can also state the intended model, directory conventions and prohibitions at the top, so future you (or a teammate) doesn't have to dig through old context.
 
 Where Vibe Coding really saves time isn't in letting the AI finish everything for you. It's in fixing in place what you've already figured out. A Skill is how you do that. Like a lesson plan, you teach it once and use it many times.
+
+## FAQ
+
+### What's the real difference between a Skill and a Prompt?
+
+The most common waste in student AI projects isn't compute — it's re-explaining: restating project background, directory conventions, and hard no-nos every new session. A Prompt answers "how do I answer this time." A Skill answers "how do I handle this kind of task from now on."
+
+### What does a Skill need to spell out at minimum?
+
+Four things: which tasks trigger it (when to use); what comes first, next, and where it stops (step boundaries); what counts as done and what must be redone (quality bar); and the fallback when it gets stuck (failure exit).
+
+### Which workflows deserve to become Skills?
+
+The ones with repeatable steps and checkable results. For student dev work, prioritize three kinds: publishing (articles, README updates, release notes), engineering (scaffolding, CI, fixing common config errors), and research (paper summaries, experiment logs, failure postmortems). Forcing a task with a different goal every time into a Skill just adds noise.
+
+### How do you stop the agent from handing in half-finished work?
+
+Hard-code a minimal acceptance bar at the end of the Skill: local `npm run build` passes, internal links work under the target deploy path, article frontmatter is complete, no unrequested new dependencies. It replaces "feels about done" with executable checks.
+
+### Where should a Skill live?
+
+Not in your chat history. Put it in the repo's skills/ directory or docs folder, versioned alongside your code — that's when reuse becomes real. State the applicable models, directory conventions, and hard no-nos at the top, so future-you doesn't have to do archaeology.

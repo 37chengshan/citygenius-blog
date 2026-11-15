@@ -33,6 +33,26 @@ const L = (p: string) => localePath(lang, p);
 const site = Astro.site ?? new URL('https://37chengshan.github.io');
 const canonical = new URL(Astro.url.pathname, site);
 const ogImage = new URL(assetUrl(image), site);
+const siteUrl = new URL(withBase('/'), site).href.replace(/\/$/, '');
+const _bd = new Date();
+const issueDate = _bd.getFullYear() + '.' + String(_bd.getMonth() + 1).padStart(2, '0');
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'CityGenius Blog',
+  url: siteUrl,
+  description,
+  inLanguage: t.htmlLang,
+  author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
+};
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'CityGenius',
+  url: siteUrl,
+  sameAs: ['https://github.com/37chengshan'],
+  knowsAbout: ['Vibe Coding', 'AI Agents', 'FastAPI', 'React', 'Android', 'Swift', '全栈开发'],
+};
 const palPosts = (await getPosts(lang))
   .filter((p) => p.id !== 'dev-log')
   .sort((a, b) => b.data.date.localeCompare(a.data.date))
@@ -45,6 +65,7 @@ const palData = {
     { t: t.nav.about, h: L('/#about'), k: 'about 关于' },
     { t: t.nav.projects, h: L('/#projects'), k: 'projects 项目' },
     { t: t.nav.articles, h: L('/article/'), k: 'articles 文章' },
+    { t: t.nav.news, h: L('/news/'), k: 'news 新闻' },
     { t: t.nav.contact, h: L('/#contact'), k: 'contact 联系' },
   ],
   do: [
@@ -57,7 +78,7 @@ const palData = {
 };
 ---
 <!DOCTYPE html>
-<html lang={t.htmlLang}>
+<html lang={t.htmlLang} data-lang={lang}>
 <head>
 <meta charset='utf-8' />
 <meta name='viewport' content='width=device-width, initial-scale=1' />
@@ -94,6 +115,8 @@ const palData = {
 <meta name='twitter:title' content={title} />
 <meta name='twitter:description' content={description} />
 <meta name='twitter:image' content={ogImage} />
+<script type='application/ld+json' set:html={JSON.stringify(websiteSchema)} />
+<script type='application/ld+json' set:html={JSON.stringify(personSchema)} />
 <link rel='preconnect' href='https://fonts.googleapis.com' />
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
 <link href={`https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&family=IBM+Plex+Mono:wght@400;500${lang === 'zh' ? '&family=Noto+Serif+SC:wght@500;700' : ''}${extraFonts}&display=swap`} rel='stylesheet' />
@@ -114,7 +137,7 @@ const palData = {
       <span>Vibe Coding · 全栈 · AI</span>
     </span>
     <span class='right'>
-      <span class='coord'>2026.05</span>
+      <span class='coord'>{issueDate}</span>
       <a class='topbar-link' href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>GitHub ↗</a>
     </span>
   </div>
@@ -132,7 +155,8 @@ const palData = {
         <li><a href={L('/#about')} data-key='1'><kbd>1</kbd>{t.nav.about}</a></li>
         <li><a href={L('/#projects')} data-key='2'><kbd>2</kbd>{t.nav.projects}</a></li>
         <li><a href={L('/article/')} data-key='3'><kbd>3</kbd>{t.nav.articles}</a></li>
-        <li><a href={L('/#contact')} data-key='4'><kbd>4</kbd>{t.nav.contact}</a></li>
+        <li><a href={L('/news/')} data-key='4'><kbd>4</kbd>{t.nav.news}</a></li>
+        <li><a href={L('/#contact')} data-key='5'><kbd>5</kbd>{t.nav.contact}</a></li>
       </ul>
     </nav>
     <div class='nav-side'>
@@ -158,7 +182,7 @@ const palData = {
         <a href={L('/#top')} class='brand'><span class='brand-mark'>C</span><span>CityGenius</span></a>
         <p style='margin-top:18px;'>{t.footAbout}</p>
       </div>
-      <div class='foot-col'><h5>{t.footNav}</h5><ul><li><a href={L('/#top')}>{t.footHome}</a></li><li><a href={L('/#about')}>{t.nav.about}</a></li><li><a href={L('/#projects')}>{t.nav.projects}</a></li><li><a href={L('/article/')}>{t.nav.articles}</a></li></ul></div>
+      <div class='foot-col'><h5>{t.footNav}</h5><ul><li><a href={L('/#top')}>{t.footHome}</a></li><li><a href={L('/#about')}>{t.nav.about}</a></li><li><a href={L('/#projects')}>{t.nav.projects}</a></li><li><a href={L('/article/')}>{t.nav.articles}</a></li><li><a href={L('/news/')}>{t.nav.news}</a></li></ul></div>
       <div class='foot-col'><h5>{t.footProjects}</h5><ul><li><a href={L('/#projects')}>Scholar AI</a></li><li><a href={L('/#projects')}>{t.footMac}</a></li><li><a href={L('/#projects')}>{t.footAndroid}</a></li><li><a href={L('/article/vibe-coding-3-days/')}>{t.footLatest}</a></li></ul></div>
       <div class='foot-col'><h5>{t.footSocial}</h5><ul><li><a href='https://github.com/37chengshan' target='_blank' rel='noreferrer noopener'>GitHub</a></li><li><a href='https://x.com/' target='_blank' rel='noreferrer noopener'>Twitter / X</a></li><li><a href='mailto:hello@citygenius.dev'>Email</a></li></ul></div>
     </div>
@@ -505,6 +529,8 @@ body::before {
 }
 
 .shell { position: relative; z-index: 2; overflow-x: clip; }
+html[data-lang='zh'] .lang-en { display: none !important; }
+html:not([data-lang='zh']) .lang-zh { display: none !important; }
 .container {
   max-width: 1360px;
   padding: 0 64px;
@@ -1202,6 +1228,11 @@ button, .nav-cta, .btn, .article-pill { transition-property: color, background-c
 @media (prefers-reduced-motion: reduce) {
   html.theme-switching, html.theme-switching * { transition: none !important; }
   .pal, .pal-overlay, .toast { transition: none; }
+}
+@media (max-width: 440px) {
+  .nav-links { gap: 12px; }
+  .nav-links li:last-child { display: none; }
+  .nav-inner { gap: 10px; }
 }
 @media (max-width: 600px) {
   .pal-open { display: none !important; }

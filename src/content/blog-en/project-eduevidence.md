@@ -66,6 +66,11 @@ The output is not a binary allow / forbid either. It has four states:
 
 **ADOPT / PILOT / REJECT / INSUFFICIENT EVIDENCE**, plus an actionable intervention and evaluation plan.
 
+<div class="tldr">
+<b>TL;DR</b>
+EduEvidence is an AI Agent Skill built for one problem: when AI advises on education decisions, it talks smoothly and cites nothing. It locks in three rules: retrieved snippets are only pointers, not evidence; no study gets designed without an evidence-grounded knowledge gap; the real fact layer is a versioned, immutable Evidence Graph — reports are just projections. At the end you don't get a yes/no, you get four outcomes — ADOPT, PILOT, REJECT, INSUFFICIENT EVIDENCE — plus how to pilot and how to evaluate.
+</div>
+
 ## Problem
 
 Educational decisions have three traps:
@@ -132,3 +137,15 @@ open examples/ai-coding-assistant-evidence/EduEvidence_Report.html
 It won't make the educational decision for you. It only guarantees that before you say "go" or "no go", where the evidence came from, what the Gap is, and how the pilot will be verified are all written down.
 
 Main repo: [37chengshan/eduevidence](https://github.com/37chengshan/eduevidence).
+
+## FAQ
+### How is EduEvidence different from just asking an AI?
+Ask an AI directly and you get something that sounds smooth. EduEvidence compresses a decision question into an answer that is evidence-backed, pilotable, and evaluable — ending in ADOPT, PILOT, REJECT, or INSUFFICIENT EVIDENCE, plus an executable intervention and evaluation plan.
+### Does a retrieved paper abstract count as evidence?
+No. Retrieved snippets are only locators — leads. To become evidence, something must enter a traceable citation chain. That's the first frozen principle.
+### Will it just tell me whether students should get an AI coding assistant?
+It won't make the decision for you. It only guarantees: before you say "go" or "no go" — where the evidence comes from, what the knowledge gap is, how the pilot gets verified — all written down.
+### Do I have to install Agent MCP to use it?
+No. Native Core only depends on the Python standard library and isn't welded to any single orchestration framework; hosts like Claude Code, Cursor, Codex, and OMP can all auto-load the Skill.
+### Is "insufficient evidence" a failure?
+No. It's a legitimate conclusion, not a failure. Four states are harder to sell than two, but more useful.

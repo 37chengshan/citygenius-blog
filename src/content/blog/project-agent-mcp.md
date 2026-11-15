@@ -45,6 +45,11 @@ related:
 
 这不是「模型不够强」。这是**没有人做调度**。
 
+<div class="tldr">
+<b>一句话总结</b>
+agent-mcp 把 Claude、Codex、omp 这些 Agent CLI 收成一个工作池：主 Agent 只负责拆解任务和汇合结果，派发、等待、超时、续接这些事全交给控制面。它不重写 agent loop，也不绑死某个模型，而是按任务匹配底座——读密集的探索丢给快模型，深推理的规划丢给强模型。当前 v4.0.0a1，有 34 个 MCP 工具、589 个测试通过。
+</div>
+
 agent-mcp 的 README 写得很清楚——核心不是「多开几个 Agent」，而是把任意 CLI 收成一个**可派发、可监控、可续接、可终止的工作池**。
 
 主 Agent 只做两件事：**拆解**和**汇合**。
@@ -121,3 +126,25 @@ curl -fsSL https://raw.githubusercontent.com/37chengshan/agent-mcp/main/install.
 ```
 
 主仓库：[37chengshan/agent-mcp](https://github.com/37chengshan/agent-mcp)。欢迎提 issue，也欢迎直接骂。
+
+## 常见问题
+
+### 跟直接多开几个终端有什么区别？
+
+多开终端没人调度：子任务跑飞、槽位排队、中途改方向、token 对账全靠人盯。agent-mcp 里 Run 是唯一执行单位，槽位满了自动排队，任务超时会终止整棵进程树，token 预算超了可以降档重跑，session_id 划清所有权边界。
+
+### 它会锁死我用某个模型吗？
+
+不会。模型推理仍发生在各家 CLI 原生 runtime 里，agent-mcp 不重写 agent loop。原则是按任务匹配底座：读密集探索丢给快底座（omp / pi / grok），深推理规划丢给强底座（claude），成本与质量现场匹配。
+
+### 小任务也要拆成子 Agent 吗？
+
+不要。作者早期版本小事也 spawn 一堆子 Agent，结果协调开销比任务本身还大。现在有 estimate_complexity：本地判断 S/M/L，零 token 消耗，默认直接做，按需才拆。
+
+### 我用的 CLI 不在那 11 款里怎么办？
+
+写一份 JSON 配置就能接，不用改代码。适配器层负责把各家的事件流、usage 字段、session 归一化，差异由它抹平。
+
+### 现在稳定吗？
+
+v4.0.0a1，还是 alpha。适配器实测率不均匀；沙箱目前只是"统一策略翻译到各 CLI 自己的参数"，不是真隔离；复杂合并场景的跨厂商审查还要再踩。作者说下一步先补适配器实测。

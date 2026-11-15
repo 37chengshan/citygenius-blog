@@ -67,6 +67,11 @@ Three hard rules:
 - **Explicit routing**: every request takes a clear path, and the provider is never switched silently.
 - **One receipt per request**: source agent, route, transforms, Local / Provider tokens, recovery state.
 
+<div class="tldr">
+<b>TL;DR</b>
+d-token is a context control plane that runs on your own machine: requests from your AI coding agent pass through it first — duplicates get compressed, routing stays explicit — then go out to the model provider, with a receipt for every request. In one measured real request, it cut the physical payload by 33,705 tokens — not an estimate, but the difference between Local Tokens and Provider Tokens on the receipt. Three rules: secrets never leave your machine, routing never switches silently, and a broken config can be rolled back.
+</div>
+
 ## Problem
 
 AI coding agents resend the same files, logs and tool output again and again. The token bill creeps up, and yet:
@@ -129,3 +134,25 @@ npm run tauri:dev
 ```
 
 Main repo: [37chengshan/d-token](https://github.com/37chengshan/d-token).
+
+## FAQ
+
+### What exactly is d-token for?
+
+It's a local context control plane for AI coding agents, sitting between "the agent you use" and "the provider you configured": it compresses redundancy before context leaves your machine, keeps routing explicit, and makes config changes recoverable.
+
+### Does it really save tokens? How many?
+
+The README records one measurement: a single real routed request on 2026-08-04 sent 33,705 fewer tokens. Note this is a single data point, not an average; the receipt shows Local Tokens vs. Provider Tokens, so the savings are on paper, not a feeling.
+
+### Will it upload my code or secrets?
+
+No. Local-first is a hard rule: settings, diagnostics, request metadata, and rollback records stay on your machine, and plain logs never store full prompts, full responses, source text, or API keys. Your chosen provider still receives the requests you send — but now there's a door you control in between.
+
+### What if I break a config?
+
+Changes aren't "save and it applies" — they go through five steps: preview → redacted diff → backup → verify → roll back. When something breaks, you diagnose, fix, and recover; the author calls it "the config doctor".
+
+### Can I use it now?
+
+It's at 0.2.0-beta.1, a public unsigned pre-release (macOS ARM64 / Windows x64). Unsigned builds may trigger OS security warnings — after downloading, verify the repo and hashes; don't bypass system protections.

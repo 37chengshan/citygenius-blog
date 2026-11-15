@@ -35,6 +35,11 @@ related:
     slug: "local-ai-tflite"
 ---
 
+<div class="tldr">
+<b>TL;DR</b>
+I shipped Scholar AI's MVP in 3 days with Vibe Coding: an academic tool that searches papers, auto-generates summaries, does multilingual translation, and answers questions with RAG. Stack: Python / FastAPI / React / PostgreSQL / ChromaDB. Vibe Coding is great for rapid prototypes and standardized features, but complex business logic and performance-critical paths still need handwritten code — treat it as your coding copilot, not autopilot.
+</div>
+
 ## Problem
 
 ### What Is <em>Vibe Coding</em>
@@ -121,3 +126,21 @@ Finishing a full-stack AI app MVP in three days would have been unthinkable befo
 It has limits, though. For complex business logic, performance-critical paths, and anything that needs a deep understanding of the underlying principles, hand-written code is still irreplaceable. Vibe Coding fits best for **quick prototypes** and **standard features**.
 
 My advice: treat Vibe Coding as your coding copilot, not an autopilot. Stay in touch with your code and keep control of it, and that's when it really pays off.
+
+## FAQ
+
+### Can you really build a full-stack AI app in three days?
+
+Yes — but it's an MVP. Day 1 backend, Day 2 frontend, Day 3 integration and polish. The precondition: you have to be in the "describe requirements, verify output, iterate" loop, know exactly what you're building, and be able to judge the quality of the AI's code.
+
+### Is Vibe Coding good for big projects?
+
+Not for complex business logic, performance-critical paths, or anything that needs a deep dive into fundamentals — handwritten code is still irreplaceable there. It's best at rapid prototypes and standardized features.
+
+### Do you still need to know how to code?
+
+Yes. Your role shifts from "person who writes code" to "person who directs code" — you still need to judge code quality and know when to step in. The AI's CORS middleware dropped specific headers; its first SSE attempt had bugs. A human has to fix those.
+
+### Any tips for describing frontend work?
+
+Don't describe a whole page at once — break it into small components and describe them one by one. "A search box with autocomplete showing paper titles and authors in the dropdown" beats "build a search page" every time.

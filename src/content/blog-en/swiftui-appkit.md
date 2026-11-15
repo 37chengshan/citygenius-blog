@@ -34,6 +34,11 @@ related:
     slug: "local-ai-tflite"
 ---
 
+<div class="tldr">
+<b>TL;DR</b>
+My rule of thumb for macOS tools is simple: if it's mostly content display and basic interaction, SwiftUI is fast and good. The moment it approaches the detail density of a desktop-grade productivity tool (window management, menu bar, shortcuts, drag and drop, fine scrolling), bring AppKit back early — it's not legacy baggage, it's a capability boundary. In practice I work in three layers: SwiftUI handles page structure and state display, AppKit handles windows, menus, and focus — the desktop details users actually feel — and the shared layer holds the data models and Core ML inference. One thing to remember: native feel isn't looking like macOS; it's the user never noticing "this is a wrapper" when working the edges.
+</div>
+
 ## Why This Keeps Coming Up
 
 When I start a macOS tool, SwiftUI always makes a great first impression: it's quick to write, the preview is right there, and the structure is clean. But once I touch window management, menu bar behavior, complex lists, keyboard shortcuts, drag and drop, or fine scroll control, AppKit shows up on my desk again sooner or later.
@@ -67,3 +72,13 @@ This way I don't have to pick a side up front. SwiftUI gives me speed and expres
 If a tool needs local inference, I put model calls and the caching strategy in a separate service layer instead of stuffing inference logic into views. Then whether the front end is SwiftUI or AppKit, the UI only cares about state, not the model's lifecycle.
 
 What's worth the time isn't figuring out how to write everything in SwiftUI. It's making the app feel like a natural macOS tool.
+
+## FAQ
+### Do I have to pick between SwiftUI and AppKit?
+No need to pick a side up front. My layering habit: SwiftUI does page structure, forms, and state-driven display; AppKit handles windows, menus, input focus, and bridging complex controls; data models, commands, file system, and Core ML inference live in the shared layer.
+### When should I decisively go back to AppKit?
+Three signals: you need stable multi-window behavior and lifecycle control; you're building complex tables, sidebars, command menus, a shortcut system; you start working around scrolling, focus, text selection, drag and drop, or list performance.
+### What counts as truly native feel?
+Not looking like macOS — the user not noticing "this is a wrapper" when working the edges.
+### Where should Core ML inference code go?
+Prefer a standalone service layer, together with the caching strategy, not stuffed directly into views. Then, whether the front is SwiftUI or AppKit, the UI only cares about state, not model lifecycle.

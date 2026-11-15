@@ -32,6 +32,17 @@ const fmt = (d: string) => {
   return !m || lang === 'zh' ? d : `${MONTHS[Number(m[2]) - 1]} ${m[3]}, ${m[1]}`;
 };
 const pageUrl = new URL(L(`/article/${slug}/`), Astro.site ?? 'https://37chengshan.github.io').href;
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: plainTitle,
+  description,
+  datePublished: date.replace(/\./g, '-'),
+  inLanguage: t.htmlLang,
+  author: { '@type': 'Person', name: 'CityGenius', url: 'https://github.com/37chengshan' },
+  image: new URL(assetUrl(image), Astro.site ?? 'https://37chengshan.github.io').href,
+  mainEntityOfPage: pageUrl,
+};
 const shareX = `https://x.com/intent/post?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(plainTitle)}`;
 ---
 
@@ -45,6 +56,7 @@ const shareX = `https://x.com/intent/post?url=${encodeURIComponent(pageUrl)}&tex
   lang={lang}
 >
   <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
     <style>
       /* ===== ARTICLE HEADER — Anthropic-style centered ===== */
       .article-header {
@@ -669,6 +681,24 @@ const shareX = `https://x.com/intent/post?url=${encodeURIComponent(pageUrl)}&tex
     /* Body styles are global: markdown output carries no Astro scope attributes. */
     /* ===== ARTICLE BODY (OpenAI-blog reading measure) ===== */
     .article-body { padding: 12px 0 48px; }
+    .article-body .prose .tldr {
+      background: var(--bone);
+      border-left: 3px solid var(--coral);
+      border-radius: 0 10px 10px 0;
+      padding: 18px 22px;
+      margin: 0 0 2em;
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--ink);
+    }
+    .article-body .prose .tldr b {
+      display: block;
+      font: 500 11.5px/1 var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--coral);
+      margin-bottom: 10px;
+    }
     .article-body .prose {
       font-family: var(--body);
       font-size: 17.5px;

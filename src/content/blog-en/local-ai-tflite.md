@@ -34,6 +34,11 @@ related:
     slug: "swiftui-appkit"
 ---
 
+<div class="tldr">
+<b>TL;DR</b>
+Many mobile AI tasks (image watermark removal, OCR assist, offline translation, text classification) don't need a constant connection at all — once they run locally, the experience is steadier and the privacy boundary is clearer. TFLite's strength isn't being "state of the art" — it's being engineered enough: model size, inference speed, device compatibility, and dual-platform integration paths are all clear. The real pitfalls are pre- and post-processing: size normalization, color channels, quantization precision, output interpretation — get one wrong and the results are completely distorted. Three optimization rules: load the model only once, minimize bitmap copies in pre/post-processing, run inference on a background thread. But don't go local for local's sake: if the model is too big, device coverage is poor, accuracy demands are extreme, or you need constant hot updates — just use the cloud. The approach should be driven by the scenario, not by ideology.
+</div>
+
 ## Why local
 
 Plenty of mobile AI features don't need a network connection. Removing watermarks from images, OCR help, offline translation, text classification: once these run on the device, the experience gets a lot steadier and the privacy boundary is easier to explain.
@@ -54,3 +59,15 @@ TFLite isn't appealing because it is the most advanced option. It is appealing b
 ## Limits
 
 If the model is too big, device coverage is poor, the task demands very high accuracy, or you need frequent hot updates, don't go local just for the sake of going local. A good solution follows the scenario, not a belief.
+
+## FAQ
+### Which scenarios fit local models?
+Tasks like image watermark removal, OCR assist, offline translation, and text classification. Once they run on the device, the experience is much steadier and the privacy boundary much clearer.
+### Why TFLite?
+Not because it's the most advanced — because it's engineered enough: model size, inference speed, device compatibility, and the Android / iOS integration paths are all relatively clear.
+### What's the biggest pitfall with TFLite?
+Model pre- and post-processing: size normalization, color channels, quantization precision, output interpretation. Get one wrong and the results are completely distorted.
+### What are the key performance optimizations for on-device inference?
+Three rules: load the model only once instead of re-initializing per task; minimize extra bitmap copies in pre- and post-processing; run inference on a background thread and let the UI only consume state.
+### When should I not use local models?
+When the model is too big, device coverage is poor, accuracy demands are extreme, or you need constant hot-update capability. A good approach is driven by the scenario, not by ideology.

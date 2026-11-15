@@ -1,0 +1,9 @@
+---
+import NewsArticle from '../../../views/NewsArticle.astro';
+import { newsArticlePaths } from '../../../lib/news-paths.js';
+
+export function getStaticPaths() {
+  return newsArticlePaths();
+}
+---
+<NewsArticle lang='zh' {...Astro.props} />

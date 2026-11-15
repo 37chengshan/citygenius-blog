@@ -1,0 +1,9 @@
+---
+import NewsCategory from '../../views/NewsCategory.astro';
+import { NEWS_CATS } from '../../lib/news-cats.js';
+
+export function getStaticPaths() {
+  return NEWS_CATS.map((c) => ({ params: { category: c.id } }));
+}
+---
+<NewsCategory lang='zh' />

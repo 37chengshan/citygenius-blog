@@ -34,6 +34,11 @@ related:
     slug: "swiftui-appkit"
 ---
 
+<div class="tldr">
+<b>TL;DR</b>
+Open Design is a macOS desktop app that generates brand-consistent HTML pages through "three-axis composition" (149 brand design systems × 110 page templates × 11 craft specs). Turning it into a Claude Code Skill isn't about porting features — it's about distilling three design patterns: a six-part-assembled prompt structure, an advisor-style interaction flow, and a token-preview hard gate. Remember: a Skill distills logic and patterns, not UI and experience.
+</div>
+
 ## Problem
 
 Open Design is a macOS desktop app that does something simple: you tell it what kind of page you want, and it assembles a brand-consistent HTML artifact. Inside it sit three repositories: 149 brand design systems, 110 page templates and 11 general craft guides. Every generation picks one from each axis and puts them together into the final output.
@@ -225,3 +230,25 @@ Open Design's three-axis architecture of design system × template × craft guid
 The answer isn't "every feature". It is "the core design patterns". Six-part assembly, consultant-style interaction and the hard gate on the token preview are worth more than any one app's implementation.
 
 If you have a complex app you want to turn into a Skill, start by identifying its core design patterns. Code can be rewritten, but design patterns are the real asset.
+
+## FAQ
+
+### What exactly is the three-axis composition?
+
+Design systems (look: the visual language of 149 brands, one DESIGN.md per brand), templates (shape: 110 page types, one SKILL.md per template), craft specs (quality: 11 generic rule sets). Design systems decide "which tokens to use," craft specs decide "how to use these tokens," templates decide "what shape the output takes." When in conflict, the brand wins.
+
+### After converting to a Skill, what can't be ported over?
+
+Things at the "app experience" layer can't make it over: pixel-level device-frame rendering, live preview, complex animations in some templates. But the full advisor-style interaction flow, Top-3 smart recommendations, brand-consistent HTML output, and automatic craft-spec application all work fine.
+
+### How is the matching algorithm implemented in a Skill?
+
+No code needed — it's expressed as a "matching index table." For example, template score = 3×keyword match + 2×scenario match + 2×style match + 2×scale match + 1×featured. The agent reads the user's answers, scores them against the table, and recommends the Top 3 combinations.
+
+### What's the general method for distilling design patterns?
+
+Five steps: first identify the core architecture (which independent parts, how they relate); then find the design patterns; re-express with Claude's native capabilities (AskUserQuestion instead of UI interaction, tables instead of algorithms); then define boundaries; finally test and iterate.
+
+### How is a Skill different from just "porting features over"?
+
+It's not translating code — it's re-expressing logic. Don't try to replicate the whole app; distilling the most valuable parts is enough. Code can be rewritten, but design patterns are the real assets.

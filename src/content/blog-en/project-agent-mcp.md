@@ -55,6 +55,11 @@ Another principle: **match the backend to the task**.
 
 Read-heavy exploration goes to a fast backend (omp / pi / grok). Deep planning goes to a strong one (claude). Cost and quality get matched on the spot, instead of running everything on one model.
 
+<div class="tldr">
+<b>TL;DR</b>
+agent-mcp turns agent CLIs like Claude, Codex, and omp into one work pool: the main agent only splits tasks and merges results, while dispatch, waiting, timeouts, and resume all go to the control plane. It doesn't rewrite the agent loop or tie you to one model — instead it matches the model to the task: read-heavy exploration goes to fast models, deep-reasoning planning goes to strong ones. Currently v4.0.0a1, with 34 MCP tools and 589 passing tests.
+</div>
+
 ## Problem
 
 Opening a few terminals is simple. What's hard is this:
@@ -121,3 +126,25 @@ curl -fsSL https://raw.githubusercontent.com/37chengshan/agent-mcp/main/install.
 ```
 
 Main repo: [37chengshan/agent-mcp](https://github.com/37chengshan/agent-mcp). Issues are welcome, and so is blunt criticism.
+
+## FAQ
+
+### How is this different from just opening more terminals?
+
+Terminals have no scheduler: runaway subtasks, slot queueing, mid-course correction, token reconciliation — all on a human. In agent-mcp, a Run is the only unit of execution: full slots queue automatically, timed-out tasks kill the whole process tree, blown token budgets rerun at a lower tier, and session_id draws the ownership boundary.
+
+### Does it lock me into one model?
+
+No. Inference still happens in each CLI's native runtime; agent-mcp doesn't rewrite the agent loop. The principle is match-the-model-to-the-task: read-heavy exploration to fast models (omp / pi / grok), deep-reasoning planning to strong ones (claude), cost and quality matched on the spot.
+
+### Do small tasks need splitting into sub-agents too?
+
+No. Early versions spawned a pile of sub-agents for tiny things, and coordination cost more than the task. Now there's estimate_complexity: local S/M/L grading, zero token cost, do it directly by default, split only when needed.
+
+### My CLI isn't one of the 11 — what then?
+
+One JSON config plugs it in, no code changes. The adapter layer normalizes each vendor's event streams, usage fields, and sessions; the differences get ironed out there.
+
+### Is it stable now?
+
+v4.0.0a1, still alpha. Adapter test coverage is uneven; the sandbox is currently just "one policy translated into each CLI's own flags" — not real isolation; cross-vendor review in complex merges needs more mileage. The author says adapter coverage comes first.

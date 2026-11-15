@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/gen-news-shared.js",
     "build": "astro build",
     "preview": "astro preview"
   },
