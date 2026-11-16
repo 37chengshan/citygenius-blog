@@ -567,7 +567,7 @@ function cardLang(it, lang, tag, rel) {
   var p = dateParts(it.published, lang);
   var when = (rel && it.published && relTime(it.published, lang)) || (p ? p.date + ' ' + p.hm : '');
   return '<div class="lang-' + lang + '">' +
-    '<div class="nc-meta"><span class="nc-src">' + esc(srcName(it.source)) + '</span>' +
+    '<div class="nc-meta"><span class="nc-src">' + esc(it.aihot ? 'AI HOT · ' + srcName(it.source) : srcName(it.source)) + '</span>' +
     (when ? '<span title="' + esc(fullTime(it.published, lang)) + '">' + esc(when) + '</span>' : '') + '</div>' +
     '<' + tag + ' class="nc-title">' + esc(title) + '</' + tag + '>' +
     (sum ? '<p class="nc-sum">' + esc(sum) + '</p>' : '') +
