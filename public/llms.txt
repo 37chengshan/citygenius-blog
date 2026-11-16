@@ -6,7 +6,7 @@
 ## 站点信息
 - 首页: https://citygenius-blog.pages.dev/
 - 文章列表: https://citygenius-blog.pages.dev/article/
-- 新闻速览: https://citygenius-blog.pages.dev/news/ （AI 科技、国际、财经、体育、娱乐、Valorant 六个板块，每 3 小时自动更新；每条新闻有独立文章页）
+- 新闻速览: https://citygenius-blog.pages.dev/news/ （AI 科技、国际、财经、体育、娱乐、Valorant 六个板块，每小时自动更新；每条新闻有独立文章页）
 - RSS: https://citygenius-blog.pages.dev/rss.xml
 - Sitemap: https://citygenius-blog.pages.dev/sitemap-index.xml
 

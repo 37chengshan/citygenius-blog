@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
   schedule:
-    - cron: "17 */3 * * *" # 每 3 小时刷新一次新闻
+    - cron: "7 * * * *" # 每小时刷新一次新闻（避开整点）
   workflow_dispatch:
 
 permissions:
